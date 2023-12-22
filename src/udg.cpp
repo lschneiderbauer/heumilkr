@@ -2,6 +2,8 @@
 #include <unordered_set>
 #include <algorithm>
 #include <iterator>
+#include <vector>
+#include <memory>
 
 udg::udg(int n_vertices)
 {
@@ -11,11 +13,11 @@ udg::udg(int n_vertices)
     *it = std::unordered_set { -1 };
   }
 
-  cycs = std::vector<std::unordered_set<int>>(n_vertices);
+  cycs = std::vector<std::shared_ptr<std::unordered_set<int>>>(n_vertices);
   for (auto it = cycs.begin(); it != cycs.end(); it++)
   {
     int i = std::distance(cycs.begin(), it);
-    *it = std::unordered_set { i };
+    *it = std::make_shared<std::unordered_set<int>>(std::unordered_set { i });
   }
 }
 
@@ -24,8 +26,15 @@ void udg::add_edge(const int a, const int b)
   adj[a].insert(b);
   adj[b].insert(a);
 
-  cycs[a].merge(cycs[b]);
+  (*cycs[a]).merge(*cycs[b]);
+
   cycs[b] = cycs[a];
+  // since all vertices in the cycles are affected,
+  // we need to update them all.
+  // for (auto &s : cycs[a])
+  // {
+  //   cycs[s] = cycs[a];
+  // }
 }
 
 void udg::remove_origin_edge(const int a)
@@ -49,10 +58,16 @@ bool udg::links_only_to_origin(const int a) const
 
 bool udg::edges_share_cycle(const int a, const int b) const
 {
-  return(cycs[a].find(b) != cycs[a].end());
+  return((*cycs[a]).find(b) != (*cycs[a]).end());
 }
 
-std::vector<std::unordered_set<int> > udg::cycles() const
+std::unordered_set<std::shared_ptr<std::unordered_set<int>>> udg::con_comps() const
 {
-  return(cycs);
+  std::unordered_set<std::shared_ptr<std::unordered_set<int>>> unique_cycles;
+
+  for (auto it : cycs) {
+    unique_cycles.insert(it);
+  }
+
+  return unique_cycles;
 }
