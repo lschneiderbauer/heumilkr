@@ -4,30 +4,33 @@
 #include <stdio.h>
 #include <array>
 
-bool combined_loads_exceed_truck_capacity(const std::vector<int> &load, const int a, const int b)
+bool combined_loads_exceed_truck_capacity(const std::vector<double> &load, const int a, const int b)
 {
   int capacity = 100; // TODO
 
   return(load[a] + load[b] > capacity);
 }
 
-std::array<int,2> best_link(const symmat<double> &savings,
-                             const std::vector<int> &load,
+std::array<int,2> best_link(const distmat<double> &savings,
+                             const std::vector<double> &load,
                              const udg &graph)
 {
   std::array<int,2> max_idx = {-1, -1};
   double max_val = 0;
-  printf("sav %d\n", savings.size);
-  for (int i = 0; i < savings.size; i++)
+
+  for (int i = 1; i < savings.size(); i++)
   {
     for (int j = 0; j < i; j++)
     {
-      /*
+      printf("---\n");
+      printf("Link (%d,%d)\n", i, j);
       printf("orig1 %d\n", graph.links_to_origin(i));
+      printf("orig-only1 %d\n", graph.links_only_to_origin(i));
       printf("orig2 %d\n", graph.links_to_origin(j));
-      printf("exceed %d\n", !combined_loads_exceed_truck_capacity(load, i, j));
-      printf("share cycle %d\n", !graph.edges_share_cycle(i, j));
-      */
+      printf("orig-only2 %d\n", graph.links_only_to_origin(j));
+      printf("exceed %d\n", combined_loads_exceed_truck_capacity(load, i, j));
+      printf("share cycle %d\n", graph.edges_share_cycle(i, j));
+
       if (graph.links_to_origin(i) &&
           graph.links_to_origin(j) &&
           !combined_loads_exceed_truck_capacity(load, i, j) &&
@@ -44,16 +47,16 @@ std::array<int,2> best_link(const symmat<double> &savings,
     }
   }
 
-  return (max_idx);
+  return max_idx;
 }
 
 // we create a symmat that is one size smaller than the distances
 // (only calculate for sites)
-symmat<double> calc_savings(const symmat<double> &d)
+distmat<double> calc_savings(const distmat<double> &d)
 {
-  symmat<double> savings(d.size - 1, 0);
+  distmat<double> savings(d.size() - 1, 0);
 
-  for (int i = 0; i < d.size; i++)
+  for (int i = 1; i < savings.size(); i++)
   {
     for (int j = 0; j < i; j++)
     {
@@ -61,13 +64,13 @@ symmat<double> calc_savings(const symmat<double> &d)
     }
   }
 
-  return (savings);
+  return savings;
 }
 
 RoutingState::RoutingState(
     // we want a copy of this vector
-    const std::vector<int> demand,
-    const symmat<double> &dist)
+    const std::vector<double> demand,
+    const distmat<double> &dist)
 {
   distances = dist;
 
@@ -82,8 +85,7 @@ RoutingState::RoutingState(
 bool RoutingState::relink_best()
 {
   std::array<int, 2> cell = best_link(savings, load, graph);
-  printf("bl1 %d\n", cell[0]);
-  printf("bl2 %d\n", cell[1]);
+  printf("bl: (%d,%d)\n", cell[0], cell[1]);
 
   if (not ((cell[0] == cell[1]) && (cell[0] == -1)))
   {
@@ -92,8 +94,9 @@ bool RoutingState::relink_best()
     //      do not remove that link
     // * -1, c (it non-trivially connects to site c)
     //      remove the (-1,a) link
-    graph.add_edge(cell[0], cell[1]);
-    if (!graph.links_only_to_origin(cell[0]))
+
+    // we need to remove before we add, otherwise this is trivially true
+    if (!(graph.links_only_to_origin(cell[0])))
     {
       graph.remove_origin_edge(cell[0]);
     }
@@ -101,6 +104,8 @@ bool RoutingState::relink_best()
     {
       graph.remove_origin_edge(cell[1]);
     }
+
+    graph.add_edge(cell[0], cell[1]);
 
     // recalculate load
     for (auto it = load.begin(); it != load.end(); it++)
@@ -113,15 +118,15 @@ bool RoutingState::relink_best()
       }
     }
 
-    return(true);
+    return true;
   }
   else
   {
-    return(false);
+    return false;
   }
 }
 
-std::vector<std::unordered_set<int>> RoutingState::runs() const
+std::unordered_set<std::shared_ptr<std::unordered_set<int>>> RoutingState::runs() const
 {
-  return(graph.cycles());
+  return graph.con_comps();
 }

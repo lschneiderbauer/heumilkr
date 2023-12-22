@@ -1,4 +1,4 @@
-#include "symmat.h"
+#include "distmat.h"
 #include "udg.h"
 #include <stdint.h>
 #include <unordered_set>
@@ -10,15 +10,15 @@
 class RoutingState
 {
 public:
-  RoutingState(std::vector<int> demand, const symmat<double> &dist);
-  std::vector<std::unordered_set<int>> runs() const;
+  RoutingState(std::vector<double> demand, const distmat<double> &dist);
+  std::unordered_set<std::shared_ptr<std::unordered_set<int>>> runs() const;
   bool relink_best();
 
 private:
-  symmat<double> distances;
-  symmat<double> savings;
+  distmat<double> distances;
+  distmat<double> savings;
   udg graph;
-  std::vector<int> load;
+  std::vector<double> load;
 };
 
 #endif
