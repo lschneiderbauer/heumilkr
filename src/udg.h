@@ -11,11 +11,10 @@ class udg
 public:
   udg(int n_vertices = 0);
   void add_edge(const int a, const int b);
-  void remove_origin_edge(const int a);
+  void relink_edge(const int a, const int b);
   bool links_to_origin(const int a) const;
-  bool links_only_to_origin(const int a) const;
   bool edges_share_cycle(const int a, const int b) const;
-  std::unordered_set<std::shared_ptr<std::unordered_set<int>>> con_comps() const;
+  std::vector<std::shared_ptr<std::unordered_set<int>>> get_cycs() const;
 
 private:
   std::vector<std::unordered_set<int>> adj;

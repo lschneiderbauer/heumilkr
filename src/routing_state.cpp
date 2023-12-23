@@ -1,8 +1,11 @@
 #include "routing_state.h"
-#include <unordered_set>
-#include <list>
+#include "tsp_greedy.h"
+#include <vector>
 #include <stdio.h>
 #include <array>
+#include <map>
+#include <algorithm>
+
 
 bool combined_loads_exceed_truck_capacity(const std::vector<double> &load, const int a, const int b)
 {
@@ -25,9 +28,7 @@ std::array<int,2> best_link(const distmat<double> &savings,
       printf("---\n");
       printf("Link (%d,%d)\n", i, j);
       printf("orig1 %d\n", graph.links_to_origin(i));
-      printf("orig-only1 %d\n", graph.links_only_to_origin(i));
       printf("orig2 %d\n", graph.links_to_origin(j));
-      printf("orig-only2 %d\n", graph.links_only_to_origin(j));
       printf("exceed %d\n", combined_loads_exceed_truck_capacity(load, i, j));
       printf("share cycle %d\n", graph.edges_share_cycle(i, j));
 
@@ -87,25 +88,9 @@ bool RoutingState::relink_best()
   std::array<int, 2> cell = best_link(savings, load, graph);
   printf("bl: (%d,%d)\n", cell[0], cell[1]);
 
-  if (not ((cell[0] == cell[1]) && (cell[0] == -1)))
+  if (!((cell[0] == cell[1]) && (cell[0] == -1)))
   {
-    // two edge-possibilities for a vertex:
-    // * one -1 (i.e. it is the trivial back-and-forth route):
-    //      do not remove that link
-    // * -1, c (it non-trivially connects to site c)
-    //      remove the (-1,a) link
-
-    // we need to remove before we add, otherwise this is trivially true
-    if (!(graph.links_only_to_origin(cell[0])))
-    {
-      graph.remove_origin_edge(cell[0]);
-    }
-    if (!graph.links_only_to_origin(cell[1]))
-    {
-      graph.remove_origin_edge(cell[1]);
-    }
-
-    graph.add_edge(cell[0], cell[1]);
+    graph.relink_edge(cell[0], cell[1]);
 
     // recalculate load
     for (auto it = load.begin(); it != load.end(); it++)
@@ -126,7 +111,41 @@ bool RoutingState::relink_best()
   }
 }
 
-std::unordered_set<std::shared_ptr<std::unordered_set<int>>> RoutingState::runs() const
+
+std::vector<std::pair<int, int>> RoutingState::runs_as_cols() const
 {
-  return graph.con_comps();
+  typedef std::shared_ptr<std::unordered_set<int>> T;
+  std::vector<std::shared_ptr<std::unordered_set<int>>> cycs = graph.get_cycs();
+
+  std::map<T, int> visited_elements;
+  std::map<int, std::vector<int>> orders;
+  std::vector<std::pair<int, int>> cols (cycs.size());
+
+  int run_id = 0;
+
+  for (auto it = cycs.begin(); it != cycs.end(); it++) {
+    int i = std::distance(cycs.begin(), it);
+
+    // check if we have seen elem before
+    if (visited_elements.count(*it) > 0)
+    {
+      std::vector<int> order = orders[visited_elements[*it]];
+
+      cols[i] = { visited_elements[*it],
+                  std::distance(order.begin(),
+                    std::find(order.begin(), order.end(), i)) };
+    }
+    else // if we did not see it before
+    {
+      run_id++;
+      visited_elements.insert({*it, run_id});
+      std::vector<int> order = tsp_greedy(**it, distances);
+
+      orders.insert({run_id, order});
+      cols[i] = { run_id, std::distance(order.begin(),
+                            std::find(order.begin(), order.end(), i) )};
+    }
+  }
+
+  return cols;
 }

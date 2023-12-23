@@ -11,7 +11,7 @@ class RoutingState
 {
 public:
   RoutingState(std::vector<double> demand, const distmat<double> &dist);
-  std::unordered_set<std::shared_ptr<std::unordered_set<int>>> runs() const;
+  std::vector<std::pair<int, int>> runs_as_cols() const;
   bool relink_best();
 
 private:

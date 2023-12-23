@@ -21,6 +21,22 @@ udg::udg(int n_vertices)
   }
 }
 
+void udg::relink_edge(const int a, const int b) {
+
+  add_edge(a, b);
+
+  // a vertex can only be connected to either the source alone (-1),
+  // or to another vertex v (-1, v). If a vertex v is to be connected to another
+  // vertex v2, we always have (v, v2), not (-1, v2).
+  if (adj[a].size() > 2) {
+    adj[a].erase(-1);
+  }
+  if (adj[b].size() > 2) {
+    adj[b].erase(-1);
+  }
+
+}
+
 void udg::add_edge(const int a, const int b)
 {
   adj[a].insert(b);
@@ -29,21 +45,9 @@ void udg::add_edge(const int a, const int b)
   (*cycs[a]).merge(*cycs[b]);
 
   cycs[b] = cycs[a];
-  // since all vertices in the cycles are affected,
-  // we need to update them all.
-  // for (auto &s : cycs[a])
-  // {
-  //   cycs[s] = cycs[a];
-  // }
-}
-
-void udg::remove_origin_edge(const int a)
-{
-  adj[a].erase(-1);
-
-  // in this case we do not have to modify cycs,
-  // since severing an origin-edge does not break any existing
-  // cycles
+  // all vertices in the cycles are affected,
+  // but since those already points to the same cycle (of either a or b)
+  // we do not need to update them all.
 }
 
 bool udg::links_to_origin(const int a) const
@@ -51,23 +55,12 @@ bool udg::links_to_origin(const int a) const
   return(adj[a].find(-1) != adj[a].end());
 }
 
-bool udg::links_only_to_origin(const int a) const
-{
-  return(adj[a].find(-1) != adj[a].end() && adj[a].size() == 1);
-}
-
 bool udg::edges_share_cycle(const int a, const int b) const
 {
   return((*cycs[a]).find(b) != (*cycs[a]).end());
 }
 
-std::unordered_set<std::shared_ptr<std::unordered_set<int>>> udg::con_comps() const
+std::vector<std::shared_ptr<std::unordered_set<int>>> udg::get_cycs() const
 {
-  std::unordered_set<std::shared_ptr<std::unordered_set<int>>> unique_cycles;
-
-  for (auto it : cycs) {
-    unique_cycles.insert(it);
-  }
-
-  return unique_cycles;
+  return cycs;
 }
