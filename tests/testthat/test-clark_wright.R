@@ -1,14 +1,13 @@
 test_that("multiplication works", {
-  demand <- c(12, 3, 14)
+  demand <- c(12, 3, 14, 12)
 
-  distances <-
-    dist(
-      data.frame(
-        pos_x = c(0, sample(10, 3, replace = TRUE)),
-        pos_y = c(0, sample(10, 3, replace = TRUE))
-      ),
-      method = "euclidean"
+  pos <-
+    data.frame(
+      pos_x = c(0, runif(length(demand), -10, 10)),
+      pos_y = c(0, runif(length(demand), -10, 10))
     )
+
+  distances <- dist(pos, method = "euclidean")
 
   res <- clark_wright(demand, distances)
 

@@ -5,34 +5,34 @@
 
 using namespace cpp11;
 
-template <typename T>
-list vl_to_list(const std::unordered_set<std::shared_ptr<std::unordered_set<T>>> &vv)
-{
+template <typename T1, typename T2>
+list pair_to_list(const std::vector<std::pair<T1,T2>> vec) {
   cpp11::writable::list lst;
 
-  for (auto &v : vv)
-  {
-    // convert un-ordered set to vector
-    std::vector<T> v2{ std::make_move_iterator(std::begin(*v)),
-                  std::make_move_iterator(std::end(*v)) };
+  std::vector<T1> v1(vec.size());
+  std::vector<T2> v2(vec.size());
 
-    lst.push_back(as_sexp(v2));
+  for (auto it = vec.begin(); it != vec.end(); it++)
+  {
+    int i = std::distance(vec.begin(), it);
+
+    v1[i] = (*it).first;
+    v2[i] = (*it).second;
   }
+
+  lst.push_back(as_sexp(v1));
+  lst.push_back(as_sexp(v2));
 
   return lst;
 }
-
 
 [[cpp11::register]]
 list cpp_clark_wright(const std::vector<double> &demand,
                               const std::vector<double> &distances)
 {
-
   RoutingState state(demand, distmat<double>(distances));
 
-  printf("relinked-%d\n", state.relink_best());
-  printf("===\n");
-  printf("relinked-%d\n", state.relink_best());
+  while(state.relink_best()) { printf("===\n"); };
 
-  return vl_to_list(state.runs());
+  return pair_to_list<int,int>(state.runs_as_cols());
 }

@@ -20,5 +20,8 @@ clark_wright <- function(demand, distances) {
   stopifnot(inherits(distances, "dist"))
   stopifnot(attr(distances, "Size") == length(demand) + 1)
 
-  .Call(`_heumilkr_cpp_clark_wright`, as.vector(demand), distances)
+  as.data.frame(
+    .Call(`_heumilkr_cpp_clark_wright`, as.vector(demand), distances),
+    col.names = c("run_id", "order")
+  )
 }
