@@ -60,7 +60,7 @@ bool udg::links_to_origin(const int a) const
 
 bool udg::edges_share_cycle(const int a, const int b) const
 {
-  return((*cycs[a]).find(b) != (*cycs[a]).end());
+  return(cycs[a] == cycs[b]);
 }
 
 std::vector<std::shared_ptr<std::unordered_set<int>>> udg::get_cycs() const
