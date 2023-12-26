@@ -44,10 +44,13 @@ void udg::add_edge(const int a, const int b)
 
   (*cycs[a]).merge(*cycs[b]);
 
-  cycs[b] = cycs[a];
   // all vertices in the cycles are affected,
-  // but since those already points to the same cycle (of either a or b)
-  // we do not need to update them all.
+  // we need to reset the pointer of the ones that b pointed
+  // to to point to the same cycle
+  for (auto site : *cycs[a])
+  {
+    cycs[site] = cycs[a];
+  }
 }
 
 bool udg::links_to_origin(const int a) const
