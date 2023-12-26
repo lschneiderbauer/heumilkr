@@ -16,7 +16,6 @@ public:
 private:
   std::vector<T> data;
   int m_size;
-
 };
 
 #endif

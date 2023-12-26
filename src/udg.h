@@ -21,7 +21,6 @@ private:
   // a vector of cycles: each vertex has a reference to
   // the cycle it belongs to (which in turn has all the other references)
   std::vector<std::shared_ptr<std::unordered_set<int>>> cycs;
-
 };
 
 #endif

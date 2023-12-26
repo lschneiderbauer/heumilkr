@@ -6,7 +6,8 @@
 using namespace cpp11;
 
 template <typename T1, typename T2>
-list pair_to_list(const std::vector<std::pair<T1,T2>> vec) {
+list pair_to_list(const std::vector<std::pair<T1, T2>> vec)
+{
   cpp11::writable::list lst;
 
   std::vector<T1> v1(vec.size());
@@ -26,13 +27,15 @@ list pair_to_list(const std::vector<std::pair<T1,T2>> vec) {
   return lst;
 }
 
-[[cpp11::register]]
-list cpp_clark_wright(const std::vector<double> &demand,
-                              const std::vector<double> &distances)
+[[cpp11::register]] list cpp_clark_wright(const std::vector<double> &demand,
+                                          const std::vector<double> &distances)
 {
   RoutingState state(demand, distmat<double>(distances));
 
-  while(state.relink_best()) { printf("===\n"); };
+  while (state.relink_best())
+  {
+    printf("===\n");
+  };
 
-  return pair_to_list<int,int>(state.runs_as_cols());
+  return pair_to_list<int, int>(state.runs_as_cols());
 }

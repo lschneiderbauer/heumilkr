@@ -5,7 +5,8 @@
 #include "distmat.h"
 
 std::vector<int> tsp_greedy(const std::unordered_set<int> sites,
-                            const distmat<double> &distances) {
+                             const distmat<double> &distances)
+{
   std::vector<int> run;
   run.reserve(sites.size());
 
@@ -13,7 +14,8 @@ std::vector<int> tsp_greedy(const std::unordered_set<int> sites,
   int next_site = ref_site;
 
   int cont = true;
-  do {
+  do
+  {
     double min_dist = std::numeric_limits<double>::max();
     // get the nearest site from origin
     for (auto &site : sites)
@@ -23,21 +25,25 @@ std::vector<int> tsp_greedy(const std::unordered_set<int> sites,
       {
         double dist = distances.get(ref_site + 1, site + 1);
 
-        if (dist < min_dist) {
+        if (dist < min_dist)
+        {
           min_dist = dist;
           next_site = site;
         }
       }
     }
 
-    if (next_site != ref_site) {
+    if (next_site != ref_site)
+    {
       run.push_back(next_site);
       ref_site = next_site;
-    } else {
+    }
+    else
+    {
       cont = false;
     }
 
   } while (cont);
 
-  return(run);
+  return run;
 }

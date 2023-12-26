@@ -5,36 +5,36 @@
 #include <vector>
 #include <memory>
 
-udg::udg(int n_vertices)
-{
+udg::udg(int n_vertices) {
   adj = std::vector<std::unordered_set<int>>(n_vertices);
   for (auto it = adj.begin(); it != adj.end(); it++)
   {
-    *it = std::unordered_set { -1 };
+    *it = std::unordered_set{-1};
   }
 
   cycs = std::vector<std::shared_ptr<std::unordered_set<int>>>(n_vertices);
   for (auto it = cycs.begin(); it != cycs.end(); it++)
   {
     int i = std::distance(cycs.begin(), it);
-    *it = std::make_shared<std::unordered_set<int>>(std::unordered_set { i });
+    *it = std::make_shared<std::unordered_set<int>>(std::unordered_set{i});
   }
 }
 
-void udg::relink_edge(const int a, const int b) {
-
+void udg::relink_edge(const int a, const int b)
+{
   add_edge(a, b);
 
   // a vertex can only be connected to either the source alone (-1),
   // or to another vertex v (-1, v). If a vertex v is to be connected to another
   // vertex v2, we always have (v, v2), not (-1, v2).
-  if (adj[a].size() > 2) {
+  if (adj[a].size() > 2)
+  {
     adj[a].erase(-1);
   }
-  if (adj[b].size() > 2) {
+  if (adj[b].size() > 2)
+  {
     adj[b].erase(-1);
   }
-
 }
 
 void udg::add_edge(const int a, const int b)
@@ -55,12 +55,12 @@ void udg::add_edge(const int a, const int b)
 
 bool udg::links_to_origin(const int a) const
 {
-  return(adj[a].find(-1) != adj[a].end());
+  return (adj[a].find(-1) != adj[a].end());
 }
 
 bool udg::edges_share_cycle(const int a, const int b) const
 {
-  return(cycs[a] == cycs[b]);
+  return (cycs[a] == cycs[b]);
 }
 
 std::vector<std::shared_ptr<std::unordered_set<int>>> udg::get_cycs() const

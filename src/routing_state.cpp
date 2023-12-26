@@ -6,19 +6,18 @@
 #include <map>
 #include <algorithm>
 
-
 bool combined_loads_exceed_truck_capacity(const std::vector<double> &load, const int a, const int b)
 {
   int capacity = 100; // TODO
 
-  return(load[a] + load[b] > capacity);
+  return (load[a] + load[b] > capacity);
 }
 
-std::array<int,2> best_link(const distmat<double> &savings,
+std::array<int, 2> best_link(const distmat<double> &savings,
                              const std::vector<double> &load,
                              const udg &graph)
 {
-  std::array<int,2> max_idx = {-1, -1};
+  std::array<int, 2> max_idx = {-1, -1};
   double max_val = 0;
 
   for (int i = 1; i < savings.size(); i++)
@@ -61,7 +60,7 @@ distmat<double> calc_savings(const distmat<double> &d)
   {
     for (int j = 0; j < i; j++)
     {
-      savings.acc(i, j) = d.get(0, i+1) + d.get(0, j+1) - d.get(i+1, j+1);
+      savings.acc(i, j) = d.get(0, i + 1) + d.get(0, j + 1) - d.get(i + 1, j + 1);
     }
   }
 
@@ -96,9 +95,12 @@ bool RoutingState::relink_best()
     for (auto it = load.begin(); it != load.end(); it++)
     {
       int i = std::distance(load.begin(), it);
-      if (!graph.links_to_origin(i)) {
+      if (!graph.links_to_origin(i))
+      {
         *it = 0;
-      } else {
+      }
+      else
+      {
         *it = load[cell[0]] + load[cell[1]];
       }
     }
@@ -111,7 +113,6 @@ bool RoutingState::relink_best()
   }
 }
 
-
 std::vector<std::pair<int, int>> RoutingState::runs_as_cols() const
 {
   typedef std::shared_ptr<std::unordered_set<int>> T;
@@ -119,11 +120,12 @@ std::vector<std::pair<int, int>> RoutingState::runs_as_cols() const
 
   std::map<T, int> visited_elements;
   std::map<int, std::vector<int>> orders;
-  std::vector<std::pair<int, int>> cols (cycs.size());
+  std::vector<std::pair<int, int>> cols(cycs.size());
 
   int run_id = 0;
 
-  for (auto it = cycs.begin(); it != cycs.end(); it++) {
+  for (auto it = cycs.begin(); it != cycs.end(); it++)
+  {
     int i = std::distance(cycs.begin(), it);
 
     // check if we have seen elem before
@@ -131,9 +133,9 @@ std::vector<std::pair<int, int>> RoutingState::runs_as_cols() const
     {
       std::vector<int> order = orders[visited_elements[*it]];
 
-      cols[i] = { visited_elements[*it],
-                  std::distance(order.begin(),
-                    std::find(order.begin(), order.end(), i)) };
+      cols[i] = {visited_elements[*it],
+                 std::distance(order.begin(),
+                               std::find(order.begin(), order.end(), i))};
     }
     else // if we did not see it before
     {
@@ -142,8 +144,8 @@ std::vector<std::pair<int, int>> RoutingState::runs_as_cols() const
       std::vector<int> order = tsp_greedy(**it, distances);
 
       orders.insert({run_id, order});
-      cols[i] = { run_id, std::distance(order.begin(),
-                            std::find(order.begin(), order.end(), i) )};
+      cols[i] = {run_id, std::distance(order.begin(),
+                                       std::find(order.begin(), order.end(), i))};
     }
   }
 
