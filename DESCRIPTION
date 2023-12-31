@@ -13,5 +13,6 @@ LinkingTo:
 URL: https://github.com/lschneiderbauer/heumilkr
 BugReports: https://github.com/lschneiderbauer/heumilkr/issues
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    hedgehog (>= 0.1)
 Config/testthat/edition: 3
