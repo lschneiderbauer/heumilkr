@@ -23,23 +23,41 @@ distmat<double> calc_savings(const distmat<double> &d)
   return savings;
 }
 
-bool combined_loads_exceed_truck_capacity(const std::vector<int> &n_res,
-                                          const std::vector<double> &capacities,
-                                          const std::vector<double> &load,
-                                          const int a, const int b)
+int select_vehicle(const std::vector<int> &vehicle_avail,
+                   const std::vector<double> &vehicle_caps,
+                   const std::vector<int> &site_vehicle,
+                   const std::vector<double> &load,
+                   const int a, const int b)
 {
-  int capacity = 100; // TODO
+  for (auto it = vehicle_caps.begin(); it != vehicle_caps.end(); it++)
+  {
+    int vehicle = std::distance(vehicle_caps.begin(), it);
 
-  return (load[a] + load[b] > capacity);
+    int avail = vehicle_avail[vehicle];
+    printf("veh avail %i: %d\n", vehicle, avail);
+    if (site_vehicle[a] == vehicle || site_vehicle[b] == vehicle)
+    {
+      avail += 1;
+    }
+
+    if (avail >= 1 && load[a] + load[b] <= vehicle_caps[vehicle])
+    {
+      return vehicle;
+    }
+  }
+
+  return -1;
 }
 
-std::array<int, 2> best_link(const distmat<double> &savings,
-                             const std::vector<double> &load,
-                             const std::vector<int> &n_res,
-                             const std::vector<double> &capacities,
-                             const udg &graph)
+// returns Site 1, Site 2, Used vehicle
+std::tuple<int, int, int> best_link(const distmat<double> &savings,
+                                    const std::vector<double> &load,
+                                    const std::vector<int> &site_vehicle,
+                                    const std::vector<int> &vehicle_avail,
+                                    const std::vector<double> &vehicle_caps,
+                                    const udg &graph)
 {
-  std::array<int, 2> max_idx = {-1, -1};
+  std::tuple<int, int, int> best_link = {-1, -1, -1};
   double max_val = 0;
 
   for (int i = 1; i < savings.size(); i++)
@@ -50,60 +68,77 @@ std::array<int, 2> best_link(const distmat<double> &savings,
       printf("Link (%d,%d)\n", i, j);
       printf("orig1 %d\n", graph.links_to_origin(i));
       printf("orig2 %d\n", graph.links_to_origin(j));
-      printf("exceed %d\n", combined_loads_exceed_truck_capacity(n_res, capacities, load, i, j));
+      printf("selected vehicle %d\n", select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, i, j));
       printf("share cycle %d\n", graph.edges_share_cycle(i, j));
+
+      int selected_vehicle;
 
       if (graph.links_to_origin(i) &&
           graph.links_to_origin(j) &&
-          !combined_loads_exceed_truck_capacity(n_res, capacities, load, i, j) &&
-          !graph.edges_share_cycle(i, j))
+          !graph.edges_share_cycle(i, j) &&
+          (selected_vehicle =
+               select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, i, j) != -1))
       {
 
         if (savings.get(i, j) > max_val)
         {
           max_val = savings.get(i, j);
-          max_idx[0] = i;
-          max_idx[1] = j;
+          std::get<0>(best_link) = i;
+          std::get<1>(best_link) = j;
+          std::get<2>(best_link) = selected_vehicle;
         }
       }
     }
   }
 
-  return max_idx;
+  return best_link;
 }
 
 RoutingState::RoutingState(
-  // we want a copy of this vector
-  const std::vector<double> demand, const distmat<double> &distances,
-  const std::vector<int> &n_res, const std::vector<double> &capacities)
+    // we want a copy of this vector
+    const std::vector<double> demand, const distmat<double> &distances,
+    const std::vector<int> vehicle_avail, const std::vector<double> &vehicle_caps)
 {
   RoutingState::distances = distances;
-  RoutingState::n_res = n_res;
-  RoutingState::capacities = capacities;
+  RoutingState::vehicle_caps = vehicle_caps;
 
   RoutingState::graph = udg(demand.size());
 
   RoutingState::load = demand;
+  RoutingState::vehicle_avail = vehicle_avail;
   RoutingState::savings = calc_savings(distances);
 
   // TODO (default resource ?)
-  RoutingState::res_ids = std::vector<int> (demand.size(), 0);
-
+  RoutingState::site_vehicle = std::vector<int>(demand.size());
+  for (auto it = site_vehicle.begin(); it != site_vehicle.end(); it++)
+  {
+    int site = std::distance(site_vehicle.begin(), it);
+    *it = 0; // TODO
+    RoutingState::vehicle_avail[*it] -= 1;
+    RoutingState::site_vehicle[site] = *it;
+  }
 }
 
 // TRUE if something got relinked,
 // FALSE if nothing got relinked (i.e. the procedure stabilized)
 bool RoutingState::relink_best()
 {
-  std::array<int, 2> cell = best_link(savings, load, n_res, capacities, graph);
-  printf("bl: (%d,%d)\n", cell[0], cell[1]);
+  int a;
+  int b;
+  int vehicle;
+  std::tie(a, b, vehicle) =
+      best_link(savings, load,
+                site_vehicle, vehicle_avail,
+                vehicle_caps, graph);
 
-  if (!((cell[0] == cell[1]) && (cell[0] == -1)))
+  printf("bl: (%d,%d)\n", a, b);
+
+  if (!((a == b) && (a == -1)))
   {
-    graph.relink_edge(cell[0], cell[1]);
+    graph.relink_edge(a, b);
 
     // recalculate load
-    for (auto &site : graph.sites_in_cycle(cell[0]))
+    for (auto &site : graph.sites_in_cycle(a))
     {
       if (!graph.links_to_origin(site))
       {
@@ -111,9 +146,16 @@ bool RoutingState::relink_best()
       }
       else
       {
-        load[site] = load[cell[0]] + load[cell[1]];
+        load[site] = load[a] + load[b];
       }
     }
+
+    // reassign vehicles
+    vehicle_avail[site_vehicle[a]] += 1;
+    vehicle_avail[site_vehicle[b]] += 1;
+    vehicle_avail[vehicle] -= 1;
+    site_vehicle[a] = vehicle;
+    site_vehicle[b] = vehicle;
 
     return true;
   }

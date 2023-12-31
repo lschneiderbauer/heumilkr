@@ -24,9 +24,14 @@ clark_wright <- function(demand, distances, vehicle_caps) {
   stopifnot(is.integer(vehicle_caps$n))
   stopifnot(is.numeric(vehicle_caps$caps))
 
+  # replace NAs by maximal machine integer value
+  vehicle_caps$n[is.na(vehicle_caps$n)] <- .Machine$integer.max
+
   as.data.frame(
-    .Call(`_heumilkr_cpp_clark_wright`, as.vector(demand), distances,
-          vehicle_caps$n, vehicle_caps$caps),
+    .Call(
+      `_heumilkr_cpp_clark_wright`, as.vector(demand), distances,
+      vehicle_caps$n, vehicle_caps$caps
+    ),
     col.names = c("run_id", "order")
   )
 }
