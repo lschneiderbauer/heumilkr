@@ -165,14 +165,14 @@ bool RoutingState::relink_best()
   }
 }
 
-std::vector<std::pair<int, int>> RoutingState::runs_as_cols() const
+std::vector<std::tuple<int, int, int>> RoutingState::runs_as_cols() const
 {
   typedef std::shared_ptr<std::unordered_set<int>> T;
   std::vector<std::shared_ptr<std::unordered_set<int>>> cycs = graph.get_cycs();
 
   std::map<T, int> visited_elements;
   std::map<int, std::vector<int>> orders;
-  std::vector<std::pair<int, int>> cols(cycs.size());
+  std::vector<std::tuple<int, int, int>> cols(cycs.size());
 
   int run_id = 0;
 
@@ -187,17 +187,21 @@ std::vector<std::pair<int, int>> RoutingState::runs_as_cols() const
 
       cols[i] = {visited_elements[*it],
                  std::distance(order.begin(),
-                               std::find(order.begin(), order.end(), i))};
+                               std::find(order.begin(), order.end(), i)),
+                 site_vehicle[i]};
     }
     else // if we did not see it before
     {
-      run_id++;
       visited_elements.insert({*it, run_id});
       std::vector<int> order = tsp_greedy(**it, distances);
 
       orders.insert({run_id, order});
-      cols[i] = {run_id, std::distance(order.begin(),
-                                       std::find(order.begin(), order.end(), i))};
+      cols[i] = {run_id,
+                 std::distance(order.begin(),
+                               std::find(order.begin(), order.end(), i)),
+                 site_vehicle[i]};
+
+      run_id++;
     }
   }
 

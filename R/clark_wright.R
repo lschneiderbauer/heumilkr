@@ -32,6 +32,6 @@ clark_wright <- function(demand, distances, vehicle_caps) {
       `_heumilkr_cpp_clark_wright`, as.vector(demand), distances,
       vehicle_caps$n, vehicle_caps$caps
     ),
-    col.names = c("run_id", "order")
+    col.names = c("run_id", "order", "vehicle_id")
   )
 }

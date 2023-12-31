@@ -26,7 +26,8 @@ test_that("vehicle with infinite capacity covers everything in a single run", {
           demand_net$distances, data.frame(n = NA_integer_, caps = 99999)
         )
 
-      expect_equal(length(unique(res$run_id)), 1)
+      expect_equal(unique(res$run_id), 0)
+      expect_equal(unique(res$vehicle_id), 0)
     }
   )
 })

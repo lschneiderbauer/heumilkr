@@ -13,7 +13,7 @@ public:
   RoutingState(const std::vector<double> demand, const distmat<double> &dist,
                const std::vector<int> vehicle_avail,
                const std::vector<double> &vehicle_caps);
-  std::vector<std::pair<int, int>> runs_as_cols() const;
+  std::vector<std::tuple<int, int, int>> runs_as_cols() const;
   bool relink_best();
 
 private:
