@@ -15,7 +15,24 @@ gen.demand_net <- function(max_sites = 10L) {
 }
 
 gen.demand <- function(n_sites) {
-  hedgehog::gen.c(hedgehog::gen.unif(1, 33, shrink.median = FALSE), of = n_sites)
+  hedgehog::gen.shrink(
+    shrink_demand,
+    hedgehog::gen.c(
+      hedgehog::gen.no.shrink(
+        hedgehog::gen.unif(1, 33, shrink.median = FALSE)
+      ),
+      of = n_sites
+    )
+  )
+}
+
+shrink_demand <- function(vec) {
+  if (all(vec <= 1)) {
+    return(list())
+  } else {
+    nxt_vec <- pmax(1, vec - 1)
+    return(c(shrink_demand(nxt_vec), list(nxt_vec)))
+  }
 }
 
 gen.pos <- function(n_sites) {
