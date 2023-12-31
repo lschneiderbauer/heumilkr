@@ -103,16 +103,15 @@ bool RoutingState::relink_best()
     graph.relink_edge(cell[0], cell[1]);
 
     // recalculate load
-    for (auto it = load.begin(); it != load.end(); it++)
+    for (auto &site : graph.sites_in_cycle(cell[0]))
     {
-      int i = std::distance(load.begin(), it);
-      if (!graph.links_to_origin(i))
+      if (!graph.links_to_origin(site))
       {
-        *it = 0;
+        load[site] = 0;
       }
       else
       {
-        *it = load[cell[0]] + load[cell[1]];
+        load[site] = load[cell[0]] + load[cell[1]];
       }
     }
 

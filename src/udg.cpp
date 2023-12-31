@@ -64,6 +64,11 @@ bool udg::edges_share_cycle(const int a, const int b) const
   return (cycs[a] == cycs[b]);
 }
 
+std::unordered_set<int> udg::sites_in_cycle(const int a) const
+{
+  return *cycs[a];
+}
+
 std::vector<std::shared_ptr<std::unordered_set<int>>> udg::get_cycs() const
 {
   return cycs;
