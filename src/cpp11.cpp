@@ -6,16 +6,16 @@
 #include <R_ext/Visibility.h>
 
 // clark_wright.cpp
-list cpp_clark_wright(const std::vector<double> & demand, const std::vector<double> & distances);
-extern "C" SEXP _heumilkr_cpp_clark_wright(SEXP demand, SEXP distances) {
+list cpp_clark_wright(const std::vector<double> & demand, const std::vector<double> & distances, const std::vector<int> & n_res, const std::vector<double> & capacities);
+extern "C" SEXP _heumilkr_cpp_clark_wright(SEXP demand, SEXP distances, SEXP n_res, SEXP capacities) {
   BEGIN_CPP11
-    return cpp11::as_sexp(cpp_clark_wright(cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(demand), cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(distances)));
+    return cpp11::as_sexp(cpp_clark_wright(cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(demand), cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(distances), cpp11::as_cpp<cpp11::decay_t<const std::vector<int> &>>(n_res), cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(capacities)));
   END_CPP11
 }
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_heumilkr_cpp_clark_wright", (DL_FUNC) &_heumilkr_cpp_clark_wright, 2},
+    {"_heumilkr_cpp_clark_wright", (DL_FUNC) &_heumilkr_cpp_clark_wright, 4},
     {NULL, NULL, 0}
 };
 }

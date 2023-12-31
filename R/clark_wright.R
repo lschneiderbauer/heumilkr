@@ -16,12 +16,17 @@
 #' @export
 #'
 #' @examples
-clark_wright <- function(demand, distances) {
+clark_wright <- function(demand, distances, vehicle_caps) {
   stopifnot(inherits(distances, "dist"))
   stopifnot(attr(distances, "Size") == length(demand) + 1)
+  stopifnot(is.data.frame(vehicle_caps))
+  stopifnot(c("n", "caps") %in% colnames(vehicle_caps))
+  stopifnot(is.integer(vehicle_caps$n))
+  stopifnot(is.numeric(vehicle_caps$caps))
 
   as.data.frame(
-    .Call(`_heumilkr_cpp_clark_wright`, as.vector(demand), distances),
+    .Call(`_heumilkr_cpp_clark_wright`, as.vector(demand), distances,
+          vehicle_caps$n, vehicle_caps$caps),
     col.names = c("run_id", "order")
   )
 }

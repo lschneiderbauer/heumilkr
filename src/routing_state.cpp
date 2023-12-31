@@ -6,50 +6,6 @@
 #include <map>
 #include <algorithm>
 
-bool combined_loads_exceed_truck_capacity(const std::vector<double> &load, const int a, const int b)
-{
-  int capacity = 100; // TODO
-
-  return (load[a] + load[b] > capacity);
-}
-
-std::array<int, 2> best_link(const distmat<double> &savings,
-                             const std::vector<double> &load,
-                             const udg &graph)
-{
-  std::array<int, 2> max_idx = {-1, -1};
-  double max_val = 0;
-
-  for (int i = 1; i < savings.size(); i++)
-  {
-    for (int j = 0; j < i; j++)
-    {
-      printf("---\n");
-      printf("Link (%d,%d)\n", i, j);
-      printf("orig1 %d\n", graph.links_to_origin(i));
-      printf("orig2 %d\n", graph.links_to_origin(j));
-      printf("exceed %d\n", combined_loads_exceed_truck_capacity(load, i, j));
-      printf("share cycle %d\n", graph.edges_share_cycle(i, j));
-
-      if (graph.links_to_origin(i) &&
-          graph.links_to_origin(j) &&
-          !combined_loads_exceed_truck_capacity(load, i, j) &&
-          !graph.edges_share_cycle(i, j))
-      {
-
-        if (savings.get(i, j) > max_val)
-        {
-          max_val = savings.get(i, j);
-          max_idx[0] = i;
-          max_idx[1] = j;
-        }
-      }
-    }
-  }
-
-  return max_idx;
-}
-
 // we create a symmat that is one size smaller than the distances
 // (only calculate for sites)
 distmat<double> calc_savings(const distmat<double> &d)
@@ -67,24 +23,79 @@ distmat<double> calc_savings(const distmat<double> &d)
   return savings;
 }
 
-RoutingState::RoutingState(
-    // we want a copy of this vector
-    const std::vector<double> demand,
-    const distmat<double> &dist)
+bool combined_loads_exceed_truck_capacity(const std::vector<int> &n_res,
+                                          const std::vector<double> &capacities,
+                                          const std::vector<double> &load,
+                                          const int a, const int b)
 {
-  distances = dist;
+  int capacity = 100; // TODO
 
-  graph = udg(demand.size());
+  return (load[a] + load[b] > capacity);
+}
 
-  load = demand;
-  savings = calc_savings(distances);
+std::array<int, 2> best_link(const distmat<double> &savings,
+                             const std::vector<double> &load,
+                             const std::vector<int> &n_res,
+                             const std::vector<double> &capacities,
+                             const udg &graph)
+{
+  std::array<int, 2> max_idx = {-1, -1};
+  double max_val = 0;
+
+  for (int i = 1; i < savings.size(); i++)
+  {
+    for (int j = 0; j < i; j++)
+    {
+      printf("---\n");
+      printf("Link (%d,%d)\n", i, j);
+      printf("orig1 %d\n", graph.links_to_origin(i));
+      printf("orig2 %d\n", graph.links_to_origin(j));
+      printf("exceed %d\n", combined_loads_exceed_truck_capacity(n_res, capacities, load, i, j));
+      printf("share cycle %d\n", graph.edges_share_cycle(i, j));
+
+      if (graph.links_to_origin(i) &&
+          graph.links_to_origin(j) &&
+          !combined_loads_exceed_truck_capacity(n_res, capacities, load, i, j) &&
+          !graph.edges_share_cycle(i, j))
+      {
+
+        if (savings.get(i, j) > max_val)
+        {
+          max_val = savings.get(i, j);
+          max_idx[0] = i;
+          max_idx[1] = j;
+        }
+      }
+    }
+  }
+
+  return max_idx;
+}
+
+RoutingState::RoutingState(
+  // we want a copy of this vector
+  const std::vector<double> demand, const distmat<double> &distances,
+  const std::vector<int> &n_res, const std::vector<double> &capacities)
+{
+  RoutingState::distances = distances;
+  RoutingState::n_res = n_res;
+  RoutingState::capacities = capacities;
+
+  RoutingState::graph = udg(demand.size());
+
+  RoutingState::load = demand;
+  RoutingState::savings = calc_savings(distances);
+
+  // TODO (default resource ?)
+  RoutingState::res_ids = std::vector<int> (demand.size(), 0);
+
 }
 
 // TRUE if something got relinked,
 // FALSE if nothing got relinked (i.e. the procedure stabilized)
 bool RoutingState::relink_best()
 {
-  std::array<int, 2> cell = best_link(savings, load, graph);
+  std::array<int, 2> cell = best_link(savings, load, n_res, capacities, graph);
   printf("bl: (%d,%d)\n", cell[0], cell[1]);
 
   if (!((cell[0] == cell[1]) && (cell[0] == -1)))

@@ -28,9 +28,11 @@ list pair_to_list(const std::vector<std::pair<T1, T2>> vec)
 }
 
 [[cpp11::register]] list cpp_clark_wright(const std::vector<double> &demand,
-                                          const std::vector<double> &distances)
+                                          const std::vector<double> &distances,
+                                          const std::vector<int> &n_res,
+                                          const std::vector<double> &capacities)
 {
-  RoutingState state(demand, distmat<double>(distances));
+  RoutingState state(demand, distmat<double>(distances), n_res, capacities);
 
   while (state.relink_best())
   {

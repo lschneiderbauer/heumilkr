@@ -1,5 +1,5 @@
 test_that("multiplication works", {
-  demand <- c(12, 3, 14, 12)
+  demand <- c(12, 3, 14)
 
   pos <-
     data.frame(
@@ -9,7 +9,7 @@ test_that("multiplication works", {
 
   distances <- dist(pos, method = "euclidean")
 
-  res <- clark_wright(demand, distances)
+  res <- clark_wright(demand, distances, data.frame(n=1L, caps = 33))
 
   expect_equal(length(res), 1)
   expect_equal(

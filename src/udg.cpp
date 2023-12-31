@@ -5,7 +5,8 @@
 #include <vector>
 #include <memory>
 
-udg::udg(int n_vertices) {
+udg::udg(int n_vertices)
+{
   adj = std::vector<std::unordered_set<int>>(n_vertices);
   for (auto it = adj.begin(); it != adj.end(); it++)
   {
