@@ -1,19 +1,14 @@
-test_that("multiplication works", {
-  demand <- c(12, 3, 14)
+test_that("vehicle with infinite capacity covers everything in a single run", {
+  hedgehog::forall(
+    gen.demand_net(max_sites = 10L),
+    function(demand_net) {
+      res <-
+        clark_wright(
+          demand_net$demand,
+          demand_net$distances, data.frame(n = NA_integer_, caps = 99999)
+        )
 
-  pos <-
-    data.frame(
-      pos_x = c(0, runif(length(demand), -10, 10)),
-      pos_y = c(0, runif(length(demand), -10, 10))
-    )
-
-  distances <- dist(pos, method = "euclidean")
-
-  res <- clark_wright(demand, distances, data.frame(n=1L, caps = 33))
-
-  expect_equal(length(res), 1)
-  expect_equal(
-    sort(res[[1]]),
-    c(0, 1, 2)
+      expect_equal(length(unique(res$run_id)), 1)
+    }
   )
 })
