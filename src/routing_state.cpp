@@ -77,7 +77,7 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
           graph.links_to_origin(j) &&
           !graph.edges_share_cycle(i, j) &&
           (selected_vehicle =
-               select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, i, j) != -1))
+               select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, i, j)) != -1)
       {
 
         if (savings.get(i, j) > max_val)
