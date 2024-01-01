@@ -2,8 +2,8 @@ Package: heumilkr
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
-    person("Lukas", "Schneiderbauer", , "lukas.schneiderbauer@google.com", role = c("aut", "cre", "cph"))
-Description: What the package does (one paragraph).
+    person("Lukas", "Schneiderbauer", email = "lukas.schneiderbauer@gmail.com", role = c("aut", "cre", "cph"))
+Description: Implements the Clark-Wright algorithm to find a quasi-optimal solution to the Capacitated Vehicle Routing Problem. See Clarke, G. and Wright, J.R. (1964) <http://dx.doi.org/10.1287/opre.12.4.568> for a details.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
