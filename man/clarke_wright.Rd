@@ -49,7 +49,7 @@ pos <-
     pos_y = c(0, 1, 1, 2, 3)
   )
 
-clark_wright(
+clarke_wright(
   demand,
   dist(pos),
   data.frame(n = NA_integer_, caps = 6)

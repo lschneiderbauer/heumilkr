@@ -49,7 +49,7 @@ pos <-
   )
 
 res <-
-  clark_wright(
+  clarke_wright(
     demand,
     dist(pos),
     data.frame(n = NA_integer_, caps = 33)
