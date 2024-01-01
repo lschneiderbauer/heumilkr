@@ -1,5 +1,7 @@
 ---
 output: github_document
+bibliography: references.bib
+link-citations: true
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -17,14 +19,12 @@ knitr::opts_chunk$set(
 # heumilkr
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/lschneiderbauer/heumilkr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lschneiderbauer/heumilkr/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/lschneiderbauer/heumilkr/branch/master/graph/badge.svg)](https://app.codecov.io/gh/lschneiderbauer/heumilkr?branch=master)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/heumilkr)](https://CRAN.R-project.org/package=heumilkr)
+
+[![R-CMD-check](https://github.com/lschneiderbauer/heumilkr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lschneiderbauer/heumilkr/actions/workflows/R-CMD-check.yaml) [![Codecov test coverage](https://codecov.io/gh/lschneiderbauer/heumilkr/branch/master/graph/badge.svg)](https://app.codecov.io/gh/lschneiderbauer/heumilkr?branch=master) [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![CRAN status](https://www.r-pkg.org/badges/version/heumilkr)](https://CRAN.R-project.org/package=heumilkr)
+
 <!-- badges: end -->
 
-heumilkr provides an implementation of the Clark-Wright algorithm to find a quasi-optimal solution to the [Capacitated Vehicle Routing Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem).
-
+This R package provides an implementation of the Clarke-Wright algorithm [@clarke1964] to find a quasi-optimal solution to the [Capacitated Vehicle Routing Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem).
 
 ## Installation
 
@@ -37,7 +37,7 @@ devtools::install_github("lschneiderbauer/heumilkr")
 
 ## Example
 
-The following example generates random demands at random locations, applies the Clark-Wright algorithm to generate quasi-optimal vehicle runs and shows the resulting runs.
+The following example generates random demands at random locations, applies the Clarke-Wright algorithm to generate quasi-optimal vehicle runs and shows the resulting runs.
 
 ```{r example}
 library(heumilkr)
@@ -61,12 +61,11 @@ res <-
 print(res)
 ```
 
-A plotting function (using ggplot) for the result is built in. The individual runs are distinguished by color. The demanding site locations are marked with round circles while the (single) supplying site is depicted as a square.
+A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for the result is built in. The individual runs are distinguished by color. The demanding site locations are marked with round circles while the (single) supplying site is depicted as a square.
 
 ```{r example_plot}
 plot(res)
 ```
-
 
 ## Benchmarks
 
@@ -77,9 +76,9 @@ library(ggplot2)
 library(dplyr)
 ```
 
-The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz CPU.
+The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 \@ 3.40GHz CPU, using the R package [bench](https://bench.r-lib.org/).
 
-The following graph shows the run time behavior as the number of sites `n` increase. The curve exhibits near-cubic behavior in `n`. For `n = 110` the performance is still relatively reasonable with a run time of approximately `97 ms`.
+The following graph shows the run time behavior as the number of sites $n$ increase. The curve exhibits near-cubic behavior in $n$. For $n = 110$ the performance is still relatively reasonable with a run time of approximately $\sim 97 ms$.
 
 ```{r benchmark_runtime, echo = FALSE}
 result |>
@@ -90,7 +89,7 @@ result |>
   ) |>
   ggplot(aes(x = n, y = median, ymin = ymin, ymax = ymax)) +
   scale_x_continuous(
-    name = "Number of items",
+    name = "Number of demanding sites",
     labels = scales::label_number(
       scale_cut = scales::cut_long_scale()
     )
