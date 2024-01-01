@@ -66,3 +66,44 @@ A plotting function (using ggplot) for the result is built in. The individual ru
 ```{r example_plot}
 plot(res)
 ```
+
+
+## Benchmarks
+
+```{r benchmark_calc, echo=FALSE, message=FALSE, warning=FALSE}
+result <- readRDS("./benchmark/results.rds")
+
+library(ggplot2)
+library(dplyr)
+```
+
+The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz CPU.
+
+The following graph shows the run time behavior as the number of sites `n` increase. The curve exhibits near-cubic behavior in `n`. For `n = 110` the performance is still relatively reasonable with a run time of approximately `97 ms`.
+
+```{r benchmark_runtime, echo = FALSE}
+result |>
+  mutate(
+    ymin = as.numeric(mean - std),
+    ymax = as.numeric(mean + std),
+    median = as.numeric(median)
+  ) |>
+  ggplot(aes(x = n, y = median, ymin = ymin, ymax = ymax)) +
+  scale_x_continuous(
+    name = "Number of items",
+    labels = scales::label_number(
+      scale_cut = scales::cut_long_scale()
+    )
+  ) +
+  scale_y_continuous(
+    name = "Runtime (in seconds)",
+    labels = scales::label_number(
+      suffix = "s",
+      scale_cut = scales::cut_long_scale()
+    )
+  ) +
+  geom_ribbon(alpha = 0.3, linewidth = 0) +
+  geom_point() +
+  geom_line() +
+  theme_minimal()
+```

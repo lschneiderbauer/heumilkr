@@ -87,3 +87,15 @@ plot(res)
 ```
 
 <img src="man/figures/README-example_plot-1.png" width="100%" />
+
+## Benchmarks
+
+The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz
+CPU.
+
+The following graph shows the run time behavior as the number of sites
+`n` increase. The curve exhibits near-cubic behavior in `n`. For
+`n = 110` the performance is still relatively reasonable with a run time
+of approximately `97 ms`.
+
+<img src="man/figures/README-benchmark_runtime-1.png" width="100%" />
