@@ -9,7 +9,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "100%",
+  dpi = 300
 )
 ```
 
@@ -22,7 +23,8 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/heumilkr)](https://CRAN.R-project.org/package=heumilkr)
 <!-- badges: end -->
 
-The goal of heumilkr is to ...
+heumilkr provides an implementation of the Clark-Wright algorithm to find a quasi-optimal solution to the [Capacity Vehicle Routing Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem).
+
 
 ## Installation
 
@@ -35,9 +37,32 @@ devtools::install_github("lschneiderbauer/heumilkr")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+The following example generates random demands at random locations, applies the Clark-Wright algorithm to generate quasi-optimal vehicle runs and shows the resulting runs.
 
 ```{r example}
 library(heumilkr)
-## basic example code
+
+set.seed(42)
+demand <- runif(20, 5, 15)
+
+pos <-
+  data.frame(
+    pos_x = c(0, runif(length(demand), -10, 10)),
+    pos_y = c(0, runif(length(demand), -10, 10))
+  )
+
+res <-
+  clark_wright(
+    demand,
+    dist(pos),
+    data.frame(n = NA_integer_, caps = 33)
+  )
+
+print(res)
+```
+
+A plotting function (using ggplot) for the result is built in. The individual runs are distinguished by color. The demanding site locations are marked with round circles while the (single) supplying site is depicted as a square.
+
+```{r example_plot}
+plot(res)
 ```
