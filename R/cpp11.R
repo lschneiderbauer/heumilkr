@@ -3,3 +3,7 @@
 cpp_clarke_wright <- function(demand, distances, n_res, capacities) {
   .Call(`_heumilkr_cpp_clarke_wright`, demand, distances, n_res, capacities)
 }
+
+cpp_clarke_wright_stepwise <- function(demand, distances, n_res, capacities) {
+  .Call(`_heumilkr_cpp_clarke_wright_stepwise`, demand, distances, n_res, capacities)
+}

@@ -65,3 +65,35 @@ clarke_wright <- function(demand, distances, vehicles) {
     distances = distances
   )
 }
+
+#' Same as [clarke_wright()] but returns all intermediate state results as well.
+#' This function exists only for showcase purposes and should not be used in
+#' production (performance is quite bad).
+#'
+#' @inheritParams clarke_wright
+#' @seealso [clarke_wright()]
+#' @noRd
+clarke_wright_stepwise <- function(demand, distances, vehicles) {
+  stopifnot(inherits(distances, "dist"))
+  stopifnot(attr(distances, "Size") == length(demand) + 1)
+  stopifnot(is.data.frame(vehicles))
+  stopifnot(c("n", "caps") %in% colnames(vehicles))
+  stopifnot(is.integer(vehicles$n))
+  stopifnot(is.numeric(vehicles$caps))
+
+  # replace NAs by maximal machine integer value
+  vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max
+
+  lapply(
+    .Call(
+      `_heumilkr_cpp_clarke_wright_stepwise`, as.numeric(demand), distances,
+      vehicles$n, vehicles$caps
+    ),
+    \(x) heumilkr_result(
+      as.data.frame(x,
+        col.names = c("run_id", "order", "vehicle_id")
+      ),
+      distances = distances
+    )
+  )
+}

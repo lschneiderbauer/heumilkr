@@ -30,10 +30,11 @@ list triple_to_list(const std::vector<std::tuple<T1, T2, T3>> vec)
   return lst;
 }
 
-[[cpp11::register]] list cpp_clarke_wright(const std::vector<double> &demand,
-                                          const std::vector<double> &distances,
-                                          const std::vector<int> &n_res,
-                                          const std::vector<double> &capacities)
+[[cpp11::register]]
+list cpp_clarke_wright(const std::vector<double> &demand,
+                       const std::vector<double> &distances,
+                       const std::vector<int> &n_res,
+                       const std::vector<double> &capacities)
 {
   RoutingState state(demand, distmat<double>(distances), n_res, capacities);
 
@@ -43,4 +44,24 @@ list triple_to_list(const std::vector<std::tuple<T1, T2, T3>> vec)
   };
 
   return triple_to_list<int, int, int>(state.runs_as_cols());
+}
+
+[[cpp11::register]]
+list cpp_clarke_wright_stepwise(const std::vector<double> &demand,
+                                const std::vector<double> &distances,
+                                const std::vector<int> &n_res,
+                                const std::vector<double> &capacities)
+{
+  RoutingState state(demand, distmat<double>(distances), n_res, capacities);
+
+  cpp11::writable::list steps;
+  steps.push_back(triple_to_list<int, int, int>(state.runs_as_cols()));
+
+  while (state.relink_best())
+  {
+    steps.push_back(triple_to_list<int, int, int>(state.runs_as_cols()));;
+    //printf("===\n");
+  };
+
+  return steps;
 }
