@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/heumilkr)](https://CRAN.R-project.org/package=heumilkr)
 <!-- badges: end -->
 
-heumilkr provides an implementation of the Clark-Wright algorithm to find a quasi-optimal solution to the [Capacity Vehicle Routing Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem).
+heumilkr provides an implementation of the Clark-Wright algorithm to find a quasi-optimal solution to the [Capacitated Vehicle Routing Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem).
 
 
 ## Installation

@@ -15,7 +15,7 @@ status](https://www.r-pkg.org/badges/version/heumilkr)](https://CRAN.R-project.o
 <!-- badges: end -->
 
 heumilkr provides an implementation of the Clark-Wright algorithm to
-find a quasi-optimal solution to the [Capacity Vehicle Routing
+find a quasi-optimal solution to the [Capacitated Vehicle Routing
 Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem).
 
 ## Installation

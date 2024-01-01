@@ -1,6 +1,6 @@
 #' Clark-Wright Algorithm (CVRP solver)
 #'
-#' Finds a quasi-optimal solution to the Capacity Vehicle Routing
+#' Finds a quasi-optimal solution to the Capacitated Vehicle Routing
 #' Problem (CVRP). It is assumed that all demands can and will be satisfied by a
 #' single source.
 #'
