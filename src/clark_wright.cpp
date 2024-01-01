@@ -39,7 +39,7 @@ list triple_to_list(const std::vector<std::tuple<T1, T2, T3>> vec)
 
   while (state.relink_best())
   {
-    printf("===\n");
+    //printf("===\n");
   };
 
   return triple_to_list<int, int, int>(state.runs_as_cols());

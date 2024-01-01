@@ -1,7 +1,7 @@
 #include "routing_state.h"
 #include "tsp_greedy.h"
 #include <vector>
-#include <stdio.h>
+//#include <stdio.h>
 #include <array>
 #include <map>
 #include <algorithm>
@@ -34,7 +34,7 @@ int select_vehicle(const std::vector<int> &vehicle_avail,
     int vehicle = std::distance(vehicle_caps.begin(), it);
 
     int avail = vehicle_avail[vehicle];
-    printf("veh avail %i: %d\n", vehicle, avail);
+    //printf("veh avail %i: %d\n", vehicle, avail);
     if (site_vehicle[a] == vehicle || site_vehicle[b] == vehicle)
     {
       avail += 1;
@@ -64,12 +64,12 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
   {
     for (int j = 0; j < i; j++)
     {
-      printf("---\n");
-      printf("Link (%d,%d)\n", i, j);
-      printf("orig1 %d\n", graph.links_to_origin(i));
-      printf("orig2 %d\n", graph.links_to_origin(j));
-      printf("selected vehicle %d\n", select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, i, j));
-      printf("share cycle %d\n", graph.edges_share_cycle(i, j));
+      // printf("---\n");
+      // printf("Link (%d,%d)\n", i, j);
+      // printf("orig1 %d\n", graph.links_to_origin(i));
+      // printf("orig2 %d\n", graph.links_to_origin(j));
+      // printf("selected vehicle %d\n", select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, i, j));
+      // printf("share cycle %d\n", graph.edges_share_cycle(i, j));
 
       int selected_vehicle;
 
@@ -131,7 +131,7 @@ bool RoutingState::relink_best()
                 site_vehicle, vehicle_avail,
                 vehicle_caps, graph);
 
-  printf("bl: (%d,%d)\n", a, b);
+  //printf("bl: (%d,%d)\n", a, b);
 
   if (!((a == b) && (a == -1)))
   {
