@@ -10,14 +10,14 @@ udg::udg(int n_vertices)
   adj = std::vector<std::unordered_set<int>>(n_vertices);
   for (auto it = adj.begin(); it != adj.end(); it++)
   {
-    *it = std::unordered_set{-1};
+    *it = std::unordered_set<int>{-1};
   }
 
   cycs = std::vector<std::shared_ptr<std::unordered_set<int>>>(n_vertices);
   for (auto it = cycs.begin(); it != cycs.end(); it++)
   {
     int i = std::distance(cycs.begin(), it);
-    *it = std::make_shared<std::unordered_set<int>>(std::unordered_set{i});
+    *it = std::make_shared<std::unordered_set<int>>(std::unordered_set<int>{i});
   }
 }
 
