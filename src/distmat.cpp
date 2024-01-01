@@ -1,13 +1,11 @@
 #include "distmat.h"
-#include <stdint.h>
 #include <cmath>
-#include <stdio.h>
 
 template <class T>
 distmat<T>::distmat(int size, T def)
 {
   m_size = size;
-  data = std::vector(size * (size - 1) / 2, def);
+  data = std::vector<T>(size * (size - 1) / 2, def);
 }
 
 template <class T>
