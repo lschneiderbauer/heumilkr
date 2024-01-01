@@ -12,6 +12,9 @@ LinkingTo:
     cpp11
 URL: https://github.com/lschneiderbauer/heumilkr
 BugReports: https://github.com/lschneiderbauer/heumilkr/issues
+Imports:
+    rlang (>= 1.1.0),
+    ggplot2 (>= 3.4.0)
 Suggests: 
     testthat (>= 3.0.0),
     hedgehog (>= 0.1)
