@@ -6,7 +6,8 @@
 #'                              theme_void theme
 #' @importFrom rlang .data
 #' @export
-autoplot.heumilkr_result <- function(res, ...) {
+autoplot.heumilkr_result <- function(object, ...) {
+  res <- object
 
   # recalculate positions
   pos <- as.data.frame(cmdscale(attr(res, "distances")))
