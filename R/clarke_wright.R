@@ -43,7 +43,7 @@
 #'   dist(pos),
 #'   data.frame(n = NA_integer_, caps = 6)
 #' )
-clark_wright <- function(demand, distances, vehicles) {
+clarke_wright <- function(demand, distances, vehicles) {
   stopifnot(inherits(distances, "dist"))
   stopifnot(attr(distances, "Size") == length(demand) + 1)
   stopifnot(is.data.frame(vehicles))
@@ -57,7 +57,7 @@ clark_wright <- function(demand, distances, vehicles) {
   heumilkr_result(
     as.data.frame(
       .Call(
-        `_heumilkr_cpp_clark_wright`, as.numeric(demand), distances,
+        `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
         vehicles$n, vehicles$caps
       ),
       col.names = c("run_id", "order", "vehicle_id")

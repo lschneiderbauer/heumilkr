@@ -2,7 +2,7 @@
 
 S3method(autoplot,heumilkr_result)
 S3method(plot,heumilkr_result)
-export(clark_wright)
+export(clarke_wright)
 importFrom(ggplot2,aes)
 importFrom(ggplot2,autoplot)
 importFrom(ggplot2,geom_path)

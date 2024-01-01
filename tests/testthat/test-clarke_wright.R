@@ -8,7 +8,7 @@ test_that("runs without error", {
     )
 
   expect_no_error(
-    clark_wright(
+    clarke_wright(
       demand,
       dist(pos),
       data.frame(n = NA_integer_, caps = 99999)
@@ -21,7 +21,7 @@ test_that("vehicle with infinite capacity covers everything in a single run", {
     gen.demand_net(max_sites = 10L),
     function(demand_net) {
       res <-
-        clark_wright(
+        clarke_wright(
           demand_net$demand,
           demand_net$distances, data.frame(n = NA_integer_, caps = 99999)
         )

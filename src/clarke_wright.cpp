@@ -30,7 +30,7 @@ list triple_to_list(const std::vector<std::tuple<T1, T2, T3>> vec)
   return lst;
 }
 
-[[cpp11::register]] list cpp_clark_wright(const std::vector<double> &demand,
+[[cpp11::register]] list cpp_clarke_wright(const std::vector<double> &demand,
                                           const std::vector<double> &distances,
                                           const std::vector<int> &n_res,
                                           const std::vector<double> &capacities)

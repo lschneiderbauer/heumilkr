@@ -26,7 +26,7 @@ result <-
         distances <- dist(pos[1:(n + 1), ])
 
         bench::mark(
-          clark_wright(demand, distances, vehicles)
+          clarke_wright(demand, distances, vehicles)
         ) |>
           rowwise() |>
           mutate(
