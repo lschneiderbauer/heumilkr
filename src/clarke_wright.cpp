@@ -36,7 +36,7 @@ list cpp_clarke_wright(const std::vector<double> &demand,
                        const std::vector<int> &n_res,
                        const std::vector<double> &capacities)
 {
-  RoutingState state(demand, distmat<double>(distances), n_res, capacities);
+  routing_state state(demand, distmat<double>(distances), n_res, capacities);
 
   while (state.relink_best())
   {
@@ -52,7 +52,7 @@ list cpp_clarke_wright_stepwise(const std::vector<double> &demand,
                                 const std::vector<int> &n_res,
                                 const std::vector<double> &capacities)
 {
-  RoutingState state(demand, distmat<double>(distances), n_res, capacities);
+  routing_state state(demand, distmat<double>(distances), n_res, capacities);
 
   cpp11::writable::list steps;
   steps.push_back(triple_to_list<int, int, int>(state.runs_as_cols()));

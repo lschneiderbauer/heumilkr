@@ -7,10 +7,10 @@
 #ifndef ROUTINGSTATE_H
 #define ROUTINGSTATE_H
 
-class RoutingState
+class routing_state
 {
 public:
-  RoutingState(const std::vector<double> demand, const distmat<double> &dist,
+  routing_state(const std::vector<double> demand, const distmat<double> &dist,
                const std::vector<int> vehicle_avail,
                const std::vector<double> &vehicle_caps);
   std::vector<std::tuple<int, int, int>> runs_as_cols() const;

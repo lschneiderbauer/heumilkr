@@ -94,34 +94,34 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
   return best_link;
 }
 
-RoutingState::RoutingState(
+routing_state::routing_state(
     // we want a copy of this vector
     const std::vector<double> demand, const distmat<double> &distances,
     const std::vector<int> vehicle_avail, const std::vector<double> &vehicle_caps)
 {
-  RoutingState::distances = distances;
-  RoutingState::vehicle_caps = vehicle_caps;
+  routing_state::distances = distances;
+  routing_state::vehicle_caps = vehicle_caps;
 
-  RoutingState::graph = udg(demand.size());
+  routing_state::graph = udg(demand.size());
 
-  RoutingState::load = demand;
-  RoutingState::vehicle_avail = vehicle_avail;
-  RoutingState::savings = calc_savings(distances);
+  routing_state::load = demand;
+  routing_state::vehicle_avail = vehicle_avail;
+  routing_state::savings = calc_savings(distances);
 
   // TODO (default resource ?)
-  RoutingState::site_vehicle = std::vector<int>(demand.size());
+  routing_state::site_vehicle = std::vector<int>(demand.size());
   for (auto it = site_vehicle.begin(); it != site_vehicle.end(); it++)
   {
     int site = std::distance(site_vehicle.begin(), it);
     *it = 0; // TODO
-    RoutingState::vehicle_avail[*it] -= 1;
-    RoutingState::site_vehicle[site] = *it;
+    routing_state::vehicle_avail[*it] -= 1;
+    routing_state::site_vehicle[site] = *it;
   }
 }
 
 // TRUE if something got relinked,
 // FALSE if nothing got relinked (i.e. the procedure stabilized)
-bool RoutingState::relink_best()
+bool routing_state::relink_best()
 {
   int a;
   int b;
@@ -165,7 +165,7 @@ bool RoutingState::relink_best()
   }
 }
 
-std::vector<std::tuple<int, int, int>> RoutingState::runs_as_cols() const
+std::vector<std::tuple<int, int, int>> routing_state::runs_as_cols() const
 {
   typedef std::shared_ptr<std::unordered_set<int>> T;
   std::vector<std::shared_ptr<std::unordered_set<int>>> cycs = graph.get_cycs();
