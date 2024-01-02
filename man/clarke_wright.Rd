@@ -7,38 +7,54 @@
 clarke_wright(demand, distances, vehicles)
 }
 \arguments{
-\item{demand}{A numeric vector consisting of "demands" of sites. The length
-of the vector equals the number of sites \code{N} with demands. The
+\item{demand}{A numeric vector consisting of "demands" indexed by sites.
+The \code{i}th entry refers to the demand of site \code{i} (and the length
+of the vector equals the number of sites \code{N} with demands). The
 units of the demand values need to match the units of the
 vehicle capacity values.}
 
-\item{distances}{An object of class \code{dist} (created by \code{\link[stats:dist]{stats::dist()}}) with
-\code{N + 1} locations, describing the distances between sites.
-The zeroth location refers to the source.}
+\item{distances}{An object of class \code{dist}, created by \code{\link[stats:dist]{stats::dist()}}, with
+\code{(N + 1)} locations describing the distances between individual
+sites. The first index refers to the source site. The \code{(i+1)}'th
+index refers to site \code{i} (as defined by \code{demand}).}
 
-\item{vehicles}{A data frame describing available vehicle types and
-their respective capacities. One row per vehicle type.
-The data frame is expected to have two columns:
-* \code{n} - Number of available vehicles. This can be set to
-\code{NA} if the number is "infinite" (i.e. effectively
-the maximal integer value on your machine.)
-* \code{caps} - The vehicle capacity in same units as \code{demand}.
-The order of the data frame is relevant and determines
-the prioritization of vehicle assignments to runs (in case
-two or more vehicle types are eligible for assignment the
-"first" vehicle is chosen).}
+\item{vehicles}{A data frame describing available vehicle types and their respective
+capacities. One row per vehicle type. The data frame is expected to have
+two columns:
+\itemize{
+\item \code{n} - Number of available vehicles. This can be set to \code{NA} if the
+number is "infinite" (i.e. effectively the maximal integer value
+on your machine.).
+\item \code{caps} - The vehicle capacity in same units as \code{demand}.
+}
+
+The order of the data frame is relevant and determines the prioritization
+of vehicle assignments to runs (in case two or more vehicle types are
+eligible for assignment the "first" vehicle is chosen).}
 }
 \value{
-Returns a data frame of the same length as \code{demand} with columns
-* \code{run_id} - Identifies the run the site is assigned to.
-* \code{order}  - Provides the visiting order within each run.
-* \code{vehicle_id} - The vehicle index (as provided in \code{vehicles})
-associated to the run.
+Returns a data frame with one row per site-run combination.
+\itemize{
+\item \code{site} - The site index (as provided in \code{demand}) associated
+to the run.
+\item \code{run} - Identifies the run the site is assigned to.
+\item \code{order}  - Integer values providing the visiting order within each run.
+\item \code{vehicle} - The vehicle index (as provided in \code{vehicles}) associated
+to the run.
+}
+
+Unless a site demand exceeds the vehicle capacities it is always assigned
+to only a single run.
 }
 \description{
 Finds a quasi-optimal solution to the Capacitated Vehicle Routing
-Problem (CVRP). It is assumed that all demands can and will be satisfied by a
+Problem (CVRP). It is assumed that all demands will be satisfied by a
 single source.
+}
+\details{
+See the original paper,
+\href{http://dx.doi.org/10.1287/opre.12.4.568}{Clarke, G. and Wright, J.R. (1964)},
+for details.
 }
 \examples{
 demand <- c(3, 2, 4, 2)

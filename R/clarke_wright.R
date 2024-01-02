@@ -1,32 +1,52 @@
 #' Clark-Wright Algorithm (CVRP solver)
 #'
 #' Finds a quasi-optimal solution to the Capacitated Vehicle Routing
-#' Problem (CVRP). It is assumed that all demands can and will be satisfied by a
+#' Problem (CVRP). It is assumed that all demands will be satisfied by a
 #' single source.
 #'
-#' @param demand A numeric vector consisting of "demands" of sites. The length
-#'               of the vector equals the number of sites `N` with demands. The
-#'               units of the demand values need to match the units of the
-#'               vehicle capacity values.
-#' @param distances An object of class `dist` (created by [stats::dist()]) with
-#'                  `N + 1` locations, describing the distances between sites.
-#'                  The zeroth location refers to the source.
-#' @param vehicles A data frame describing available vehicle types and
-#'                     their respective capacities. One row per vehicle type.
-#'                     The data frame is expected to have two columns:
-#'                     * `n` - Number of available vehicles. This can be set to
-#'                             `NA` if the number is "infinite" (i.e. effectively
-#'                             the maximal integer value on your machine.)
-#'                     * `caps` - The vehicle capacity in same units as `demand`.
-#'                     The order of the data frame is relevant and determines
-#'                     the prioritization of vehicle assignments to runs (in case
-#'                     two or more vehicle types are eligible for assignment the
-#'                     "first" vehicle is chosen).
-#' @return Returns a data frame of the same length as `demand` with columns
-#'         * `run_id` - Identifies the run the site is assigned to.
-#'         * `order`  - Provides the visiting order within each run.
-#'         * `vehicle_id` - The vehicle index (as provided in `vehicles`)
-#'                          associated to the run.
+#' @details
+#' See the original paper,
+#' [Clarke, G. and Wright, J.R. (1964)](http://dx.doi.org/10.1287/opre.12.4.568),
+#' for details.
+#'
+#' @param demand
+#'  A numeric vector consisting of "demands" indexed by sites.
+#'  The `i`th entry refers to the demand of site `i` (and the length
+#'  of the vector equals the number of sites `N` with demands). The
+#'  units of the demand values need to match the units of the
+#'  vehicle capacity values.
+#'
+#' @param distances
+#'  An object of class `dist`, created by [stats::dist()], with
+#'  `(N + 1)` locations describing the distances between individual
+#'  sites. The first index refers to the source site. The `(i+1)`'th
+#'  index refers to site `i` (as defined by `demand`).
+#'
+#' @param vehicles
+#'  A data frame describing available vehicle types and their respective
+#'  capacities. One row per vehicle type. The data frame is expected to have
+#'  two columns:
+#'  * `n` - Number of available vehicles. This can be set to `NA` if the
+#'          number is "infinite" (i.e. effectively the maximal integer value
+#'          on your machine.).
+#'  * `caps` - The vehicle capacity in same units as `demand`.
+#'
+#'  The order of the data frame is relevant and determines the prioritization
+#'  of vehicle assignments to runs (in case two or more vehicle types are
+#'  eligible for assignment the "first" vehicle is chosen).
+#'
+#' @return
+#'  Returns a data frame with one row per site-run combination.
+#'  * `site` - The site index (as provided in `demand`) associated
+#'             to the run.
+#'  * `run` - Identifies the run the site is assigned to.
+#'  * `order`  - Integer values providing the visiting order within each run.
+#'  * `vehicle` - The vehicle index (as provided in `vehicles`) associated
+#'                to the run.
+#'
+#'  Unless a site demand exceeds the vehicle capacities it is always assigned
+#'  to only a single run.
+#'
 #' @export
 #'
 #' @examples
@@ -60,7 +80,7 @@ clarke_wright <- function(demand, distances, vehicles) {
         `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
         vehicles$n, vehicles$caps
       ),
-      col.names = c("run_id", "order", "vehicle_id")
+      col.names = c("run", "order", "vehicle")
     ),
     distances = distances
   )
