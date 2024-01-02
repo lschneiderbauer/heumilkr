@@ -5,6 +5,7 @@
 #include <array>
 #include <map>
 #include <algorithm>
+#include <stdexcept>
 
 // we create a symmat that is one size smaller than the distances
 // (only calculate for sites)
@@ -21,6 +22,43 @@ distmat<double> calc_savings(const distmat<double> &d)
   }
 
   return savings;
+}
+
+int select_initial_vehicle(const std::vector<int> &vehicle_avail,
+                           const std::vector<double> &vehicle_caps,
+                           const double load)
+{
+  for (auto it = vehicle_caps.begin(); it != vehicle_caps.end(); it++)
+  {
+    int vehicle = std::distance(vehicle_caps.begin(), it);
+    int avail = vehicle_avail[vehicle];
+
+    if (avail >= 1 && load <= vehicle_caps[vehicle])
+    {
+      return vehicle;
+    }
+  }
+
+  // if we are here we did not find any vehicle with fitting capacity:
+  // check again, but this time we return the next best vehicle
+  // (not caring about capacity)
+  for (auto it = vehicle_caps.begin(); it != vehicle_caps.end(); it++)
+  {
+    int vehicle = std::distance(vehicle_caps.begin(), it);
+    int avail = vehicle_avail[vehicle];
+
+    if (avail >= 1)
+    {
+      return vehicle;
+    }
+  }
+
+  throw std::runtime_error(
+    "Not enough vehicles available to fulfill all demands trivially."
+    " Solver cannot proceed in that case."
+  );
+
+  return -1;
 }
 
 int select_vehicle(const std::vector<int> &vehicle_avail,
@@ -108,14 +146,30 @@ routing_state::routing_state(
   routing_state::vehicle_avail = vehicle_avail;
   routing_state::savings = calc_savings(distances);
 
-  // TODO (default resource ?)
+  // first resource assignments
   routing_state::site_vehicle = std::vector<int>(demand.size());
   for (auto it = site_vehicle.begin(); it != site_vehicle.end(); it++)
   {
     int site = std::distance(site_vehicle.begin(), it);
-    *it = 0; // TODO
-    routing_state::vehicle_avail[*it] -= 1;
-    routing_state::site_vehicle[site] = *it;
+
+    int vehicle = select_initial_vehicle(routing_state::vehicle_avail,
+                                         routing_state::vehicle_caps,
+                                         load[site]);
+    routing_state::vehicle_avail[vehicle] -= 1;
+
+    while (load[site] > vehicle_caps[vehicle])
+    {
+      load[site] -= vehicle_caps[vehicle];
+      routing_state::vehicle_avail[vehicle] -= 1;
+      // add those to some extra list
+      // TODO
+      vehicle = select_initial_vehicle(routing_state::vehicle_avail,
+                                       routing_state::vehicle_caps,
+                                       load[site]);
+    }
+
+    // only add the last one to the state
+    *it = vehicle;
   }
 }
 
