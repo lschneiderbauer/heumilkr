@@ -7,46 +7,21 @@
 #' @importFrom rlang .data
 #' @export
 autoplot.heumilkr_result <- function(object, ...) {
-  res <- object
+  data <- plot_data(object)
 
-  # recalculate positions
-  pos <- as.data.frame(cmdscale(attr(res, "distances")))
-  colnames(pos) <- c("pos_x", "pos_y")
-  pos$site <- seq.int(nrow(pos)) - 1
-
-  runs <-
-    rbind(
-      data.frame(
-        run_id = unique(res$run_id),
-        order = -1,
-        site = 0
-      ),
-      cbind(res[, c("run_id", "order")], site = seq.int(nrow(res))),
-      do.call(rbind, by(
-        res,
-        res$run_id,
-        \(x) data.frame(
-          run_id = unique(x$run_id),
-          order = 1 + max(x$order),
-          site = 0
-        )
-      ))
-    )
-
-  data <- merge(runs, pos, by = "site")
   data$shape <- ifelse(data$site == 0, "square", "circle")
   data$size <- ifelse(data$site == 0, 5, 3)
 
   ggplot(
-    data = data[order(data$run_id, data$order), ],
+    data = data[order(data$run, data$order), ],
     aes(
       x = .data$pos_x, y = .data$pos_y,
-      group = .data$run_id
+      group = .data$run
     )
   ) +
     scale_color_discrete() +
     geom_path(
-      aes(color = as.factor(.data$run_id)),
+      aes(color = as.factor(.data$run)),
       linewidth = 1, alpha = 0.7
     ) +
     geom_point(aes(shape = .data$shape, size = .data$size)) +
@@ -60,4 +35,37 @@ autoplot.heumilkr_result <- function(object, ...) {
 #' @export
 plot.heumilkr_result <- function(x, ...) {
   print(autoplot(x, ...))
+}
+
+plot_data <- function(x) {
+  stopifnot(inherits(x, "heumilkr_result"))
+
+  # recalculate positions
+  pos <- as.data.frame(cmdscale(attr(x, "distances")))
+  colnames(pos) <- c("pos_x", "pos_y")
+  pos$site <- seq.int(nrow(pos)) - 1
+
+  runs <-
+    rbind(
+      data.frame(
+        run = unique(x$run),
+        order = -1,
+        site = 0
+      ),
+      cbind(x[, c("run", "order")], site = seq.int(nrow(x))),
+      do.call(
+        rbind,
+        by(
+          x,
+          x$run,
+          \(y) data.frame(
+            run = unique(y$run),
+            order = 1 + max(y$order),
+            site = 0
+          )
+        )
+      )
+    )
+
+  merge(runs, pos, by = "site")
 }
