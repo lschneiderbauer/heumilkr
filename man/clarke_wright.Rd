@@ -25,6 +25,10 @@ two columns:
 \item \code{n} - Number of available vehicles. This can be set to \code{NA} if the
 number is "infinite" (i.e. effectively the maximal integer value
 on your machine.).
+It is recommended to keep at least one vehicle type as "infinite",
+otherwise the solver might raise a run time error due to initially
+not having enough vehicles available (even though the final
+solution might satisfy the availability restrictions).
 \item \code{caps} - The vehicle capacity in same units as \code{demand}.
 }
 

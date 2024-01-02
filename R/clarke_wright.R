@@ -29,6 +29,10 @@
 #'  * `n` - Number of available vehicles. This can be set to `NA` if the
 #'          number is "infinite" (i.e. effectively the maximal integer value
 #'          on your machine.).
+#'          It is recommended to keep at least one vehicle type as "infinite",
+#'          otherwise the solver might raise a run time error due to initially
+#'          not having enough vehicles available (even though the final
+#'          solution might satisfy the availability restrictions).
 #'  * `caps` - The vehicle capacity in same units as `demand`.
 #'
 #'  The order of the data frame is relevant and determines the prioritization
@@ -64,12 +68,15 @@
 #'   data.frame(n = NA_integer_, caps = 6)
 #' )
 clarke_wright <- function(demand, distances, vehicles) {
+  stopifnot(is.numeric(demand))
   stopifnot(inherits(distances, "dist"))
   stopifnot(attr(distances, "Size") == length(demand) + 1)
   stopifnot(is.data.frame(vehicles))
   stopifnot(c("n", "caps") %in% colnames(vehicles))
+  stopifnot(nrow(vehicles) > 0)
   stopifnot(is.integer(vehicles$n))
   stopifnot(is.numeric(vehicles$caps))
+  stopifnot(vehicles$caps > 0)
 
   # replace NAs by maximal machine integer value
   vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max
