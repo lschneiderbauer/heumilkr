@@ -200,20 +200,26 @@ bool routing_state::relink_best()
 
     double new_load = load[a] + load[b];
 
+    // return two vehicles
+    vehicle_avail[site_vehicle[a]] += 1;
+    vehicle_avail[site_vehicle[b]] += 1;
+    // take one vehicle
+    vehicle_avail[vehicle] -= 1;
+
     // recalculate load
     for (auto &site : graph.sites_in_cycle(a))
     {
       // (since we don't use the intermediate ones anyways)
       // we can as well set all of them to the full load
       load[site] = new_load;
-    }
+      site_vehicle[site] = vehicle;
 
-    // reassign vehicles
-    vehicle_avail[site_vehicle[a]] += 1;
-    vehicle_avail[site_vehicle[b]] += 1;
-    vehicle_avail[vehicle] -= 1;
-    site_vehicle[a] = vehicle;
-    site_vehicle[b] = vehicle;
+      // TODO: these are actually properties that should be assigned
+      // once per cycle. we should build that into udg somehow, we
+      // would save some ~ linear-time assignments.
+      // (constant time from here (actually depends on the demand inputs)
+      // times the nodes we are relinking.)
+    }
 
     return true;
   }
