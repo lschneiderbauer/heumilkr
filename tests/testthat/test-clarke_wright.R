@@ -16,6 +16,24 @@ test_that("runs without error", {
   )
 })
 
+test_that("Sum of loads over all runs equals sum of demands", {
+  hedgehog::forall(
+    gen.demand_net(max_sites = 10L),
+    function(demand_net) {
+      res <-
+        clarke_wright(
+          demand_net$demand,
+          demand_net$distances, data.frame(n = c(NA_integer_, 3L), caps = c(60, 120))
+        )
+
+      expect_equal(
+        sum(unique(data.frame(res$run, res$load))$res.load),
+        sum(demand_net$demand)
+      )
+    }
+  )
+})
+
 test_that("A vehicle with infinite capacity covers everything in a single run", {
   hedgehog::forall(
     gen.demand_net(max_sites = 10L),
@@ -50,6 +68,7 @@ test_that("A demand that exceeds vehicle capacities generates more than a single
 
   expect_equal(length(unique(res$run)), 3)
   expect_equal(unique(res$site), 0)
+  expect_equal(sort(res$load), c(3, 6, 6))
 })
 
 test_that("Not having enough vehicles is handled gracefully", {

@@ -45,6 +45,7 @@ to the run.
 \item \code{order}  - Integer values providing the visiting order within each run.
 \item \code{vehicle} - The vehicle index (as provided in \code{vehicles}) associated
 to the run.
+\item \code{load} - The actual load in units of \code{demand} on the particular run.
 }
 
 Unless a site demand exceeds the vehicle capacities it is always assigned

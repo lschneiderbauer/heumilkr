@@ -5,12 +5,13 @@
 
 using namespace cpp11;
 
-data_frame arrvec_to_dataframe(const std::array<std::vector<int>, 4> &cols)
+data_frame arrvec_to_dataframe(const col_types &cols)
 {
-  cpp11::writable::data_frame df({"site"_nm = as_sexp(cols[0]),
-                                  "run"_nm = as_sexp(cols[1]),
-                                  "order"_nm = as_sexp(cols[2]),
-                                  "vehicle"_nm = as_sexp(cols[3])});
+  cpp11::writable::data_frame df({"site"_nm = as_sexp(std::get<0>(cols)),
+                                  "run"_nm = as_sexp(std::get<1>(cols)),
+                                  "order"_nm = as_sexp(std::get<2>(cols)),
+                                  "vehicle"_nm = as_sexp(std::get<3>(cols)),
+                                  "load"_nm = as_sexp(std::get<4>(cols))});
 
   return df;
 }

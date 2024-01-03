@@ -112,8 +112,7 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
 
       int selected_vehicle;
 
-      if (graph.links_to_origin(i) &&
-          graph.links_to_origin(j) &&
+      if (graph.links_to_origin(i) && graph.links_to_origin(j) &&
           !graph.edges_share_cycle(i, j) &&
           (selected_vehicle =
                select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, i, j)) != -1)
@@ -199,17 +198,14 @@ bool routing_state::relink_best()
   {
     graph.relink_edge(a, b);
 
+    double new_load = load[a] + load[b];
+
     // recalculate load
     for (auto &site : graph.sites_in_cycle(a))
     {
-      if (!graph.links_to_origin(site))
-      {
-        load[site] = 0;
-      }
-      else
-      {
-        load[site] = load[a] + load[b];
-      }
+      // (since we don't use the intermediate ones anyways)
+      // we can as well set all of them to the full load
+      load[site] = new_load;
     }
 
     // reassign vehicles
@@ -231,7 +227,8 @@ bool routing_state::relink_best()
 // 2 - run
 // 3 - order
 // 4 - vehicle
-std::array<std::vector<int>, 4> routing_state::runs_as_cols() const
+// 5 - load
+col_types routing_state::runs_as_cols() const
 {
   typedef std::shared_ptr<std::unordered_set<int>> T;
   typedef long unsigned int lui;
@@ -247,11 +244,12 @@ std::array<std::vector<int>, 4> routing_state::runs_as_cols() const
 
   std::map<T, int> visited_elements;
   std::map<int, std::vector<int>> orders;
-  std::array<std::vector<int>, 4> cols = {
+  col_types cols = {
       std::vector<int>(col_size),
       std::vector<int>(col_size),
       std::vector<int>(col_size),
-      std::vector<int>(col_size)};
+      std::vector<int>(col_size),
+      std::vector<double>(col_size)};
 
   int run_id = 0;
 
@@ -261,15 +259,16 @@ std::array<std::vector<int>, 4> routing_state::runs_as_cols() const
     std::vector<int> order;
     T cyc = cycs[i];
 
-    cols[0][i] = i;
-    cols[3][i] = site_vehicle[i];
+    std::get<0>(cols)[i] = i;
+    std::get<3>(cols)[i] = site_vehicle[i];
+    std::get<4>(cols)[i] = load[i];
 
     // check if we have seen elem before
     if (visited_elements.count(cyc) > 0)
     {
       order = orders[visited_elements[cyc]];
 
-      cols[1][i] = visited_elements[cyc];
+      std::get<1>(cols)[i] = visited_elements[cyc];
     }
     else // if we did not see it before
     {
@@ -278,11 +277,11 @@ std::array<std::vector<int>, 4> routing_state::runs_as_cols() const
 
       orders.insert({run_id, order});
 
-      cols[1][i] = run_id;
+      std::get<1>(cols)[i] = run_id;
       run_id++;
     }
 
-    cols[2][i] = std::distance(order.begin(),
+    std::get<2>(cols)[i] = std::distance(order.begin(),
                                std::find(order.begin(), order.end(), i));
   }
 
@@ -293,10 +292,11 @@ std::array<std::vector<int>, 4> routing_state::runs_as_cols() const
     {
       for (int j = 0; j < singleton_runs[vehicle][site]; j++)
       {
-        cols[0][i] = site;
-        cols[1][i] = run_id;
-        cols[2][i] = 0;
-        cols[3][i] = vehicle;
+        std::get<0>(cols)[i] = site;
+        std::get<1>(cols)[i] = run_id;
+        std::get<2>(cols)[i] = 0;
+        std::get<3>(cols)[i] = vehicle;
+        std::get<4>(cols)[i] = routing_state::vehicle_caps[vehicle];
         run_id++;
         i++;
       }

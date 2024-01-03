@@ -47,6 +47,7 @@
 #'  * `order`  - Integer values providing the visiting order within each run.
 #'  * `vehicle` - The vehicle index (as provided in `vehicles`) associated
 #'                to the run.
+#'  * `load` - The actual load in units of `demand` on the particular run.
 #'
 #'  Unless a site demand exceeds the vehicle capacities it is always assigned
 #'  to only a single run.

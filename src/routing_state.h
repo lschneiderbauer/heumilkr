@@ -7,13 +7,20 @@
 #ifndef ROUTINGSTATE_H
 #define ROUTINGSTATE_H
 
+using col_types = std::tuple<
+  std::vector<int>,
+  std::vector<int>,
+  std::vector<int>,
+  std::vector<int>,
+  std::vector<double>>;
+
 class routing_state
 {
 public:
   routing_state(const std::vector<double> demand, const distmat<double> &dist,
                const std::vector<int> vehicle_avail,
                const std::vector<double> &vehicle_caps);
-  std::array<std::vector<int>, 4> runs_as_cols() const;
+  col_types runs_as_cols() const;
   bool relink_best();
 
 private:
