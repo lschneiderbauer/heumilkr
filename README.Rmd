@@ -78,7 +78,7 @@ library(dplyr)
 
 The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 \@ 3.40GHz CPU, using the R package [bench](https://bench.r-lib.org/).
 
-The following graph shows the run time behavior as the number of sites $n$ increase. The curve exhibits near-cubic behavior in $n$. For $n = 110$ the performance is still relatively reasonable with a run time of approximately $\sim 110 ms$.
+The following graph shows the run time behavior as the number of sites $n$ increase. The curve exhibits near-cubic behavior in $n$. For $n = 110$ the performance is still relatively reasonable with a run time of approximately $\sim 12 ms$.
 
 ```{r benchmark_runtime, echo = FALSE}
 result |>

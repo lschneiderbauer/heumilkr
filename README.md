@@ -98,7 +98,7 @@ CPU, using the R package [bench](https://bench.r-lib.org/).
 The following graph shows the run time behavior as the number of sites
 $n$ increase. The curve exhibits near-cubic behavior in $n$. For
 $n = 110$ the performance is still relatively reasonable with a run time
-of approximately $\sim 110 ms$.
+of approximately $\sim 12 ms$.
 
 <img src="man/figures/README-benchmark_runtime-1.png" width="100%" />
 
