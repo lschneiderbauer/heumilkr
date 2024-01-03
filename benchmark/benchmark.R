@@ -2,6 +2,8 @@ library(purrr)
 library(dplyr)
 library(tidyr)
 
+sha <- system("git rev-parse HEAD", intern=TRUE)
+
 set.seed(42)
 
 demand <- runif(500, 5, 15)
@@ -38,6 +40,13 @@ result <-
       },
       .progress = TRUE
     )
+  ) |>
+  mutate(
+    timestamp = Sys.time(),
+    sha = !!sha
   )
 
-saveRDS(result, "./benchmark/results.rds")
+filename <- paste0(format(Sys.time(), "%Y%m%d"), "-", sha, ".rds")
+
+writeLines(filename, "./benchmark/last_result.txt")
+saveRDS(result, paste0("./benchmark/", filename))
