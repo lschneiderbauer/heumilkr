@@ -70,7 +70,10 @@ plot(res)
 ## Benchmarks
 
 ```{r benchmark_calc, echo=FALSE, message=FALSE, warning=FALSE}
+library(bench) # we load that so that the below gets correctly formatted
 result <- readRDS(paste0("./benchmark/", readLines("./benchmark/last_result.txt")))
+
+time <- \(n) format(result$median[result$n == n])
 
 library(ggplot2)
 library(dplyr)
@@ -78,7 +81,7 @@ library(dplyr)
 
 The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 \@ 3.40GHz CPU, using the R package [bench](https://bench.r-lib.org/).
 
-The following graph shows the run time behavior as the number of sites $n$ increase. The curve exhibits near-cubic behavior in $n$. For $n = 110$ the performance is still relatively reasonable with a run time of approximately $\sim 12 ms$.
+The following graph shows the run time behavior as the number of sites $n$ increase. The curve exhibits near-cubic behavior in $n$. For $n = 110$ the performance is still relatively reasonable with a run time of $\sim `r time(110)`$.
 
 ```{r benchmark_runtime, echo = FALSE}
 result |>
