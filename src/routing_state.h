@@ -13,7 +13,7 @@ public:
   routing_state(const std::vector<double> demand, const distmat<double> &dist,
                const std::vector<int> vehicle_avail,
                const std::vector<double> &vehicle_caps);
-  std::vector<std::tuple<int, int, int>> runs_as_cols() const;
+  std::array<std::vector<int>, 4> runs_as_cols() const;
   bool relink_best();
 
 private:
@@ -27,6 +27,8 @@ private:
   std::vector<double> load;
   std::vector<int> site_vehicle;
 
+  // indexed by vehicle x site
+  std::vector<std::vector<int>> singleton_runs;
 };
 
 #endif

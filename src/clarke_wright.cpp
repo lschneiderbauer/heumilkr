@@ -5,62 +5,46 @@
 
 using namespace cpp11;
 
-template <typename T1, typename T2, typename T3>
-list triple_to_list(const std::vector<std::tuple<T1, T2, T3>> vec)
+data_frame arrvec_to_dataframe(const std::array<std::vector<int>, 4> &cols)
 {
-  cpp11::writable::list lst;
+  cpp11::writable::data_frame df({"site"_nm = as_sexp(cols[0]),
+                                  "run"_nm = as_sexp(cols[1]),
+                                  "order"_nm = as_sexp(cols[2]),
+                                  "vehicle"_nm = as_sexp(cols[3])});
 
-  std::vector<T1> v1(vec.size());
-  std::vector<T2> v2(vec.size());
-  std::vector<T3> v3(vec.size());
-
-  for (auto it = vec.begin(); it != vec.end(); it++)
-  {
-    int i = std::distance(vec.begin(), it);
-
-    v1[i] = std::get<0>(*it);
-    v2[i] = std::get<1>(*it);
-    v3[i] = std::get<2>(*it);
-  }
-
-  lst.push_back(as_sexp(v1));
-  lst.push_back(as_sexp(v2));
-  lst.push_back(as_sexp(v3));
-
-  return lst;
+  return df;
 }
 
-[[cpp11::register]]
-list cpp_clarke_wright(const std::vector<double> &demand,
-                       const std::vector<double> &distances,
-                       const std::vector<int> &n_res,
-                       const std::vector<double> &capacities)
+[[cpp11::register]] data_frame cpp_clarke_wright(const std::vector<double> &demand,
+                                                 const std::vector<double> &distances,
+                                                 const std::vector<int> &n_res,
+                                                 const std::vector<double> &capacities)
 {
   routing_state state(demand, distmat<double>(distances), n_res, capacities);
 
   while (state.relink_best())
   {
-    //printf("===\n");
+    // printf("===\n");
   };
 
-  return triple_to_list<int, int, int>(state.runs_as_cols());
+  return arrvec_to_dataframe(state.runs_as_cols());
 }
 
-[[cpp11::register]]
-list cpp_clarke_wright_stepwise(const std::vector<double> &demand,
-                                const std::vector<double> &distances,
-                                const std::vector<int> &n_res,
-                                const std::vector<double> &capacities)
+[[cpp11::register]] list cpp_clarke_wright_stepwise(const std::vector<double> &demand,
+                                                    const std::vector<double> &distances,
+                                                    const std::vector<int> &n_res,
+                                                    const std::vector<double> &capacities)
 {
   routing_state state(demand, distmat<double>(distances), n_res, capacities);
 
   cpp11::writable::list steps;
-  steps.push_back(triple_to_list<int, int, int>(state.runs_as_cols()));
+  steps.push_back(arrvec_to_dataframe(state.runs_as_cols()));
 
   while (state.relink_best())
   {
-    steps.push_back(triple_to_list<int, int, int>(state.runs_as_cols()));;
-    //printf("===\n");
+    steps.push_back(arrvec_to_dataframe(state.runs_as_cols()));
+    ;
+    // printf("===\n");
   };
 
   return steps;

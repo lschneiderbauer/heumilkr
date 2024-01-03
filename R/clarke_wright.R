@@ -82,12 +82,9 @@ clarke_wright <- function(demand, distances, vehicles) {
   vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max
 
   heumilkr_result(
-    as.data.frame(
-      .Call(
-        `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
-        vehicles$n, vehicles$caps
-      ),
-      col.names = c("run", "order", "vehicle")
+    .Call(
+      `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
+      vehicles$n, vehicles$caps
     ),
     distances = distances
   )
@@ -117,10 +114,7 @@ clarke_wright_stepwise <- function(demand, distances, vehicles) {
       vehicles$n, vehicles$caps
     ),
     \(x) heumilkr_result(
-      as.data.frame(x,
-        col.names = c("run_id", "order", "vehicle_id")
-      ),
-      distances = distances
+      x, distances = distances
     )
   )
 }

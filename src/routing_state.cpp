@@ -1,11 +1,13 @@
 #include "routing_state.h"
 #include "tsp_greedy.h"
 #include <vector>
-//#include <stdio.h>
+#include <numeric>
+// #include <stdio.h>
 #include <array>
 #include <map>
 #include <algorithm>
 #include <stdexcept>
+
 
 // we create a symmat that is one size smaller than the distances
 // (only calculate for sites)
@@ -54,9 +56,8 @@ int select_initial_vehicle(const std::vector<int> &vehicle_avail,
   }
 
   throw std::runtime_error(
-    "Not enough vehicles available to fulfill all demands trivially."
-    " Solver cannot proceed in that case."
-  );
+      "Not enough vehicles available to fulfill all demands trivially."
+      " Solver cannot proceed in that case.");
 
   return -1;
 }
@@ -72,7 +73,7 @@ int select_vehicle(const std::vector<int> &vehicle_avail,
     int vehicle = std::distance(vehicle_caps.begin(), it);
 
     int avail = vehicle_avail[vehicle];
-    //printf("veh avail %i: %d\n", vehicle, avail);
+    // printf("veh avail %i: %d\n", vehicle, avail);
     if (site_vehicle[a] == vehicle || site_vehicle[b] == vehicle)
     {
       avail += 1;
@@ -146,6 +147,12 @@ routing_state::routing_state(
   routing_state::vehicle_avail = vehicle_avail;
   routing_state::savings = calc_savings(distances);
 
+  // this is potentially a big space waste because most of them will be 0.
+  // (but we do it anyways because time is more important than space)
+  routing_state::singleton_runs =
+      std::vector<std::vector<int>>(
+          vehicle_caps.size(), std::vector<int>(demand.size(), 0));
+
   // first resource assignments
   routing_state::site_vehicle = std::vector<int>(demand.size());
   for (auto it = site_vehicle.begin(); it != site_vehicle.end(); it++)
@@ -161,8 +168,9 @@ routing_state::routing_state(
     {
       load[site] -= vehicle_caps[vehicle];
       routing_state::vehicle_avail[vehicle] -= 1;
-      // add those to some extra list
-      // TODO
+      // add those to the extra list "singleton_runs" which we will not
+      // touch until the end.
+      routing_state::singleton_runs[vehicle][site] += 1;
       vehicle = select_initial_vehicle(routing_state::vehicle_avail,
                                        routing_state::vehicle_caps,
                                        load[site]);
@@ -185,7 +193,7 @@ bool routing_state::relink_best()
                 site_vehicle, vehicle_avail,
                 vehicle_caps, graph);
 
-  //printf("bl: (%d,%d)\n", a, b);
+  // printf("bl: (%d,%d)\n", a, b);
 
   if (!((a == b) && (a == -1)))
   {
@@ -219,43 +227,79 @@ bool routing_state::relink_best()
   }
 }
 
-std::vector<std::tuple<int, int, int>> routing_state::runs_as_cols() const
+// 1 - site
+// 2 - run
+// 3 - order
+// 4 - vehicle
+std::array<std::vector<int>, 4> routing_state::runs_as_cols() const
 {
   typedef std::shared_ptr<std::unordered_set<int>> T;
-  std::vector<std::shared_ptr<std::unordered_set<int>>> cycs = graph.get_cycs();
+  typedef long unsigned int lui;
+
+  std::vector<T> cycs = graph.get_cycs();
+
+  int n_singleton_runs = 0;
+  for (auto& v : routing_state::singleton_runs)
+    for (auto& n : v)
+      n_singleton_runs += n;
+
+  lui col_size = cycs.size() + n_singleton_runs;
 
   std::map<T, int> visited_elements;
   std::map<int, std::vector<int>> orders;
-  std::vector<std::tuple<int, int, int>> cols(cycs.size());
+  std::array<std::vector<int>, 4> cols = {
+      std::vector<int>(col_size),
+      std::vector<int>(col_size),
+      std::vector<int>(col_size),
+      std::vector<int>(col_size)};
 
   int run_id = 0;
 
-  for (auto it = cycs.begin(); it != cycs.end(); it++)
+  lui i;
+  for (i = 0; i < cycs.size(); i++)
   {
-    int i = std::distance(cycs.begin(), it);
+    std::vector<int> order;
+    T cyc = cycs[i];
+
+    cols[0][i] = i;
+    cols[3][i] = site_vehicle[i];
 
     // check if we have seen elem before
-    if (visited_elements.count(*it) > 0)
+    if (visited_elements.count(cyc) > 0)
     {
-      std::vector<int> order = orders[visited_elements[*it]];
+      order = orders[visited_elements[cyc]];
 
-      cols[i] = {visited_elements[*it],
-                 std::distance(order.begin(),
-                               std::find(order.begin(), order.end(), i)),
-                 site_vehicle[i]};
+      cols[1][i] = visited_elements[cyc];
     }
     else // if we did not see it before
     {
-      visited_elements.insert({*it, run_id});
-      std::vector<int> order = tsp_greedy(**it, distances);
+      visited_elements.insert({cyc, run_id});
+      order = tsp_greedy(*cyc, distances);
 
       orders.insert({run_id, order});
-      cols[i] = {run_id,
-                 std::distance(order.begin(),
-                               std::find(order.begin(), order.end(), i)),
-                 site_vehicle[i]};
 
+      cols[1][i] = run_id;
       run_id++;
+    }
+
+    cols[2][i] = std::distance(order.begin(),
+                               std::find(order.begin(), order.end(), i));
+  }
+
+  // fill the rest up with singleton runs
+  for (lui vehicle = 0; vehicle < singleton_runs.size(); vehicle++)
+  {
+    for (lui site = 0; site < singleton_runs[vehicle].size(); site++)
+    {
+      for (int j = 0; j < singleton_runs[vehicle][site]; j++)
+      {
+        cols[0][i] = site;
+        cols[1][i] = run_id;
+        cols[2][i] = 0;
+        cols[3][i] = vehicle;
+        run_id++;
+        i++;
+      }
     }
   }
 
