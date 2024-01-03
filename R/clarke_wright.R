@@ -98,12 +98,15 @@ clarke_wright <- function(demand, distances, vehicles) {
 #' @seealso [clarke_wright()]
 #' @noRd
 clarke_wright_stepwise <- function(demand, distances, vehicles) {
+  stopifnot(is.numeric(demand))
   stopifnot(inherits(distances, "dist"))
   stopifnot(attr(distances, "Size") == length(demand) + 1)
   stopifnot(is.data.frame(vehicles))
   stopifnot(c("n", "caps") %in% colnames(vehicles))
+  stopifnot(nrow(vehicles) > 0)
   stopifnot(is.integer(vehicles$n))
   stopifnot(is.numeric(vehicles$caps))
+  stopifnot(vehicles$caps > 0)
 
   # replace NAs by maximal machine integer value
   vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max
