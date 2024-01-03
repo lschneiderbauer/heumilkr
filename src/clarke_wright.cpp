@@ -23,10 +23,13 @@ data_frame arrvec_to_dataframe(const col_types &cols)
 {
   routing_state state(demand, distmat<double>(distances), n_res, capacities);
 
-  while (state.relink_best())
-  {
-    // printf("===\n");
-  };
+  while (state.relink_best()) {};
+
+  // After we have the final routes, we might still be able to assign
+  // better vehicles for each route
+  // (we might have released some high-priority vehicles on the way which
+  // are now unused)
+  while(state.opt_vehicles()) {};
 
   return arrvec_to_dataframe(state.runs_as_cols());
 }
@@ -44,8 +47,6 @@ data_frame arrvec_to_dataframe(const col_types &cols)
   while (state.relink_best())
   {
     steps.push_back(arrvec_to_dataframe(state.runs_as_cols()));
-    ;
-    // printf("===\n");
   };
 
   return steps;

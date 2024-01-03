@@ -26,9 +26,9 @@ distmat<double> calc_savings(const distmat<double> &d)
   return savings;
 }
 
-int select_initial_vehicle(const std::vector<int> &vehicle_avail,
-                           const std::vector<double> &vehicle_caps,
-                           const double load)
+int find_first_free_vehicle(const std::vector<int> &vehicle_avail,
+                            const std::vector<double> &vehicle_caps,
+                            const double load)
 {
   for (auto it = vehicle_caps.begin(); it != vehicle_caps.end(); it++)
   {
@@ -40,6 +40,18 @@ int select_initial_vehicle(const std::vector<int> &vehicle_avail,
       return vehicle;
     }
   }
+
+  return -1;
+}
+
+int select_initial_vehicle(const std::vector<int> &vehicle_avail,
+                           const std::vector<double> &vehicle_caps,
+                           const double load)
+{
+
+  int vehicle = find_first_free_vehicle(vehicle_avail, vehicle_caps, load);
+
+  if (vehicle != -1) return vehicle;
 
   // if we are here we did not find any vehicle with fitting capacity:
   // check again, but this time we return the next best vehicle
@@ -228,6 +240,37 @@ bool routing_state::relink_best()
     return false;
   }
 }
+
+bool routing_state::opt_vehicles()
+{
+  bool changed = false;
+
+  for (auto& cyc : graph.get_cycs())
+  {
+    int site = *((*cyc).begin());
+
+    // free current vehicle before we look for the next best one
+    vehicle_avail[site_vehicle[site]] += 1;
+
+    int vehicle = find_first_free_vehicle(
+      vehicle_avail, vehicle_caps, load[site]
+    );
+
+    vehicle_avail[vehicle] -= 1;
+
+    if (vehicle != -1 && vehicle != site_vehicle[site])
+    {
+      for (auto& cyc_site : *cyc)
+      {
+        site_vehicle[cyc_site] = vehicle;
+      }
+
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 
 // 1 - site
 // 2 - run

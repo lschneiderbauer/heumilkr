@@ -34,6 +34,31 @@ test_that("Sum of loads over all runs equals sum of demands", {
   )
 })
 
+test_that("Limited vehicles with more priority should always be exhausted
+           provided there is enough demand", {
+  hedgehog::forall(
+    gen.demand_net(max_sites = 10L),
+    function(demand_net) {
+      res <-
+        clarke_wright(
+          demand_net$demand,
+          demand_net$distances,
+          data.frame(
+            n = c(3L, NA_integer_),
+            caps = c(66, 33)
+          )
+        )
+      # note: we deliberately put the higher capacity vehicle first,
+      # so this one always gets chosen.
+
+      expect_equal(
+        nrow(unique(res[res$vehicle == 0, ][, c("run", "vehicle")])),
+        pmin(length(unique(res$run)), 3)
+      )
+    }
+  )
+})
+
 test_that("A vehicle with infinite capacity covers everything in a single run", {
   hedgehog::forall(
     gen.demand_net(max_sites = 10L),

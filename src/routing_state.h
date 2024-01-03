@@ -22,6 +22,7 @@ public:
                const std::vector<double> &vehicle_caps);
   col_types runs_as_cols() const;
   bool relink_best();
+  bool opt_vehicles();
 
 private:
   distmat<double> distances;
