@@ -271,12 +271,27 @@ bool routing_state::opt_vehicles()
   return changed;
 }
 
+double run_distance(const std::vector<int> ordered_sites,
+                    const distmat<double> &d)
+{
+  auto it = ordered_sites.begin();
+  double distance = d.get(0, 1 + *it);
+
+  for (; it < (ordered_sites.end() - 1); it++)
+  {
+    distance += d.get(1 + *it, 1 + *(it + 1));
+  }
+  distance += d.get(1 + *it, 0);
+
+  return distance;
+}
 
 // 1 - site
 // 2 - run
 // 3 - order
-// 4 - vehicle
-// 5 - load
+// 4 - vehicle per run
+// 5 - load per run
+// 6 - distance per run
 col_types routing_state::runs_as_cols() const
 {
   typedef std::shared_ptr<std::unordered_set<int>> T;
@@ -293,29 +308,35 @@ col_types routing_state::runs_as_cols() const
 
   std::map<T, int> visited_elements;
   std::map<int, std::vector<int>> orders;
+  std::map<int, double> run_dists;
+
   col_types cols = {
       std::vector<int>(col_size),
       std::vector<int>(col_size),
       std::vector<int>(col_size),
       std::vector<int>(col_size),
+      std::vector<double>(col_size),
       std::vector<double>(col_size)};
 
   int run_id = 0;
 
+  // Iterate over sites
   lui i;
   for (i = 0; i < cycs.size(); i++)
   {
     std::vector<int> order;
+    double run_dist;
     T cyc = cycs[i];
 
     std::get<0>(cols)[i] = i;
     std::get<3>(cols)[i] = site_vehicle[i];
     std::get<4>(cols)[i] = load[i];
 
-    // check if we have seen elem before
+    // check if we have seen cyc before
     if (visited_elements.count(cyc) > 0)
     {
       order = orders[visited_elements[cyc]];
+      run_dist = run_dists[visited_elements[cyc]];
 
       std::get<1>(cols)[i] = visited_elements[cyc];
     }
@@ -323,8 +344,10 @@ col_types routing_state::runs_as_cols() const
     {
       visited_elements.insert({cyc, run_id});
       order = tsp_greedy(*cyc, distances);
+      run_dist = run_distance(order, routing_state::distances);
 
       orders.insert({run_id, order});
+      run_dists.insert({run_id, run_dist});
 
       std::get<1>(cols)[i] = run_id;
       run_id++;
@@ -332,6 +355,7 @@ col_types routing_state::runs_as_cols() const
 
     std::get<2>(cols)[i] = std::distance(order.begin(),
                                std::find(order.begin(), order.end(), i));
+    std::get<5>(cols)[i] = run_dist;
   }
 
   // fill the rest up with singleton runs
@@ -346,6 +370,7 @@ col_types routing_state::runs_as_cols() const
         std::get<2>(cols)[i] = 0;
         std::get<3>(cols)[i] = vehicle;
         std::get<4>(cols)[i] = routing_state::vehicle_caps[vehicle];
+        std::get<5>(cols)[i] = 2 * distances.get(0, 1 + site);
         run_id++;
         i++;
       }

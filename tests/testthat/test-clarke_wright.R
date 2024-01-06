@@ -34,6 +34,23 @@ test_that("Sum of loads over all runs equals sum of demands", {
   )
 })
 
+test_that("Distances add up correctly.", {
+  demand <- rep(1, 10)
+
+  pos <-
+    data.frame(
+      pos_x = 0:10,
+      pos_y = 0
+    )
+
+  res <- clarke_wright(
+    demand, dist(pos),
+    data.frame(n = NA_integer_, caps = 1)
+  )
+
+  expect_equal(res$distance, 1:10 * 2)
+})
+
 test_that("Limited vehicles with more priority should always be exhausted
            provided there is enough demand", {
   hedgehog::forall(
@@ -80,7 +97,7 @@ test_that("A demand that exceeds vehicle capacities generates more than a single
 
   pos <-
     data.frame(
-      pos_x = c(0, 1),
+      pos_x = c(0, 0),
       pos_y = c(0, 1)
     )
 
@@ -94,6 +111,7 @@ test_that("A demand that exceeds vehicle capacities generates more than a single
   expect_equal(length(unique(res$run)), 3)
   expect_equal(unique(res$site), 0)
   expect_equal(sort(res$load), c(3, 6, 6))
+  expect_equal(res$distance, c(2, 2, 2))
 })
 
 test_that("Not having enough vehicles is handled gracefully", {

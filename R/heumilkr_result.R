@@ -1,6 +1,8 @@
 heumilkr_result <- function(df, distances) {
   stopifnot(inherits(df, "data.frame"))
-  stopifnot(c("site", "run", "order", "vehicle", "order") %in% colnames(df))
+  stopifnot(
+    c("site", "run", "order", "vehicle", "order", "distance") %in% colnames(df)
+  )
   stopifnot(inherits(distances, "dist"))
 
   new_heumilkr_result(df, distances)

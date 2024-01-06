@@ -11,7 +11,8 @@ data_frame arrvec_to_dataframe(const col_types &cols)
                                   "run"_nm = as_sexp(std::get<1>(cols)),
                                   "order"_nm = as_sexp(std::get<2>(cols)),
                                   "vehicle"_nm = as_sexp(std::get<3>(cols)),
-                                  "load"_nm = as_sexp(std::get<4>(cols))});
+                                  "load"_nm = as_sexp(std::get<4>(cols)),
+                                  "distance"_nm = as_sexp(std::get<5>(cols))});
 
   return df;
 }

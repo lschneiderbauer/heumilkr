@@ -12,6 +12,7 @@ using col_types = std::tuple<
   std::vector<int>,
   std::vector<int>,
   std::vector<int>,
+  std::vector<double>,
   std::vector<double>>;
 
 class routing_state

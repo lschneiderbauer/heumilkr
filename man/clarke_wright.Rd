@@ -50,6 +50,7 @@ to the run.
 \item \code{vehicle} - The vehicle index (as provided in \code{vehicles}) associated
 to the run.
 \item \code{load} - The actual load in units of \code{demand} on the particular run.
+\item \code{distance} - The traveled distance of the particular run.
 }
 
 Unless a site demand exceeds the vehicle capacities it is always assigned
