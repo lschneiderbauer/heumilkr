@@ -34,7 +34,11 @@ solution might satisfy the availability restrictions).
 
 The order of the data frame is relevant and determines the prioritization
 of vehicle assignments to runs (in case two or more vehicle types are
-eligible for assignment the "first" vehicle is chosen).}
+eligible for assignment the "first" vehicle is chosen). In a typical scenario
+"more expensive" vehicles should be further down in the list (so the cheaper
+one is chosen in case there is doubt). Since higher capacity vehicles
+usually involve higher costs sorting the data frame by capacity is usually
+a good rule of thumb.}
 }
 \value{
 Returns a data frame with one row per site-run combination.
