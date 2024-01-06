@@ -1,4 +1,5 @@
-#' Clark-Wright Algorithm (CVRP solver)
+#' Clark-Wright algorithm (Capacitated Vehicle Routing
+#' Problem solver)
 #'
 #' Finds a quasi-optimal solution to the Capacitated Vehicle Routing
 #' Problem (CVRP). It is assumed that all demands will be satisfied by a
@@ -7,14 +8,14 @@
 #' @details
 #' See the original paper,
 #' [Clarke, G. and Wright, J.R. (1964)](http://dx.doi.org/10.1287/opre.12.4.568),
-#' for details.
+#' for a detailed explanation of the Clarke-Wright algorithm.
 #'
 #' @param demand
 #'  A numeric vector consisting of "demands" indexed by sites.
 #'  The `i`th entry refers to the demand of site `i` (and the length
 #'  of the vector equals the number of sites `N` with demands). The
 #'  units of the demand values need to match the units of the
-#'  vehicle capacity values.
+#'  vehicle capacity values. `NA` values are not allowed.
 #'
 #' @param distances
 #'  An object of class `dist`, created by [stats::dist()], with
@@ -23,7 +24,7 @@
 #'  index refers to site `i` (as defined by `demand`).
 #'
 #' @param vehicles
-#'  A data frame describing available vehicle types and their respective
+#'  A [data.frame()] describing available vehicle types and their respective
 #'  capacities. One row per vehicle type. The data frame is expected to have
 #'  two columns:
 #'  * `n` - Number of available vehicles. This can be set to `NA` if the
@@ -35,7 +36,7 @@
 #'          solution might satisfy the availability restrictions).
 #'  * `caps` - The vehicle capacity in same units as `demand`.
 #'
-#'  The order of the data frame is relevant and determines the prioritization
+#'  The order of the [data.frame()] is relevant and determines the prioritization
 #'  of vehicle assignments to runs (in case two or more vehicle types are
 #'  eligible for assignment the "first" vehicle is chosen). In a typical scenario
 #'  "more expensive" vehicles should be further down in the list (so the cheaper
@@ -43,21 +44,30 @@
 #'  usually involve higher costs sorting the data frame by capacity is usually
 #'  a good rule of thumb.
 #'
+#' @param restrictions
+#'  An optional [data.frame()] that allows to define vehicle type restrictions for
+#'  particular sites in the form of a blacklist.
+#'  The data frame is expected to have two columns:
+#'  * `vehicle` - The vehicle type index.
+#'  * `site` - The site index (i.e. the index of the `demand` vector)
+#'
+#'  Each row defines a restriction: <vehicle type> can not approach <site>.
+#'  Defaults to `NULL`, i.e. no restrictions are enforced.
+#'
 #' @return
-#'  Returns a data frame with one row per site-run combination.
-#'  * `site` - The site index (as provided in `demand`) associated
+#'  Returns a "`heumilkr_result`" object, a [data.frame()] with one row per
+#'  site-run combination bestowed with additional attributes.
+#'  * `site` - The site index (i.e. the index of the `demand` vector) associated
 #'             to the run.
 #'  * `run` - Identifies the run the site is assigned to.
 #'  * `order`  - Integer values providing the visiting order within each run.
-#'  * `vehicle` - The vehicle index (as provided in `vehicles`) associated
+#'  * `vehicle` - The vehicle type index (as provided in `vehicles`) associated
 #'                to the run.
 #'  * `load` - The actual load in units of `demand` on the particular run.
 #'  * `distance` - The traveled distance of the particular run.
 #'
 #'  Unless a site demand exceeds the vehicle capacities it is always assigned
 #'  to only a single run.
-#'
-#' @export
 #'
 #' @examples
 #' demand <- c(3, 2, 4, 2)
@@ -73,8 +83,11 @@
 #'   dist(pos),
 #'   data.frame(n = NA_integer_, caps = 6)
 #' )
-clarke_wright <- function(demand, distances, vehicles) {
+#'
+#' @export
+clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
   stopifnot(is.numeric(demand))
+  stopifnot(all(!is.na(demand)))
   stopifnot(inherits(distances, "dist"))
   stopifnot(attr(distances, "Size") == length(demand) + 1)
   stopifnot(is.data.frame(vehicles))

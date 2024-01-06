@@ -132,6 +132,24 @@ test_that("Not having enough vehicles is handled gracefully", {
   )
 })
 
+test_that("Having NA demand values aborts", {
+  demand <- c(15, 3, NA)
+
+  pos <-
+    data.frame(
+      pos_x = c(0, 1, -1, -2),
+      pos_y = c(0, 1, 1, 2)
+    )
+
+  expect_error(
+    clarke_wright(
+      demand,
+      dist(pos),
+      data.frame(n = NA, caps = 6)
+    )
+  )
+})
+
 test_that("README example result is preserved.", {
   set.seed(42)
   demand <- runif(20, 5, 15)

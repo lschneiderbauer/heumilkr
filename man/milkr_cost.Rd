@@ -7,8 +7,7 @@
 milkr_cost(res)
 }
 \arguments{
-\item{res}{A "heumilkr_result" object, typically obtained by
-\code{\link[=clarke_wright]{clarke_wright()}}.}
+\item{res}{A "\code{heumilkr_result}" object, typically obtained by \code{\link[=clarke_wright]{clarke_wright()}}.}
 }
 \value{
 The total traveled distance.

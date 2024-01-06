@@ -2,23 +2,24 @@
 % Please edit documentation in R/clarke_wright.R
 \name{clarke_wright}
 \alias{clarke_wright}
-\title{Clark-Wright Algorithm (CVRP solver)}
+\title{Clark-Wright algorithm (Capacitated Vehicle Routing
+Problem solver)}
 \usage{
-clarke_wright(demand, distances, vehicles)
+clarke_wright(demand, distances, vehicles, restrictions = NULL)
 }
 \arguments{
 \item{demand}{A numeric vector consisting of "demands" indexed by sites.
 The \code{i}th entry refers to the demand of site \code{i} (and the length
 of the vector equals the number of sites \code{N} with demands). The
 units of the demand values need to match the units of the
-vehicle capacity values.}
+vehicle capacity values. \code{NA} values are not allowed.}
 
 \item{distances}{An object of class \code{dist}, created by \code{\link[stats:dist]{stats::dist()}}, with
 \code{(N + 1)} locations describing the distances between individual
 sites. The first index refers to the source site. The \code{(i+1)}'th
 index refers to site \code{i} (as defined by \code{demand}).}
 
-\item{vehicles}{A data frame describing available vehicle types and their respective
+\item{vehicles}{A \code{\link[=data.frame]{data.frame()}} describing available vehicle types and their respective
 capacities. One row per vehicle type. The data frame is expected to have
 two columns:
 \itemize{
@@ -32,22 +33,34 @@ solution might satisfy the availability restrictions).
 \item \code{caps} - The vehicle capacity in same units as \code{demand}.
 }
 
-The order of the data frame is relevant and determines the prioritization
+The order of the \code{\link[=data.frame]{data.frame()}} is relevant and determines the prioritization
 of vehicle assignments to runs (in case two or more vehicle types are
 eligible for assignment the "first" vehicle is chosen). In a typical scenario
 "more expensive" vehicles should be further down in the list (so the cheaper
 one is chosen in case there is doubt). Since higher capacity vehicles
 usually involve higher costs sorting the data frame by capacity is usually
 a good rule of thumb.}
+
+\item{restrictions}{An optional \code{\link[=data.frame]{data.frame()}} that allows to define vehicle type restrictions for
+particular sites in the form of a blacklist.
+The data frame is expected to have two columns:
+\itemize{
+\item \code{vehicle} - The vehicle type index.
+\item \code{site} - The site index (i.e. the index of the \code{demand} vector)
+}
+
+Each row defines a restriction: \if{html}{\out{<vehicle type>}} can not approach \if{html}{\out{<site>}}.
+Defaults to \code{NULL}, i.e. no restrictions are enforced.}
 }
 \value{
-Returns a data frame with one row per site-run combination.
+Returns a "\code{heumilkr_result}" object, a \code{\link[=data.frame]{data.frame()}} with one row per
+site-run combination bestowed with additional attributes.
 \itemize{
-\item \code{site} - The site index (as provided in \code{demand}) associated
+\item \code{site} - The site index (i.e. the index of the \code{demand} vector) associated
 to the run.
 \item \code{run} - Identifies the run the site is assigned to.
 \item \code{order}  - Integer values providing the visiting order within each run.
-\item \code{vehicle} - The vehicle index (as provided in \code{vehicles}) associated
+\item \code{vehicle} - The vehicle type index (as provided in \code{vehicles}) associated
 to the run.
 \item \code{load} - The actual load in units of \code{demand} on the particular run.
 \item \code{distance} - The traveled distance of the particular run.
@@ -64,7 +77,7 @@ single source.
 \details{
 See the original paper,
 \href{http://dx.doi.org/10.1287/opre.12.4.568}{Clarke, G. and Wright, J.R. (1964)},
-for details.
+for a detailed explanation of the Clarke-Wright algorithm.
 }
 \examples{
 demand <- c(3, 2, 4, 2)
@@ -80,4 +93,5 @@ clarke_wright(
   dist(pos),
   data.frame(n = NA_integer_, caps = 6)
 )
+
 }

@@ -25,8 +25,8 @@ new_heumilkr_result <- function(df, distances) {
 #' This is the measure that the corresponding Capacitated Vehicle Routing
 #' Problem minimizes.
 #'
-#' @param res A "heumilkr_result" object, typically obtained by
-#'            [clarke_wright()].
+#' @param res
+#'  A "`heumilkr_result`" object, typically obtained by [clarke_wright()].
 #'
 #' @return The total traveled distance.
 #' @examples
