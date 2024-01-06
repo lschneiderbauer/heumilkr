@@ -77,6 +77,11 @@ print(res)
 #> 18   17   7     0       0 30.58007 36.895550
 #> 19   18   0     1       0 31.75943 29.029139
 #> 20   19   5     0       0 32.37187 15.090835
+
+# returns the total cost / distance
+# (the quantity that is minimized by CVRP)
+print(milkr_cost(res))
+#> [1] 180.9477
 ```
 
 A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for

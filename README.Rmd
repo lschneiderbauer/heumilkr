@@ -59,6 +59,10 @@ res <-
   )
 
 print(res)
+
+# returns the total cost / distance
+# (the quantity that is minimized by CVRP)
+print(milkr_cost(res))
 ```
 
 A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for the result is built in. The individual runs are distinguished by color. The demanding site locations are marked with round circles while the (single) supplying site is depicted as a square.
