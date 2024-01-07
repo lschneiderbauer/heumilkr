@@ -28,7 +28,13 @@ This R package provides an implementation of the Clarke-Wright algorithm [@clark
 
 ## Installation
 
-You can install the development version of heumilkr from [GitHub](https://github.com/) with:
+You can install the latest CRAN release of heumilkr with:
+
+``` r
+install.packages("heumilkr")
+```
+
+Alternatively, you can install the development version of heumilkr from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")

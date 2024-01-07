@@ -22,7 +22,13 @@ Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem).
 
 ## Installation
 
-You can install the development version of heumilkr from
+You can install the latest CRAN release of heumilkr with:
+
+``` r
+install.packages("heumilkr")
+```
+
+Alternatively, you can install the development version of heumilkr from
 [GitHub](https://github.com/) with:
 
 ``` r
