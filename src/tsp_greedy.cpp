@@ -5,7 +5,7 @@
 #include "distmat.h"
 
 std::vector<int> tsp_greedy(const std::unordered_set<int> sites,
-                             const distmat<double> &distances)
+                            const distmat<double> &distances)
 {
   std::vector<int> run;
   run.reserve(sites.size());

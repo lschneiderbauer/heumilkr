@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <stdexcept>
 
-
 // we create a symmat that is one size smaller than the distances
 // (only calculate for sites)
 distmat<double> calc_savings(const distmat<double> &d)
@@ -63,7 +62,8 @@ int select_initial_vehicle(const std::vector<int> &vehicle_avail,
                                         restricted_vehicles,
                                         load);
 
-  if (vehicle != -1) return vehicle;
+  if (vehicle != -1)
+    return vehicle;
 
   // if we are here we did not find any vehicle with fitting capacity:
   // check again, but this time we return the next best vehicle
@@ -269,7 +269,7 @@ bool routing_state::opt_vehicles()
 {
   bool changed = false;
 
-  for (auto& cyc : graph.get_cycs())
+  for (auto &cyc : graph.get_cycs())
   {
     int site = *((*cyc).begin());
 
@@ -278,9 +278,9 @@ bool routing_state::opt_vehicles()
 
     // unionize vehicle restrictions
     std::unordered_set<int> restr_vehicles;
-    for (auto& cyc_sites : *cyc)
+    for (auto &cyc_sites : *cyc)
     {
-      //restr_vehicles.merge(routing_state::restricted_vehicles[cyc_sites]);
+      // restr_vehicles.merge(routing_state::restricted_vehicles[cyc_sites]);
       restr_vehicles.insert(routing_state::restricted_vehicles[cyc_sites].begin(),
                             routing_state::restricted_vehicles[cyc_sites].end());
     }
@@ -293,7 +293,7 @@ bool routing_state::opt_vehicles()
 
     if (vehicle != -1 && vehicle != site_vehicle[site])
     {
-      for (auto& cyc_site : *cyc)
+      for (auto &cyc_site : *cyc)
       {
         site_vehicle[cyc_site] = vehicle;
       }
@@ -333,8 +333,8 @@ col_types routing_state::runs_as_cols() const
   std::vector<T> cycs = graph.get_cycs();
 
   int n_singleton_runs = 0;
-  for (auto& v : routing_state::singleton_runs)
-    for (auto& n : v)
+  for (auto &v : routing_state::singleton_runs)
+    for (auto &n : v)
       n_singleton_runs += n;
 
   lui col_size = cycs.size() + n_singleton_runs;
@@ -387,7 +387,7 @@ col_types routing_state::runs_as_cols() const
     }
 
     std::get<2>(cols)[i] = std::distance(order.begin(),
-                               std::find(order.begin(), order.end(), i));
+                                         std::find(order.begin(), order.end(), i));
     std::get<5>(cols)[i] = run_dist;
   }
 
