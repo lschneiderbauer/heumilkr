@@ -52,3 +52,64 @@ milkr_cost <- function(res) {
 
   sum(unique(res[, c("run", "distance")])$distance)
 }
+
+#' Vehicle run saving
+#'
+#' Measures the saving that was achieved by the heuristic optimization
+#' algorithm [clarke_wright()] compared to the naive vehicle run assignment,
+#' i.e. one run per site.
+#'
+#' @param res
+#'  A "`heumilkr_result`" object, typically obtained by [clarke_wright()].
+#' @param relative
+#'  Should the saving be given as dimensionful value (in units of distance as
+#'  provided to [clarke_wright()]), or as percentage relative to the
+#'  naive costs.
+#'  Defaults to `FALSE`, i.e. a dimensionful value.
+#'
+#' @return
+#'  The savings either as dimensionful value or as percentage relative to the
+#'  naive costs, depending on `relative`.
+#'
+#' @examples
+#' demand <- c(3, 2, 4, 2)
+#'
+#' pos <-
+#'   data.frame(
+#'     pos_x = c(0, 1, -1, 2, 3),
+#'     pos_y = c(0, 1, 1, 2, 3)
+#'   )
+#'
+#' res <- clarke_wright(
+#'   demand,
+#'   dist(pos),
+#'   data.frame(n = NA_integer_, caps = 6)
+#' )
+#'
+#' print(milkr_saving(res))
+#' print(milkr_saving(res, relative = TRUE))
+#'
+#' @export
+milkr_saving <- function(res, relative = FALSE) {
+  stopifnot(inherits(res, "heumilkr_result"))
+  stopifnot(is.logical(relative))
+
+  d <- as.matrix(attr(res, "distances"))
+
+  naive_cost <-
+    sum(
+      vapply(
+        1:(dim(d)[[2]] - 1),
+        \(idx) 2 * d[1, idx + 1],
+        FUN.VALUE = 1.
+      )
+    )
+
+  saving <- naive_cost - milkr_cost(res)
+
+  if (relative) {
+    saving / naive_cost
+  } else {
+    saving
+  }
+}
