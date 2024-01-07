@@ -54,7 +54,8 @@ Defaults to \code{NULL}, i.e. no restrictions are enforced.}
 }
 \value{
 Returns a "\code{heumilkr_result}" object, a \code{\link[=data.frame]{data.frame()}} with one row per
-site-run combination bestowed with additional attributes.
+site-run combination bestowed with additional attributes. Its columns
+consist of:
 \itemize{
 \item \code{site} - The site index (i.e. the index of the \code{demand} vector) associated
 to the run.
@@ -63,7 +64,7 @@ to the run.
 \item \code{vehicle} - The vehicle type index (as provided in \code{vehicles}) associated
 to the run.
 \item \code{load} - The actual load in units of \code{demand} on the particular run.
-\item \code{distance} - The traveled distance of the particular run.
+\item \code{distance} - The travel distance of the particular run.
 }
 
 Unless a site demand exceeds the vehicle capacities it is always assigned

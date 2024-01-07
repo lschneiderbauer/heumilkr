@@ -56,7 +56,8 @@
 #'
 #' @return
 #'  Returns a "`heumilkr_result`" object, a [data.frame()] with one row per
-#'  site-run combination bestowed with additional attributes.
+#'  site-run combination bestowed with additional attributes. Its columns
+#'  consist of:
 #'  * `site` - The site index (i.e. the index of the `demand` vector) associated
 #'             to the run.
 #'  * `run` - Identifies the run the site is assigned to.
@@ -64,7 +65,7 @@
 #'  * `vehicle` - The vehicle type index (as provided in `vehicles`) associated
 #'                to the run.
 #'  * `load` - The actual load in units of `demand` on the particular run.
-#'  * `distance` - The traveled distance of the particular run.
+#'  * `distance` - The travel distance of the particular run.
 #'
 #'  Unless a site demand exceeds the vehicle capacities it is always assigned
 #'  to only a single run.
