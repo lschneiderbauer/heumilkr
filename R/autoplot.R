@@ -16,15 +16,17 @@ autoplot.heumilkr_result <- function(object, ...) {
     data = data[order(data$run, data$order), ],
     aes(
       x = .data$pos_x, y = .data$pos_y,
-      group = .data$run
+      color = as.factor(.data$run),
+      group = .data$run,
+      linetype = as.factor(.data$vehicle)
     )
   ) +
     scale_color_discrete() +
-    geom_path(
-      aes(color = as.factor(.data$run)),
-      linewidth = 1, alpha = 0.7
+    geom_path(linewidth = 1, alpha = 0.7) +
+    geom_point(
+      aes(shape = .data$shape, size = .data$size),
+      color = "black"
     ) +
-    geom_point(aes(shape = .data$shape, size = .data$size)) +
     scale_shape_identity() +
     scale_size_identity() +
     theme_void() +
@@ -67,5 +69,9 @@ plot_data <- function(x) {
       )
     )
 
-  merge(runs, pos, by = "site")
+  merge(
+    merge(runs, pos, by = "site"),
+    x[, c("run", "vehicle")],
+    "run"
+  )
 }
