@@ -12,3 +12,4 @@ references.bib
 ^docs$
 ^pkgdown$
 ^cran-comments\.md$
+^CRAN-SUBMISSION$
