@@ -100,15 +100,31 @@ clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
   # replace NAs by maximal machine integer value
   vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max
 
-  heumilkr_result(
-    .Call(
-      `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
-      vehicles$n, vehicles$caps
-    ),
-    distances = distances
-  )
+  if (!is.null(restrictions)) {
+    stopifnot(is.data.frame(restrictions))
+    stopifnot(c("site", "vehicle") %in% colnames(restrictions))
+
+    heumilkr_result(
+      .Call(
+        `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
+        vehicles$n, vehicles$caps, restrictions$site, restrictions$vehicle
+      ),
+      distances = distances
+    )
+  } else {
+    heumilkr_result(
+      .Call(
+        `_heumilkr_cpp_clarke_wright_unr`, as.numeric(demand), distances,
+        vehicles$n, vehicles$caps
+      ),
+      distances = distances
+    )
+  }
 }
 
+#' Stepwise Clark-Wright algorithm (Capacitated Vehicle Routing
+#' Problem solver)
+#'
 #' Same as [clarke_wright()] but returns all intermediate state results as well.
 #' This function exists only for showcase purposes and should not be used in
 #' production (performance is quite bad).
@@ -116,8 +132,9 @@ clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
 #' @inheritParams clarke_wright
 #' @seealso [clarke_wright()]
 #' @noRd
-clarke_wright_stepwise <- function(demand, distances, vehicles) {
+clarke_wright_stepwise <- function(demand, distances, vehicles, restrictions = NULL) {
   stopifnot(is.numeric(demand))
+  stopifnot(all(!is.na(demand)))
   stopifnot(inherits(distances, "dist"))
   stopifnot(attr(distances, "Size") == length(demand) + 1)
   stopifnot(is.data.frame(vehicles))
@@ -127,16 +144,22 @@ clarke_wright_stepwise <- function(demand, distances, vehicles) {
   stopifnot(is.numeric(vehicles$caps))
   stopifnot(vehicles$caps > 0)
 
+  if (!is.null(restrictions)) {
+    stopifnot(is.data.frame(restrictions))
+    stopifnot(c("site", "vehicle") %in% colnames(restrictions))
+  }
+
   # replace NAs by maximal machine integer value
   vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max
 
   lapply(
     .Call(
       `_heumilkr_cpp_clarke_wright_stepwise`, as.numeric(demand), distances,
-      vehicles$n, vehicles$caps
+      vehicles$n, vehicles$caps, restrictions$site, restrictions$vehicle
     ),
     \(x) heumilkr_result(
-      x, distances = distances
+      x,
+      distances = distances
     )
   )
 }

@@ -114,6 +114,27 @@ test_that("A demand that exceeds vehicle capacities generates more than a single
   expect_equal(res$distance, c(2, 2, 2))
 })
 
+
+test_that("Vehicles are not assigned to restricted sites", {
+  hedgehog::forall(
+    gen.demand_net(max_sites = 10L),
+    function(demand_net) {
+      res <-
+        clarke_wright(
+          demand_net$demand,
+          demand_net$distances,
+          vehicles = data.frame(n = c(NA_integer_, NA_integer_), caps = c(99999, 99999)),
+          restrictions = data.frame(site = 0L, vehicle = 0L)
+        )
+
+      expect_false(
+        0 %in% res[res$site == 0]$vehicle
+      )
+    }
+  )
+})
+
+
 test_that("Not having enough vehicles is handled gracefully", {
   demand <- c(15, 3, 1)
 

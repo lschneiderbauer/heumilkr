@@ -18,9 +18,11 @@ using col_types = std::tuple<
 class routing_state
 {
 public:
-  routing_state(const std::vector<double> demand, const distmat<double> &dist,
-               const std::vector<int> vehicle_avail,
-               const std::vector<double> &vehicle_caps);
+  routing_state(const std::vector<double> demand,
+                const distmat<double> &dist,
+                const std::vector<int> vehicle_avail,
+                const std::vector<double> &vehicle_caps,
+                const std::vector<std::unordered_set<int>> &restricted_vehicles);
   col_types runs_as_cols() const;
   bool relink_best();
   bool opt_vehicles();
@@ -30,6 +32,8 @@ private:
   // Number and capacity of particular vehicle types
   std::vector<int> vehicle_avail;
   std::vector<double> vehicle_caps;
+
+  std::vector<std::unordered_set<int>> restricted_vehicles;
 
   distmat<double> savings;
   udg graph;

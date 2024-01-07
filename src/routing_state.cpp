@@ -26,8 +26,15 @@ distmat<double> calc_savings(const distmat<double> &d)
   return savings;
 }
 
+bool is_vehicle_restricted(const std::unordered_set<int> &restricted_vehicles,
+                           int vehicle)
+{
+  return restricted_vehicles.find(vehicle) != restricted_vehicles.end();
+}
+
 int find_first_free_vehicle(const std::vector<int> &vehicle_avail,
                             const std::vector<double> &vehicle_caps,
+                            const std::unordered_set<int> &restricted_vehicles,
                             const double load)
 {
   for (auto it = vehicle_caps.begin(); it != vehicle_caps.end(); it++)
@@ -35,7 +42,9 @@ int find_first_free_vehicle(const std::vector<int> &vehicle_avail,
     int vehicle = std::distance(vehicle_caps.begin(), it);
     int avail = vehicle_avail[vehicle];
 
-    if (avail >= 1 && load <= vehicle_caps[vehicle])
+    if (avail >= 1 &&
+        load <= vehicle_caps[vehicle] &&
+        !is_vehicle_restricted(restricted_vehicles, vehicle))
     {
       return vehicle;
     }
@@ -46,10 +55,13 @@ int find_first_free_vehicle(const std::vector<int> &vehicle_avail,
 
 int select_initial_vehicle(const std::vector<int> &vehicle_avail,
                            const std::vector<double> &vehicle_caps,
+                           const std::unordered_set<int> &restricted_vehicles,
                            const double load)
 {
-
-  int vehicle = find_first_free_vehicle(vehicle_avail, vehicle_caps, load);
+  int vehicle = find_first_free_vehicle(vehicle_avail,
+                                        vehicle_caps,
+                                        restricted_vehicles,
+                                        load);
 
   if (vehicle != -1) return vehicle;
 
@@ -61,7 +73,7 @@ int select_initial_vehicle(const std::vector<int> &vehicle_avail,
     int vehicle = std::distance(vehicle_caps.begin(), it);
     int avail = vehicle_avail[vehicle];
 
-    if (avail >= 1)
+    if (avail >= 1 && !is_vehicle_restricted(restricted_vehicles, vehicle))
     {
       return vehicle;
     }
@@ -78,6 +90,7 @@ int select_vehicle(const std::vector<int> &vehicle_avail,
                    const std::vector<double> &vehicle_caps,
                    const std::vector<int> &site_vehicle,
                    const std::vector<double> &load,
+                   const std::vector<std::unordered_set<int>> &restricted_vehicles,
                    const int a, const int b)
 {
   for (auto it = vehicle_caps.begin(); it != vehicle_caps.end(); it++)
@@ -91,7 +104,10 @@ int select_vehicle(const std::vector<int> &vehicle_avail,
       avail += 1;
     }
 
-    if (avail >= 1 && load[a] + load[b] <= vehicle_caps[vehicle])
+    if (avail >= 1 &&
+        load[a] + load[b] <= vehicle_caps[vehicle] &&
+        !is_vehicle_restricted(restricted_vehicles[a], vehicle) &&
+        !is_vehicle_restricted(restricted_vehicles[b], vehicle))
     {
       return vehicle;
     }
@@ -106,6 +122,7 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
                                     const std::vector<int> &site_vehicle,
                                     const std::vector<int> &vehicle_avail,
                                     const std::vector<double> &vehicle_caps,
+                                    const std::vector<std::unordered_set<int>> &restricted_vehicles,
                                     const udg &graph)
 {
   std::tuple<int, int, int> best_link = {-1, -1, -1};
@@ -127,7 +144,8 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
       if (graph.links_to_origin(i) && graph.links_to_origin(j) &&
           !graph.edges_share_cycle(i, j) &&
           (selected_vehicle =
-               select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, i, j)) != -1)
+               select_vehicle(vehicle_avail, vehicle_caps, site_vehicle,
+                              load, restricted_vehicles, i, j)) != -1)
       {
 
         if (savings.get(i, j) > max_val)
@@ -147,10 +165,13 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
 routing_state::routing_state(
     // we want a copy of this vector
     const std::vector<double> demand, const distmat<double> &distances,
-    const std::vector<int> vehicle_avail, const std::vector<double> &vehicle_caps)
+    const std::vector<int> vehicle_avail,
+    const std::vector<double> &vehicle_caps,
+    const std::vector<std::unordered_set<int>> &restricted_vehicles)
 {
   routing_state::distances = distances;
   routing_state::vehicle_caps = vehicle_caps;
+  routing_state::restricted_vehicles = restricted_vehicles;
 
   routing_state::graph = udg(demand.size());
 
@@ -172,9 +193,12 @@ routing_state::routing_state(
 
     int vehicle = select_initial_vehicle(routing_state::vehicle_avail,
                                          routing_state::vehicle_caps,
+                                         restricted_vehicles[site],
                                          load[site]);
+
     routing_state::vehicle_avail[vehicle] -= 1;
 
+    // special treatment for the case when initial load is higher than capacity
     while (load[site] > vehicle_caps[vehicle])
     {
       load[site] -= vehicle_caps[vehicle];
@@ -182,8 +206,10 @@ routing_state::routing_state(
       // add those to the extra list "singleton_runs" which we will not
       // touch until the end.
       routing_state::singleton_runs[vehicle][site] += 1;
+
       vehicle = select_initial_vehicle(routing_state::vehicle_avail,
                                        routing_state::vehicle_caps,
+                                       restricted_vehicles[site],
                                        load[site]);
     }
 
@@ -202,9 +228,7 @@ bool routing_state::relink_best()
   std::tie(a, b, vehicle) =
       best_link(savings, load,
                 site_vehicle, vehicle_avail,
-                vehicle_caps, graph);
-
-  // printf("bl: (%d,%d)\n", a, b);
+                vehicle_caps, restricted_vehicles, graph);
 
   if (!((a == b) && (a == -1)))
   {
@@ -252,10 +276,19 @@ bool routing_state::opt_vehicles()
     // free current vehicle before we look for the next best one
     vehicle_avail[site_vehicle[site]] += 1;
 
-    int vehicle = find_first_free_vehicle(
-      vehicle_avail, vehicle_caps, load[site]
-    );
+    // unionize vehicle restrictions
+    std::unordered_set<int> restr_vehicles;
+    for (auto& cyc_sites : *cyc)
+    {
+      //restr_vehicles.merge(routing_state::restricted_vehicles[cyc_sites]);
+      restr_vehicles.insert(routing_state::restricted_vehicles[cyc_sites].begin(),
+                            routing_state::restricted_vehicles[cyc_sites].end());
+    }
 
+    int vehicle = find_first_free_vehicle(vehicle_avail,
+                                          vehicle_caps,
+                                          restr_vehicles,
+                                          load[site]);
     vehicle_avail[vehicle] -= 1;
 
     if (vehicle != -1 && vehicle != site_vehicle[site])
@@ -329,8 +362,8 @@ col_types routing_state::runs_as_cols() const
     T cyc = cycs[i];
 
     std::get<0>(cols)[i] = i;
-    std::get<3>(cols)[i] = site_vehicle[i];
-    std::get<4>(cols)[i] = load[i];
+    std::get<3>(cols)[i] = routing_state::site_vehicle[i];
+    std::get<4>(cols)[i] = routing_state::load[i];
 
     // check if we have seen cyc before
     if (visited_elements.count(cyc) > 0)
