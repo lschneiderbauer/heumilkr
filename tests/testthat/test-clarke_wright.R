@@ -185,7 +185,7 @@ test_that("README example result is preserved.", {
     clarke_wright(
       demand,
       dist(pos),
-      data.frame(n = NA_integer_, caps = 33)
+      data.frame(n = c(NA_integer_, 2L), caps = c(33, 44))
     )
 
   expect_snapshot(res)

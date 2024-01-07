@@ -37,14 +37,16 @@ devtools::install_github("lschneiderbauer/heumilkr")
 
 ## Example
 
-The following example generates random demands at random locations, applies the Clarke-Wright algorithm to generate quasi-optimal vehicle runs and shows the resulting runs.
+The following example generates random demands at random locations, defines two vehicle types, applies the Clarke-Wright algorithm to generate quasi-optimal vehicle runs, and shows the resulting runs.
 
 ```{r example}
 library(heumilkr)
-
 set.seed(42)
+
+# generating random demand
 demand <- runif(20, 5, 15)
 
+# generating random site positions
 pos <-
   data.frame(
     pos_x = c(0, runif(length(demand), -10, 10)),
@@ -55,7 +57,9 @@ res <-
   clarke_wright(
     demand,
     dist(pos),
-    data.frame(n = NA_integer_, caps = 33)
+    # We have an infinite number of vehicles with capacity 33 available,
+    # and two vehicles with capacity 44.
+    data.frame(n = c(NA_integer_, 2L), caps = c(33, 44))
   )
 
 print(res)
@@ -65,7 +69,7 @@ print(res)
 print(milkr_cost(res))
 ```
 
-A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for the result is built in. The individual runs are distinguished by color. The demanding site locations are marked with round circles while the (single) supplying site is depicted as a square.
+A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for the result is built in. The individual runs are distinguished by color. The demanding site locations are marked with round circles while the (single) supplying site is depicted as a square. The line types (solid/dashed/...) are associated to different vehicle types.
 
 ```{r example_plot}
 plot(res)
