@@ -125,7 +125,11 @@
 <span><span class="co"># returns the total cost / distance</span></span>
 <span><span class="co"># (the quantity that is minimized by CVRP)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/milkr_cost.html">milkr_cost</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 170.2523</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 170.2523</span></span>
+<span></span>
+<span><span class="co"># returns the savings resulting from the heuristic optimization procedure</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/milkr_saving.html">milkr_saving</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 166.7192</span></span></code></pre></div>
 <p>A plotting function (using <a href="https://ggplot2.tidyverse.org/" class="external-link">ggplot</a>) for the result is built in. The individual runs are distinguished by color. The demanding site locations are marked with round circles while the (single) supplying site is depicted as a square. The line types (solid/dashed/…) are associated to different vehicle types.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>

@@ -111,14 +111,15 @@ Defaults to <code>NULL</code>, i.e. no restrictions are enforced.</site></vehicl
     
 
 <p>Returns a "<code>heumilkr_result</code>" object, a <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> with one row per
-site-run combination bestowed with additional attributes.</p><ul><li><p><code>site</code> - The site index (i.e. the index of the <code>demand</code> vector) associated
+site-run combination bestowed with additional attributes. Its columns
+consist of:</p><ul><li><p><code>site</code> - The site index (i.e. the index of the <code>demand</code> vector) associated
 to the run.</p></li>
 <li><p><code>run</code> - Identifies the run the site is assigned to.</p></li>
 <li><p><code>order</code>  - Integer values providing the visiting order within each run.</p></li>
 <li><p><code>vehicle</code> - The vehicle type index (as provided in <code>vehicles</code>) associated
 to the run.</p></li>
 <li><p><code>load</code> - The actual load in units of <code>demand</code> on the particular run.</p></li>
-<li><p><code>distance</code> - The traveled distance of the particular run.</p></li>
+<li><p><code>distance</code> - The travel distance of the particular run.</p></li>
 </ul><p>Unless a site demand exceeds the vehicle capacities it is always assigned
 to only a single run.</p>
     </div>
