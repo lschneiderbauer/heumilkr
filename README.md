@@ -86,6 +86,10 @@ print(res)
 # (the quantity that is minimized by CVRP)
 print(milkr_cost(res))
 #> [1] 170.2523
+
+# returns the savings resulting from the heuristic optimization procedure
+print(milkr_saving(res))
+#> [1] 166.7192
 ```
 
 A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for
