@@ -73,7 +73,7 @@
 #' @examples
 #' demand <- c(3, 2, 4, 2)
 #'
-#' pos <-
+#' positions <-
 #'   data.frame(
 #'     pos_x = c(0, 1, -1, 2, 3),
 #'     pos_y = c(0, 1, 1, 2, 3)
@@ -81,7 +81,7 @@
 #'
 #' clarke_wright(
 #'   demand,
-#'   dist(pos),
+#'   dist(positions),
 #'   data.frame(n = NA_integer_, caps = 6)
 #' )
 #'

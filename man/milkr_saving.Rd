@@ -26,19 +26,19 @@ i.e. one run per site.
 \examples{
 demand <- c(3, 2, 4, 2)
 
-pos <-
+positions <-
   data.frame(
     pos_x = c(0, 1, -1, 2, 3),
     pos_y = c(0, 1, 1, 2, 3)
   )
 
-res <- clarke_wright(
+solution <- clarke_wright(
   demand,
-  dist(pos),
+  dist(positions),
   data.frame(n = NA_integer_, caps = 6)
 )
 
-print(milkr_saving(res))
-print(milkr_saving(res, relative = TRUE))
+print(milkr_saving(solution))
+print(milkr_saving(solution, relative = TRUE))
 
 }
