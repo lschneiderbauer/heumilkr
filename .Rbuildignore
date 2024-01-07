@@ -6,6 +6,7 @@
 ^codecov\.yml$
 ^benchmark$
 ^.vscode$
+^tools$
 references.bib
 ^_pkgdown\.yml$
 ^docs$
