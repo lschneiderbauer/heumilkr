@@ -1,18 +1,18 @@
-heumilkr_result <- function(df, distances) {
+heumilkr_solution <- function(df, distances) {
   stopifnot(inherits(df, "data.frame"))
   stopifnot(
     c("site", "run", "order", "vehicle", "order", "distance") %in% colnames(df)
   )
   stopifnot(inherits(distances, "dist"))
 
-  new_heumilkr_result(df, distances)
+  new_heumilkr_solution(df, distances)
 }
 
-new_heumilkr_result <- function(df, distances) {
+new_heumilkr_solution <- function(df, distances) {
   obj <-
     structure(
       df,
-      class = c("heumilkr_result", class(df))
+      class = c("heumilkr_solution", class(df))
     )
 
   attr(obj, "distances") <- distances
@@ -25,8 +25,8 @@ new_heumilkr_result <- function(df, distances) {
 #' This is the measure that the corresponding Capacitated Vehicle Routing
 #' Problem minimizes.
 #'
-#' @param res
-#'  A "`heumilkr_result`" object, typically obtained by [clarke_wright()].
+#' @param solution
+#'  A "`heumilkr_solution`" object, typically obtained by [clarke_wright()].
 #'
 #' @return The total traveled distance.
 #' @examples
@@ -47,10 +47,10 @@ new_heumilkr_result <- function(df, distances) {
 #' milkr_cost(res)
 #'
 #' @export
-milkr_cost <- function(res) {
-  stopifnot(inherits(res, "heumilkr_result"))
+milkr_cost <- function(solution) {
+  stopifnot(inherits(solution, "heumilkr_solution"))
 
-  sum(unique(res[, c("run", "distance")])$distance)
+  sum(unique(solution[, c("run", "distance")])$distance)
 }
 
 #' Vehicle run saving
@@ -59,8 +59,8 @@ milkr_cost <- function(res) {
 #' algorithm [clarke_wright()] compared to the naive vehicle run assignment,
 #' i.e. one run per site.
 #'
-#' @param res
-#'  A "`heumilkr_result`" object, typically obtained by [clarke_wright()].
+#' @param solution
+#'  A "`heumilkr_solution`" object, typically obtained by [clarke_wright()].
 #' @param relative
 #'  Should the saving be given as dimensionful value (in units of distance as
 #'  provided to [clarke_wright()]), or as percentage relative to the
@@ -90,11 +90,11 @@ milkr_cost <- function(res) {
 #' print(milkr_saving(res, relative = TRUE))
 #'
 #' @export
-milkr_saving <- function(res, relative = FALSE) {
-  stopifnot(inherits(res, "heumilkr_result"))
+milkr_saving <- function(solution, relative = FALSE) {
+  stopifnot(inherits(solution, "heumilkr_solution"))
   stopifnot(is.logical(relative))
 
-  d <- as.matrix(attr(res, "distances"))
+  d <- as.matrix(attr(solution, "distances"))
 
   naive_cost <-
     sum(
@@ -105,7 +105,7 @@ milkr_saving <- function(res, relative = FALSE) {
       )
     )
 
-  saving <- naive_cost - milkr_cost(res)
+  saving <- naive_cost - milkr_cost(solution)
 
   if (relative) {
     saving / naive_cost

@@ -6,7 +6,7 @@
 #'                              theme_void theme
 #' @importFrom rlang .data
 #' @export
-autoplot.heumilkr_result <- function(object, ...) {
+autoplot.heumilkr_solution <- function(object, ...) {
   data <- plot_data(object)
 
   data$shape <- ifelse(data$site == 0, "square", "circle")
@@ -35,12 +35,12 @@ autoplot.heumilkr_result <- function(object, ...) {
 
 #' @importFrom graphics plot
 #' @export
-plot.heumilkr_result <- function(x, ...) {
+plot.heumilkr_solution <- function(x, ...) {
   print(autoplot(x, ...))
 }
 
 plot_data <- function(x) {
-  stopifnot(inherits(x, "heumilkr_result"))
+  stopifnot(inherits(x, "heumilkr_solution"))
 
   # recalculate positions
   pos <- as.data.frame(cmdscale(attr(x, "distances")))

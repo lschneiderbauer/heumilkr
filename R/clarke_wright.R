@@ -55,7 +55,7 @@
 #'  Defaults to `NULL`, i.e. no restrictions are enforced.
 #'
 #' @return
-#'  Returns a "`heumilkr_result`" object, a [data.frame()] with one row per
+#'  Returns a "`heumilkr_solution`" object, a [data.frame()] with one row per
 #'  site-run combination bestowed with additional attributes. Its columns
 #'  consist of:
 #'  * `site` - The site index (i.e. the index of the `demand` vector) associated
@@ -105,7 +105,7 @@ clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
     stopifnot(is.data.frame(restrictions))
     stopifnot(c("site", "vehicle") %in% colnames(restrictions))
 
-    heumilkr_result(
+    heumilkr_solution(
       .Call(
         `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
         vehicles$n, vehicles$caps, restrictions$site, restrictions$vehicle
@@ -113,7 +113,7 @@ clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
       distances = distances
     )
   } else {
-    heumilkr_result(
+    heumilkr_solution(
       .Call(
         `_heumilkr_cpp_clarke_wright_unr`, as.numeric(demand), distances,
         vehicles$n, vehicles$caps
@@ -158,7 +158,7 @@ clarke_wright_stepwise <- function(demand, distances, vehicles, restrictions = N
       `_heumilkr_cpp_clarke_wright_stepwise`, as.numeric(demand), distances,
       vehicles$n, vehicles$caps, restrictions$site, restrictions$vehicle
     ),
-    \(x) heumilkr_result(
+    \(x) heumilkr_solution(
       x,
       distances = distances
     )

@@ -53,7 +53,7 @@ Each row defines a restriction: \if{html}{\out{<vehicle type>}} can not approach
 Defaults to \code{NULL}, i.e. no restrictions are enforced.}
 }
 \value{
-Returns a "\code{heumilkr_result}" object, a \code{\link[=data.frame]{data.frame()}} with one row per
+Returns a "\code{heumilkr_solution}" object, a \code{\link[=data.frame]{data.frame()}} with one row per
 site-run combination bestowed with additional attributes. Its columns
 consist of:
 \itemize{
