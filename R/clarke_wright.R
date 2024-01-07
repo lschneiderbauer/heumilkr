@@ -7,7 +7,7 @@
 #'
 #' @details
 #' See the original paper,
-#' [Clarke, G. and Wright, J.R. (1964)](http://dx.doi.org/10.1287/opre.12.4.568),
+#' Clarke, G. and Wright, J.R. (1964) \doi{10.1287/opre.12.4.568},
 #' for a detailed explanation of the Clarke-Wright algorithm.
 #'
 #' @param demand
@@ -51,8 +51,8 @@
 #'  * `vehicle` - The vehicle type index.
 #'  * `site` - The site index (i.e. the index of the `demand` vector)
 #'
-#'  Each row defines a restriction: <vehicle type> can not approach <site>.
-#'  Defaults to `NULL`, i.e. no restrictions are enforced.
+#'  Each row defines a restriction: vehicle type `vehicle` can not approach site
+#'  `site`. Defaults to `NULL`, i.e. no restrictions are enforced.
 #'
 #' @return
 #'  Returns a "`heumilkr_solution`" object, a [data.frame()] with one row per

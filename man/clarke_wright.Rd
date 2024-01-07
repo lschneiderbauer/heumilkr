@@ -49,8 +49,8 @@ The data frame is expected to have two columns:
 \item \code{site} - The site index (i.e. the index of the \code{demand} vector)
 }
 
-Each row defines a restriction: \if{html}{\out{<vehicle type>}} can not approach \if{html}{\out{<site>}}.
-Defaults to \code{NULL}, i.e. no restrictions are enforced.}
+Each row defines a restriction: vehicle type \code{vehicle} can not approach site
+\code{site}. Defaults to \code{NULL}, i.e. no restrictions are enforced.}
 }
 \value{
 Returns a "\code{heumilkr_solution}" object, a \code{\link[=data.frame]{data.frame()}} with one row per
@@ -77,7 +77,7 @@ single source.
 }
 \details{
 See the original paper,
-\href{http://dx.doi.org/10.1287/opre.12.4.568}{Clarke, G. and Wright, J.R. (1964)},
+Clarke, G. and Wright, J.R. (1964) \doi{10.1287/opre.12.4.568},
 for a detailed explanation of the Clarke-Wright algorithm.
 }
 \examples{
