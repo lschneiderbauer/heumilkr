@@ -102,8 +102,8 @@ a good rule of thumb.</p></dd>
 particular sites in the form of a blacklist.
 The data frame is expected to have two columns:</p><ul><li><p><code>vehicle</code> - The vehicle type index.</p></li>
 <li><p><code>site</code> - The site index (i.e. the index of the <code>demand</code> vector)</p></li>
-</ul><p>Each row defines a restriction: <vehicle type> can not approach <site>.
-Defaults to <code>NULL</code>, i.e. no restrictions are enforced.</site></vehicle></p></dd>
+</ul><p>Each row defines a restriction: vehicle type <code>vehicle</code> can not approach site
+<code>site</code>. Defaults to <code>NULL</code>, i.e. no restrictions are enforced.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -126,7 +126,8 @@ to only a single run.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>See the original paper,
-<a href="http://dx.doi.org/10.1287/opre.12.4.568" class="external-link">Clarke, G. and Wright, J.R. (1964)</a>,
+Clarke, G. and Wright, J.R. (1964) <a href="https://doi.org/10.1287/opre.12.4.568" class="external-link">doi:10.1287/opre.12.4.568</a>
+,
 for a detailed explanation of the Clarke-Wright algorithm.</p>
     </div>
 
