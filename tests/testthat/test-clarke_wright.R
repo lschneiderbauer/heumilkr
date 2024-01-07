@@ -17,6 +17,8 @@ test_that("runs without error", {
 })
 
 test_that("Sum of loads over all runs equals sum of demands", {
+  skip_if_not_installed("hedgehog")
+
   hedgehog::forall(
     gen.demand_net(max_sites = 10L),
     function(demand_net) {
@@ -53,6 +55,8 @@ test_that("Distances add up correctly.", {
 
 test_that("Limited vehicles with more priority should always be exhausted
            provided there is enough demand", {
+  skip_if_not_installed("hedgehog")
+
   hedgehog::forall(
     gen.demand_net(max_sites = 10L),
     function(demand_net) {
@@ -77,6 +81,8 @@ test_that("Limited vehicles with more priority should always be exhausted
 })
 
 test_that("A vehicle with infinite capacity covers everything in a single run", {
+  skip_if_not_installed("hedgehog")
+
   hedgehog::forall(
     gen.demand_net(max_sites = 10L),
     function(demand_net) {
@@ -116,6 +122,8 @@ test_that("A demand that exceeds vehicle capacities generates more than a single
 
 
 test_that("Vehicles are not assigned to restricted sites", {
+  skip_if_not_installed("hedgehog")
+
   hedgehog::forall(
     gen.demand_net(max_sites = 10L),
     function(demand_net) {
