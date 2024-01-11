@@ -2,7 +2,7 @@ pandoc: 2.19.2
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles: {}
-last_built: 2024-01-11T19:14Z
+last_built: 2024-01-11T19:21Z
 urls:
   reference: https://lschneiderbauer.github.io/heumilkr/reference
   article: https://lschneiderbauer.github.io/heumilkr/articles
