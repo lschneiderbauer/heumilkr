@@ -1,5 +1,4 @@
-#' Clark-Wright algorithm (Capacitated Vehicle Routing
-#' Problem solver)
+#' Clarke-Wright algorithm, a Capacitated Vehicle Routing Problem solver
 #'
 #' Finds a quasi-optimal solution to the Capacitated Vehicle Routing
 #' Problem (CVRP). It is assumed that all demands will be satisfied by a
@@ -14,13 +13,13 @@
 #'  A numeric vector consisting of "demands" indexed by sites.
 #'  The `i`th entry refers to the demand of site `i` (and the length
 #'  of the vector equals the number of sites `N` with demands). The
-#'  units of the demand values need to match the units of the
-#'  vehicle capacity values. `NA` values are not allowed.
+#'  units of demand values need to match the units of vehicle capacity values.
+#'  `NA` values are not allowed.
 #'
 #' @param distances
 #'  An object of class `dist`, created by [stats::dist()], with
 #'  `(N + 1)` locations describing the distances between individual
-#'  sites. The first index refers to the source site. The `(i+1)`'th
+#'  sites. The first index refers to the source site. The `(i+1)`th
 #'  index refers to site `i` (as defined by `demand`).
 #'
 #' @param vehicles
@@ -123,8 +122,8 @@ clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
   }
 }
 
-#' Stepwise Clark-Wright algorithm (Capacitated Vehicle Routing
-#' Problem solver)
+#' Stepwise Clarke-Wright algorithm, a Capacitated Vehicle Routing
+#' Problem solver
 #'
 #' Same as [clarke_wright()] but returns all intermediate state results as well.
 #' This function exists only for showcase purposes and should not be used in

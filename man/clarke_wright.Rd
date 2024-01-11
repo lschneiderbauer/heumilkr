@@ -2,8 +2,7 @@
 % Please edit documentation in R/clarke_wright.R
 \name{clarke_wright}
 \alias{clarke_wright}
-\title{Clark-Wright algorithm (Capacitated Vehicle Routing
-Problem solver)}
+\title{Clarke-Wright algorithm, a Capacitated Vehicle Routing Problem solver}
 \usage{
 clarke_wright(demand, distances, vehicles, restrictions = NULL)
 }
@@ -11,12 +10,12 @@ clarke_wright(demand, distances, vehicles, restrictions = NULL)
 \item{demand}{A numeric vector consisting of "demands" indexed by sites.
 The \code{i}th entry refers to the demand of site \code{i} (and the length
 of the vector equals the number of sites \code{N} with demands). The
-units of the demand values need to match the units of the
-vehicle capacity values. \code{NA} values are not allowed.}
+units of demand values need to match the units of vehicle capacity values.
+\code{NA} values are not allowed.}
 
 \item{distances}{An object of class \code{dist}, created by \code{\link[stats:dist]{stats::dist()}}, with
 \code{(N + 1)} locations describing the distances between individual
-sites. The first index refers to the source site. The \code{(i+1)}'th
+sites. The first index refers to the source site. The \code{(i+1)}th
 index refers to site \code{i} (as defined by \code{demand}).}
 
 \item{vehicles}{A \code{\link[=data.frame]{data.frame()}} describing available vehicle types and their respective
