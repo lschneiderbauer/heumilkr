@@ -82,35 +82,54 @@
     
 <p>In this vignette we discuss performance benchmarks of the
 Clarke-Wright algorithm implemented in this package by comparing the
-Clarke-Wright solutions of a set of problem instances (provided by <a href="http://vrp.atd-lab.inf.puc-rio.br/" class="external-link">CVRPLIB</a>) with their
-optimal value.</p>
-<p>We focus on two performance measures, which we call “scale-based
-performance” and simply “relative performance”.</p>
+Clarke-Wright solutions of a set of problem instances with their optimal
+value.</p>
+<div class="section level3">
+<h3 id="the-problem-instance-data">The problem instance data<a class="anchor" aria-label="anchor" href="#the-problem-instance-data"></a>
+</h3>
+<p>The problem instances we are basing our measurements on are provided
+by by <a href="http://vrp.atd-lab.inf.puc-rio.br/" class="external-link">CVRPLIB</a> and can
+be divided into five groups<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;The naming is directly taken from &lt;a href="http://vrp.atd-lab.inf.puc-rio.br/" class="external-link"&gt;CVRPLIB&lt;/a&gt;&lt;/p&gt;'><sup>1</sup></a> of different characterists:</p>
+<ul>
+<li><p>A - Augerat, 1995 (27 instances)</p></li>
+<li><p>B - Augerat, 1995 (23 instances)</p></li>
+<li><p>E - Christofides and Eilon, 1969 (13 instances)</p></li>
+<li><p>F - Fisher, 1994 (3 instances)</p></li>
+<li><p>Tai - Rochat and Taillard, 1995 (12 instances)</p></li>
+</ul>
+<p>The data provides the problem instance as well as the optimal
+solution.</p>
+</div>
 <div class="section level2">
-<h2 id="scale-based-performance-xi">Scale based performance <span class="math inline">\(\xi\)</span><a class="anchor" aria-label="anchor" href="#scale-based-performance-xi"></a>
+<h2 id="relation-to-optimal-and-trivial-solution">Relation to optimal and trivial solution<a class="anchor" aria-label="anchor" href="#relation-to-optimal-and-trivial-solution"></a>
 </h2>
-<p>The idea of the scale based performance measure is to measure where
-the Clarke-Wright solution is compared to both, the optimal solution,
-and the trivial solution<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;By trivial solution we mean the solution where each site
-is assigned exactly one route (which goes back and forth).&lt;/p&gt;"><sup>1</sup></a>. Let <span class="math inline">\(c\)</span>
-be the cost of the Clarke-Wright solution, and <span class="math inline">\(\omega\)</span> the optimal solution, and <span class="math inline">\(\alpha\)</span> the cost of the trivial solution.
-The measure <span class="math inline">\(\xi\)</span> is defined by <span class="math display">\[\xi := 1 - \frac{c - \omega}{\alpha -
+<p>The idea this performance definition is to measure where the
+Clarke-Wright solution sits in between the optimal solution and the
+trivial solution<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;By trivial solution we mean the solution where each site
+is assigned exactly one route (which goes back and forth).&lt;/p&gt;"><sup>2</sup></a>. Let <span class="math inline">\(\gamma\)</span> be the cost of the Clarke-Wright
+solution, and <span class="math inline">\(\omega\)</span> the optimal
+solution, and <span class="math inline">\(\alpha\)</span> the cost of
+the trivial solution. The measure <span class="math inline">\(\xi\)</span> is defined by <span class="math display">\[\xi := 1 - \frac{\gamma - \omega}{\alpha -
 \omega}\,.\]</span> The measure can move between zero and 1. It is zero
 if the Clarke-Wright solution is the trivial solution, and it is 1 if
 the Clarke-Wright solution is the optimal solution.</p>
 <p>Evaluating this for CVRPLIB sample data yields the following
 graph.</p>
 <p><img src="clarke_wright_performance_files/figure-html/perf_scale_based_graph-1.png" width="100%"></p>
+<p>The mean value over all problem instances is <span class="math inline">\(\overline{\xi}=96.7\%\)</span>.</p>
 </div>
 <div class="section level2">
-<h2 id="relative-performance-rho">Relative performance <span class="math inline">\(\rho\)</span><a class="anchor" aria-label="anchor" href="#relative-performance-rho"></a>
+<h2 id="relative-deviation-of-optimal-solution">Relative deviation of optimal solution<a class="anchor" aria-label="anchor" href="#relative-deviation-of-optimal-solution"></a>
 </h2>
 <p>We can also simply measure how far the optimal solution is away from
 the Clarke-Wright solution relative to the Clarke-Wright solution
-itself. <span class="math display">\[\rho := \frac{c -
-\Omega}{c}\,.\]</span> The value <span class="math inline">\(\rho\)</span> measures how much saving we missed
-by using the Clarke-Wright solution instead of the optimal solution.</p>
+itself. <span class="math display">\[\rho := \frac{\gamma -
+\Omega}{\gamma}\,.\]</span> The value <span class="math inline">\(\rho\)</span> measures how much savings we miss by
+using the Clarke-Wright solution instead of the optimal solution.</p>
 <p><img src="clarke_wright_performance_files/figure-html/perf_rel_graph-1.png" width="100%"></p>
+<p>The mean value over all problem instances is <span class="math inline">\(\overline{\rho}=11\%\)</span>, i.e. on average, we
+miss out on around <span class="math inline">\(11\%\)</span> savings
+taking the Clarke-Wright solution compared to the optimal one.</p>
 </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
