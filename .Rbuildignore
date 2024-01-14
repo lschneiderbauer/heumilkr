@@ -13,3 +13,4 @@ references.bib
 ^pkgdown$
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
+^data-raw$
