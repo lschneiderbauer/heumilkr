@@ -2,7 +2,7 @@
 title: "Performance Benchmarks"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{performance}
+  %\VignetteIndexEntry{clarke_wright_performance}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -30,7 +30,7 @@ We focus on two performance measures, which we call "scale-based performance" an
 
 ## Scale based performance $\xi$
 
-The idea of the scale based performance measure is to measure where the Clarke-Wright solution is compared to both, the optimal solution, and the trivial solution[^1]. Let $c$ be the cost of the Clarke-Wright solution, and $o$ the optimal solution, and $t$ the cost of the trivial solution. The measure $\xi$ is defined by $$\xi := 1 - \frac{c - o}{t - o}\,.$$ The measure can move between zero and 1. It is zero if the Clarke-Wright solution is the trivial solution, and it is 1 if the Clarke-Wright solution is the optimal solution.
+The idea of the scale based performance measure is to measure where the Clarke-Wright solution is compared to both, the optimal solution, and the trivial solution[^1]. Let $c$ be the cost of the Clarke-Wright solution, and $\omega$ the optimal solution, and $\alpha$ the cost of the trivial solution. The measure $\xi$ is defined by $$\xi := 1 - \frac{c - \omega}{\alpha - \omega}\,.$$ The measure can move between zero and 1. It is zero if the Clarke-Wright solution is the trivial solution, and it is 1 if the Clarke-Wright solution is the optimal solution.
 
 [^1]: By trivial solution we mean the solution where each site is assigned exactly one route (which goes back and forth).
 
@@ -61,7 +61,7 @@ ggMarginal(
 
 ## Relative performance $\rho$
 
-We can also simply measure how far the optimal solution is away from the Clarke-Wright solution relative to the Clarke-Wright solution itself. $$\rho := 1 - \frac{c - o}{c}\,.$$ The value $\rho$ measures how much saving we missed by using the Clarke-Wright solution instead of the optimal solution.
+We can also simply measure how far the optimal solution is away from the Clarke-Wright solution relative to the Clarke-Wright solution itself. $$\rho := \frac{c - \Omega}{c}\,.$$ The value $\rho$ measures how much saving we missed by using the Clarke-Wright solution instead of the optimal solution.
 
 ```{r perf_rel_graph, echo = FALSE}
 ggMarginal(
