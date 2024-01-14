@@ -10,7 +10,7 @@ autoplot.heumilkr_solution <- function(object, ...) {
   data <- plot_data(object)
 
   data$shape <- ifelse(data$site == 0, "square", "circle")
-  data$size <- ifelse(data$site == 0, 5, 3)
+  data$size <- ifelse(data$site == 0, 4, 1.5)
 
   ggplot(
     data = data[order(data$run, data$order), ],
@@ -22,7 +22,7 @@ autoplot.heumilkr_solution <- function(object, ...) {
     )
   ) +
     scale_color_discrete() +
-    geom_path(linewidth = 1, alpha = 0.7) +
+    geom_path(linewidth = 0.8, alpha = 0.7) +
     geom_point(
       aes(shape = .data$shape, size = .data$size),
       color = "black"
