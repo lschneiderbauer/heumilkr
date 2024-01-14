@@ -113,3 +113,25 @@ milkr_saving <- function(solution, relative = FALSE) {
     saving
   }
 }
+
+milkr_perf_scale <- function(solution, optimum) {
+  stopifnot(inherits(solution, "heumilkr_solution"))
+  stopifnot(is.numeric(optimum))
+
+  cost <- milkr_cost(solution)
+  saving <- milkr_saving(solution)
+
+  # measures where we are on the scale between optimum and naive solution
+  # (= 0 when cost = naive cost, = 1 when cost = optimal cost)
+  1 - (cost - optimum) / (cost - optimum + saving)
+}
+
+milkr_perf_rel <- function(solution, optimum) {
+  stopifnot(inherits(solution, "heumilkr_solution"))
+  stopifnot(is.numeric(optimum))
+
+  cost <- milkr_cost(solution)
+
+  # how much better is the optimal solution compared to this one
+  (cost - optimum) / cost
+}
