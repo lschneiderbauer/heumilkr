@@ -124,5 +124,5 @@ result |>
   geom_ribbon(alpha = 0.3, linewidth = 0) +
   geom_point() +
   geom_line() +
-  theme_minimal()
+  theme_bw()
 ```
