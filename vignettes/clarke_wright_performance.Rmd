@@ -1,8 +1,8 @@
 ---
-title: "Performance Benchmarks"
+title: "Clark Wright Performance Benchmarks"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{clarke_wright_performance}
+  %\VignetteIndexEntry{Clark Wright Performance Benchmarks}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
