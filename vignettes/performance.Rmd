@@ -1,0 +1,87 @@
+---
+title: "Performance Benchmarks"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{performance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%",
+  dpi = 300
+)
+```
+
+```{r setup, include = FALSE}
+library(heumilkr)
+library(ggplot2)
+library(ggExtra)
+
+result <- readRDS("perf.rds")
+```
+
+In this vignette we discuss performance benchmarks of the Clarke-Wright algorithm implemented in this package by comparing the Clarke-Wright solutions of a set of problem instances (provided by [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/)) with their optimal value.
+
+We focus on two performance measures, which we call "scale-based performance" and simply "relative performance".
+
+## Scale based performance $\xi$
+
+The idea of the scale based performance measure is to measure where the Clarke-Wright solution is compared to both, the optimal solution, and the trivial solution[^1]. Let $c$ be the cost of the Clarke-Wright solution, and $o$ the optimal solution, and $t$ the cost of the trivial solution. The measure $\xi$ is defined by $$\xi := 1 - \frac{c - o}{t - o}\,.$$ The measure can move between zero and 1. It is zero if the Clarke-Wright solution is the trivial solution, and it is 1 if the Clarke-Wright solution is the optimal solution.
+
+[^1]: By trivial solution we mean the solution where each site is assigned exactly one route (which goes back and forth).
+
+Evaluating this for CVRPLIB sample data yields the following graph.
+
+```{r perf_scale_based_graph, echo=FALSE}
+ggMarginal(
+  result |>
+    ggplot(aes(x = n_site, y = clarke_wright_perf_xi, color = group)) +
+    geom_point(alpha = 0.6, size = 3) +
+    scale_y_continuous(
+      name = "Clarke-Wright Performance",
+      labels = scales::label_percent()
+    ) +
+    scale_x_continuous(
+      name = "Number of demanding sites",
+      position = "bottom"
+    ) +
+    scale_colour_discrete(name = "CVRPLIB data group") +
+    theme_bw() +
+    theme(legend.position = "bottom"),
+  type = "boxplot",
+  margins = "y",
+  list(alpha = 0.6),
+  groupFill = TRUE
+)
+```
+
+## Relative performance $\rho$
+
+We can also simply measure how far the optimal solution is away from the Clarke-Wright solution relative to the Clarke-Wright solution itself. $$\rho := 1 - \frac{c - o}{c}\,.$$ The value $\rho$ measures how much saving we missed by using the Clarke-Wright solution instead of the optimal solution.
+
+```{r perf_rel_graph, echo = FALSE}
+ggMarginal(
+  result |>
+    ggplot(aes(x = n_site, y = clarke_wright_perf_rho, color = group)) +
+    geom_point(alpha = 0.6, size = 3) +
+    scale_y_continuous(
+      name = "Clarke-Wright Performance",
+      labels = scales::label_percent()
+    ) +
+    scale_x_continuous(
+      name = "Number of demanding sites",
+      position = "bottom"
+    ) +
+    scale_colour_discrete(name = "CVRPLIB data group") +
+    theme_bw() +
+    theme(legend.position = "bottom"),
+  type = "boxplot",
+  margins = "y",
+  list(alpha = 0.6),
+  groupFill = TRUE
+)
+```
