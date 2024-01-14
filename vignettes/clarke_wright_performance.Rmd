@@ -41,25 +41,25 @@ In this vignette we discuss performance benchmarks of the Clarke-Wright algorith
 
 ### The problem instance data
 
-The problem instances we are basing our measurements on are provided by by [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/) and can be divided into five groups[^1] of different characterists:
+The problem instances we are basing our measurements on are provided by by [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/) and can be divided into five groups[^1] of different characteristics:
 
 [^1]: The naming is directly taken from [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/)
 
--   A - Augerat, 1995 (27 instances)
+-   Augerat A, 1995 (27 instances)
 
--   B - Augerat, 1995 (23 instances)
+-   Augerat B, 1995 (23 instances)
 
--   E - Christofides and Eilon, 1969 (13 instances)
+-   Christofides and Eilon, 1969 (13 instances)
 
--   F - Fisher, 1994 (3 instances)
+-   Fisher, 1994 (3 instances)
 
--   Tai - Rochat and Taillard, 1995 (12 instances)
+-   Rochat and Taillard, 1995 (12 instances)
 
 The data provides the problem instance as well as the optimal solution.
 
 ## Relation to optimal and trivial solution
 
-The idea this performance definition is to measure where the Clarke-Wright solution sits in between the optimal solution and the trivial solution[^2]. Let $\gamma$ be the cost of the Clarke-Wright solution, and $\omega$ the optimal solution, and $\alpha$ the cost of the trivial solution. The measure $\xi$ is defined by $$\xi := 1 - \frac{\gamma - \omega}{\alpha - \omega}\,.$$ The measure can move between zero and 1. It is zero if the Clarke-Wright solution is the trivial solution, and it is 1 if the Clarke-Wright solution is the optimal solution.
+The idea of this indicator is to measure where the Clarke-Wright solution sits in between the optimal solution and the trivial solution[^2]. Let $\gamma$ be the cost of the Clarke-Wright solution, $\omega$ the cost of the optimal solution, and $\alpha$ the cost of the trivial solution. The measure $\xi$ is defined to be $$\xi := 1 - \frac{\gamma - \omega}{\alpha - \omega}\,.$$ The measure can move between zero and 1. It is zero if the solution is the trivial solution, and it is one if the solution is the optimal solution.
 
 [^2]: By trivial solution we mean the solution where each site is assigned exactly one route (which goes back and forth).
 
@@ -100,7 +100,7 @@ The mean value over all problem instances is $\overline{\xi}=`r xi_mean`\%$.
 
 ## Relative deviation of optimal solution
 
-We can also simply measure how far the optimal solution is away from the Clarke-Wright solution relative to the Clarke-Wright solution itself. $$\rho := \frac{\gamma - \Omega}{\gamma}\,.$$ The value $\rho$ measures how much savings we miss by using the Clarke-Wright solution instead of the optimal solution.
+We can also simply measure the relative deviation of the Clarke-Wright cost to the optimal cost, $$\rho := \frac{\gamma - \Omega}{\gamma}\,,$$ which measures how much savings we miss by using the Clarke-Wright solution instead of the optimal solution.
 
 ```{r perf_rel_graph, echo = FALSE}
 ggMarginal(
