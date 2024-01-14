@@ -111,7 +111,7 @@ plot(solution)
 
 <img src="man/figures/README-example_plot-1.png" width="100%" />
 
-## Benchmarks
+## Runtime Benchmarks
 
 The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz
 CPU, using the R package [bench](https://bench.r-lib.org/).

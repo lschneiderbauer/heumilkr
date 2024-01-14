@@ -84,7 +84,7 @@ A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for the res
 plot(solution)
 ```
 
-## Benchmarks
+## Runtime Benchmarks
 
 ```{r benchmark_calc, echo=FALSE, message=FALSE, warning=FALSE}
 library(bench) # we load that so that the below gets correctly formatted
