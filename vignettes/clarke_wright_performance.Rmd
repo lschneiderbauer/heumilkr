@@ -22,66 +22,112 @@ library(ggplot2)
 library(ggExtra)
 
 result <- readRDS("perf.rds")
+
+rho_mean <- round(100 * mean(result$clarke_wright_perf_rho), 1)
+xi_mean <- round(100 * mean(result$clarke_wright_perf_xi), 1)
+
+description <-
+  data.frame(
+    group = c("A", "B", "E", "F", "tai"),
+    group_desc = c(
+      "Augerat A, 1995", "Augerat B, 1995",
+      "Christofides and Eilon, 1969", "Fisher, 1994",
+      "Rochatand Taillard, 1995"
+    )
+  )
 ```
 
-In this vignette we discuss performance benchmarks of the Clarke-Wright algorithm implemented in this package by comparing the Clarke-Wright solutions of a set of problem instances (provided by [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/)) with their optimal value.
+In this vignette we discuss performance benchmarks of the Clarke-Wright algorithm implemented in this package by comparing the Clarke-Wright solutions of a set of problem instances with their optimal value.
 
-We focus on two performance measures, which we call "scale-based performance" and simply "relative performance".
+### The problem instance data
 
-## Scale based performance $\xi$
+The problem instances we are basing our measurements on are provided by by [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/) and can be divided into five groups[^1] of different characterists:
 
-The idea of the scale based performance measure is to measure where the Clarke-Wright solution is compared to both, the optimal solution, and the trivial solution[^1]. Let $c$ be the cost of the Clarke-Wright solution, and $\omega$ the optimal solution, and $\alpha$ the cost of the trivial solution. The measure $\xi$ is defined by $$\xi := 1 - \frac{c - \omega}{\alpha - \omega}\,.$$ The measure can move between zero and 1. It is zero if the Clarke-Wright solution is the trivial solution, and it is 1 if the Clarke-Wright solution is the optimal solution.
+[^1]: The naming is directly taken from [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/)
 
-[^1]: By trivial solution we mean the solution where each site is assigned exactly one route (which goes back and forth).
+-   A - Augerat, 1995 (27 instances)
+
+-   B - Augerat, 1995 (23 instances)
+
+-   E - Christofides and Eilon, 1969 (13 instances)
+
+-   F - Fisher, 1994 (3 instances)
+
+-   Tai - Rochat and Taillard, 1995 (12 instances)
+
+The data provides the problem instance as well as the optimal solution.
+
+## Relation to optimal and trivial solution
+
+The idea this performance definition is to measure where the Clarke-Wright solution sits in between the optimal solution and the trivial solution[^2]. Let $\gamma$ be the cost of the Clarke-Wright solution, and $\omega$ the optimal solution, and $\alpha$ the cost of the trivial solution. The measure $\xi$ is defined by $$\xi := 1 - \frac{\gamma - \omega}{\alpha - \omega}\,.$$ The measure can move between zero and 1. It is zero if the Clarke-Wright solution is the trivial solution, and it is 1 if the Clarke-Wright solution is the optimal solution.
+
+[^2]: By trivial solution we mean the solution where each site is assigned exactly one route (which goes back and forth).
 
 Evaluating this for CVRPLIB sample data yields the following graph.
 
 ```{r perf_scale_based_graph, echo=FALSE}
 ggMarginal(
-  result |>
-    ggplot(aes(x = n_site, y = clarke_wright_perf_xi, color = group)) +
+  merge(
+    result,
+    description,
+    by = "group"
+  ) |>
+    ggplot(aes(x = n_site, y = clarke_wright_perf_xi,
+               color = group_desc)) +
     geom_point(alpha = 0.6, size = 3) +
     scale_y_continuous(
-      name = "Clarke-Wright Performance",
-      labels = scales::label_percent()
+      name = "Optimality vs. triviality",
+      labels = scales::label_percent(),
+      position = "left"
     ) +
     scale_x_continuous(
       name = "Number of demanding sites",
       position = "bottom"
     ) +
-    scale_colour_discrete(name = "CVRPLIB data group") +
+    scale_colour_discrete(name = "CVRPLIB data set") +
     theme_bw() +
-    theme(legend.position = "bottom"),
+    theme(legend.position = "bottom") +
+    guides(color = guide_legend(nrow = 2)),
   type = "boxplot",
   margins = "y",
   list(alpha = 0.6),
   groupFill = TRUE
 )
+
 ```
 
-## Relative performance $\rho$
+The mean value over all problem instances is $\overline{\xi}=`r xi_mean`\%$.
 
-We can also simply measure how far the optimal solution is away from the Clarke-Wright solution relative to the Clarke-Wright solution itself. $$\rho := \frac{c - \Omega}{c}\,.$$ The value $\rho$ measures how much saving we missed by using the Clarke-Wright solution instead of the optimal solution.
+## Relative deviation of optimal solution
+
+We can also simply measure how far the optimal solution is away from the Clarke-Wright solution relative to the Clarke-Wright solution itself. $$\rho := \frac{\gamma - \Omega}{\gamma}\,.$$ The value $\rho$ measures how much savings we miss by using the Clarke-Wright solution instead of the optimal solution.
 
 ```{r perf_rel_graph, echo = FALSE}
 ggMarginal(
-  result |>
-    ggplot(aes(x = n_site, y = clarke_wright_perf_rho, color = group)) +
+  merge(
+    result,
+    description,
+    by = "group"
+  ) |>
+    ggplot(aes(x = n_site, y = clarke_wright_perf_rho, color = group_desc)) +
     geom_point(alpha = 0.6, size = 3) +
     scale_y_continuous(
-      name = "Clarke-Wright Performance",
+      name = "Relative loss of savings",
       labels = scales::label_percent()
     ) +
     scale_x_continuous(
       name = "Number of demanding sites",
       position = "bottom"
     ) +
-    scale_colour_discrete(name = "CVRPLIB data group") +
+    scale_colour_discrete(name = "CVRPLIB data set") +
     theme_bw() +
-    theme(legend.position = "bottom"),
+    theme(legend.position = "bottom") +
+    guides(color = guide_legend(nrow = 2)),
   type = "boxplot",
   margins = "y",
   list(alpha = 0.6),
   groupFill = TRUE
 )
 ```
+
+The mean value over all problem instances is $\overline{\rho}=`r rho_mean`\%$, i.e. on average, we miss out on around $`r rho_mean`\%$ savings taking the Clarke-Wright solution compared to the optimal one.
