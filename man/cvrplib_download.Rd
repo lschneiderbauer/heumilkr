@@ -2,7 +2,7 @@
 % Please edit documentation in R/cvrplib.R
 \name{cvrplib_download}
 \alias{cvrplib_download}
-\title{CVRPLIB Problem Instance Downloader}
+\title{CVRPLIB problem instance downloader}
 \usage{
 cvrplib_download(qualifier)
 }
