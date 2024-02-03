@@ -10,7 +10,7 @@ cvrplib_ls()
 A vector of data set qualifiers which can be used with \code{\link[=cvrplib_download]{cvrplib_download()}}.
 }
 \description{
-Scraps the CVRPLIB website to look for available data sets. The function call
+Scrapes the CVRPLIB website to look for available data sets. The function call
 can take some time.
 }
 \seealso{

@@ -3,7 +3,7 @@
 \docType{data}
 \name{cvrplib_A}
 \alias{cvrplib_A}
-\title{CVRPLIB - CVRP instance data}
+\title{CVRP instance data by Augerat, 1995}
 \format{
 \subsection{\code{cvrplib_A}}{
 
@@ -19,5 +19,8 @@ cvrplib_A
 }
 \description{
 A collection of CVRP instances by Augerat, 1995.
+See \href{http://vrp.atd-lab.inf.puc-rio.br}{CBRPLIB} for visualizations of the
+instances and their solutions as well as a multitude of alternative instance
+data.
 }
 \keyword{datasets}

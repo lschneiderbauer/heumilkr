@@ -116,8 +116,8 @@ cvrplib_url <- "http://vrp.atd-lab.inf.puc-rio.br/media/com_vrp/instances/"
 
 #' List available CVRPLIB online data
 #'
-#' Scraps the CVRPLIB website to look for available data sets. The function call
-#' can take some time.
+#' Scrapes the CVRPLIB website to look for available data sets.
+#' This function call can take some time.
 #'
 #' @return
 #'  A vector of data set qualifiers which can be used with [cvrplib_download()].
@@ -173,7 +173,7 @@ extract_cost <- function(content) {
   unlist(regmatches(content, regexec(regexp, content)))[[2]]
 }
 
-#' CVRPLIB Problem Instance Downloader
+#' CVRPLIB problem instance downloader
 #'
 #' [CVRLIB](http://vrp.atd-lab.inf.puc-rio.br/) offers a selection of
 #' CVRP problem instances. This function downloads the instance data and

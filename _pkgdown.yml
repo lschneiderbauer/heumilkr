@@ -5,19 +5,19 @@ reference:
 - title: "Clarke-Wright algorithm"
   desc: >
     Functions for applying the Clarke-Wright algorithm either to custom
-    input or to CVRPLIB instance data.
+    input or to CVRPLIB instance data
   contents:
   - starts_with("clarke_wright")
 - title: "Costs and Savings"
   desc: >
-    Helper functions to retrieve costs as well as savings from CVRP solutions.
+    Helper functions to retrieve costs as well as savings from CVRP solutions
   contents:
   - starts_with("milkr_")
 - title: "Handling CVRPLIB data"
-  desc: "Functions for listing and downloading CVRPLIB instance data."
+  desc: "Functions for listing and downloading CVRPLIB instance data"
   contents:
   - has_concept("cvrplib")
-- subtitle: "A selection of CVRPLIB problem instance data"
+- subtitle: "Selected problem instances from CVRPLIB"
   contents:
   - starts_with("cvrplib")
   - -has_concept("cvrplib")

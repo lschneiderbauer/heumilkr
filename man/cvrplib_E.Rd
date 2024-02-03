@@ -3,7 +3,7 @@
 \docType{data}
 \name{cvrplib_E}
 \alias{cvrplib_E}
-\title{CVRPLIB - CVRP instance data}
+\title{CVRP instance data by Christofides and Eilon, 1969}
 \format{
 \subsection{\code{cvrplib_E}}{
 
@@ -19,5 +19,8 @@ cvrplib_E
 }
 \description{
 A collection of CVRP instances by Christofides and Eilon, 1969.
+See \href{http://vrp.atd-lab.inf.puc-rio.br}{CBRPLIB} for visualizations of the
+instances and their solutions as well as a multitude of alternative instance
+data.
 }
 \keyword{datasets}

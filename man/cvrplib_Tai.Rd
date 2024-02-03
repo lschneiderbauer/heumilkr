@@ -3,7 +3,7 @@
 \docType{data}
 \name{cvrplib_Tai}
 \alias{cvrplib_Tai}
-\title{CVRPLIB - CVRP instance data}
+\title{CVRP instance data by Rochat and Taillard, 1995}
 \format{
 \subsection{\code{cvrplib_Tai}}{
 
@@ -19,5 +19,8 @@ cvrplib_Tai
 }
 \description{
 A collection of CVRP instances by Rochat and Taillard, 1995.
+See \href{http://vrp.atd-lab.inf.puc-rio.br}{CBRPLIB} for visualizations of the
+instances and their solutions as well as a multitude of alternative instance
+data.
 }
 \keyword{datasets}
