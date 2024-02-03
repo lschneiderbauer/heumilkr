@@ -179,6 +179,20 @@ test_that("Having NA demand values aborts", {
   )
 })
 
+test_that("Having NA dist values aborts", {
+  demand <- 3
+  dist_mat <- c(0, NA, NA, 0) # note those NAs here
+  dim(dist_mat) <- c(2, 2)
+
+  expect_error(
+    clarke_wright(
+      demand,
+      as.dist(dist_mat),
+      data.frame(n = NA_integer_, caps = 6)
+    )
+  )
+})
+
 test_that("README example result is preserved.", {
   set.seed(42)
   demand <- runif(20, 5, 15)

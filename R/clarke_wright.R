@@ -90,6 +90,7 @@ clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
   stopifnot(all(!is.na(demand)))
   stopifnot(inherits(distances, "dist"))
   stopifnot(attr(distances, "Size") == length(demand) + 1)
+  stopifnot(all(!is.na(distances)))
   stopifnot(is.data.frame(vehicles))
   stopifnot(c("n", "caps") %in% colnames(vehicles))
   stopifnot(nrow(vehicles) > 0)
