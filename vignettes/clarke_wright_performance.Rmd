@@ -100,7 +100,7 @@ The mean value over all problem instances is $\overline{\xi}=`r xi_mean`\%$.
 
 ## Relative deviation of optimal solution
 
-We can also simply measure the relative deviation of the Clarke-Wright cost to the optimal cost, $$\rho := \frac{\gamma - \Omega}{\gamma}\,,$$ which measures how much savings we miss by using the Clarke-Wright solution instead of the optimal solution.
+We can also simply measure the relative deviation of the Clarke-Wright cost to the optimal cost, $$\rho := \frac{\gamma - \omega}{\gamma}\,,$$ which measures how much savings we miss by using the Clarke-Wright solution instead of the optimal solution.
 
 ```{r perf_rel_graph, echo = FALSE}
 ggMarginal(
