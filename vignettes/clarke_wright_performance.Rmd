@@ -41,7 +41,7 @@ In this vignette we discuss performance benchmarks of the Clarke-Wright algorith
 
 ### The problem instance data
 
-The problem instances we are basing our measurements on are provided by by [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/) and can be divided into five groups[^1] of different characteristics:
+The problem instances we are basing our measurements on are provided courtesy of [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/) and can be divided into five groups[^1] of different characteristics:
 
 [^1]: The naming is directly taken from [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/)
 

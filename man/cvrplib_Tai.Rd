@@ -18,8 +18,9 @@ can be directly fed into solver algorithm, e.g. via \code{\link[=clarke_wright_c
 cvrplib_Tai
 }
 \description{
-A collection of CVRP instances by Rochat and Taillard, 1995.
-See \href{http://vrp.atd-lab.inf.puc-rio.br}{CBRPLIB} for visualizations of the
+A collection of CVRP instances by Rochat and Taillard, 1995, provided courtesy of
+\href{http://vrp.atd-lab.inf.puc-rio.br}{CBRPLIB}. See
+\href{http://vrp.atd-lab.inf.puc-rio.br}{CBRPLIB} for visualizations of the
 instances and their solutions as well as a multitude of alternative instance
 data.
 }

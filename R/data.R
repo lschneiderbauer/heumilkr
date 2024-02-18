@@ -1,7 +1,8 @@
 #' CVRP instance data by Augerat, 1995
 #'
-#' A collection of CVRP instances by Augerat, 1995.
-#' See [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
+#' A collection of CVRP instances by Augerat, 1995, provided courtesy of
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br). See
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
 #' instances and their solutions as well as a multitude of alternative instance
 #' data.
 #'
@@ -14,8 +15,9 @@
 
 #' CVRP instance data by Augerat, 1995
 #'
-#' A collection of CVRP instances by Augerat, 1995.
-#' See [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
+#' A collection of CVRP instances by Augerat, 1995, provided courtesy of
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br). See
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
 #' instances and their solutions as well as a multitude of alternative instance
 #' data.
 #'
@@ -28,8 +30,9 @@
 
 #' CVRP instance data by Christofides and Eilon, 1969
 #'
-#' A collection of CVRP instances by Christofides and Eilon, 1969.
-#' See [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
+#' A collection of CVRP instances by Christofides and Eilon, 1969, provided courtesy of
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br). See
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
 #' instances and their solutions as well as a multitude of alternative instance
 #' data.
 #'
@@ -42,8 +45,9 @@
 
 #' CVRP instance data by Fisher, 1994
 #'
-#' A collection of CVRP instances by Fisher, 1994.
-#' See [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
+#' A collection of CVRP instances by Fisher, 1994, provided courtesy of
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br). See
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
 #' instances and their solutions as well as a multitude of alternative instance
 #' data.
 #'
@@ -56,8 +60,9 @@
 
 #' CVRP instance data by Rochat and Taillard, 1995
 #'
-#' A collection of CVRP instances by Rochat and Taillard, 1995.
-#' See [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
+#' A collection of CVRP instances by Rochat and Taillard, 1995, provided courtesy of
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br). See
+#' [CBRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
 #' instances and their solutions as well as a multitude of alternative instance
 #' data.
 #'
