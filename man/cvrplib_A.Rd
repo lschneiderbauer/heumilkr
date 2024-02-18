@@ -19,8 +19,8 @@ cvrplib_A
 }
 \description{
 A collection of CVRP instances by Augerat, 1995, provided courtesy of
-\href{http://vrp.atd-lab.inf.puc-rio.br}{CBRPLIB}. See
-\href{http://vrp.atd-lab.inf.puc-rio.br}{CBRPLIB} for visualizations of the
+\href{http://vrp.atd-lab.inf.puc-rio.br}{CVRPLIB}. See
+\href{http://vrp.atd-lab.inf.puc-rio.br}{CVRPLIB} for visualizations of the
 instances and their solutions as well as a multitude of alternative instance
 data.
 }
