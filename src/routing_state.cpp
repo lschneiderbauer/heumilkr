@@ -267,8 +267,13 @@ bool routing_state::relink_best()
     double new_load = load[a] + load[b];
 
     // return two vehicles
-    vehicle_avail[site_vehicle[a]] += 1;
-    vehicle_avail[site_vehicle[b]] += 1;
+    if (vehicle_avail[site_vehicle[a]] < INT_MAX) {
+      vehicle_avail[site_vehicle[a]] += 1;
+    }
+    if (vehicle_avail[site_vehicle[b]] < INT_MAX) {
+      vehicle_avail[site_vehicle[b]] += 1;
+    }
+
     // take one vehicle
     vehicle_avail[vehicle] -= 1;
 

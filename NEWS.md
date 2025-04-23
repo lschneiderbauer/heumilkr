@@ -10,6 +10,8 @@
 
     -   Fixed a bug where vehicle restrictions would not be applied correctly if two tours were linked whose end points did not have vehicle restrictions maintained, but the tours included other edges with vehicle restrictions.
 
+    -   Fixed integer overflow bugs which caused the R session to crash in certain circumstances.
+
 # heumilkr 0.2.0
 
 ## Enhancements
