@@ -1,10 +1,9 @@
 pandoc: 3.1.11
-pkgdown: 2.0.7
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   clarke_wright_performance: clarke_wright_performance.html
-last_built: 2024-04-01T13:51Z
+last_built: 2025-04-23T19:27Z
 urls:
   reference: https://lschneiderbauer.github.io/heumilkr/reference
   article: https://lschneiderbauer.github.io/heumilkr/articles
-
