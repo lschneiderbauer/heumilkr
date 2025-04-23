@@ -100,7 +100,7 @@ milkr_saving <- function(solution, relative = FALSE) {
     sum(
       vapply(
         1:(dim(d)[[2]] - 1),
-        \(idx) 2 * d[1, idx + 1],
+        function(idx) 2 * d[1, idx + 1],
         FUN.VALUE = 1.
       )
     )

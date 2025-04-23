@@ -60,7 +60,7 @@ plot_data <- function(x) {
         by(
           x,
           x$run,
-          \(y) data.frame(
+          function(y) data.frame(
             run = unique(y$run),
             order = 1 + max(y$order),
             site = 0

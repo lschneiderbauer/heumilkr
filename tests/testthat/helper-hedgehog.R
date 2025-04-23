@@ -7,7 +7,7 @@ gen.demand_net <- function(max_sites = 10L) {
         demand = gen.demand(n_sites),
         distances = hedgehog::gen.with(
           gen.pos(n_sites),
-          \(pos) dist(pos, method = "euclidean")
+          function(pos) dist(pos, method = "euclidean")
         )
       )
     }
@@ -62,6 +62,6 @@ gen.coords <- function(n_sites) {
       ),
       half_plane = hedgehog::gen.element(c(1, -1))
     ),
-    \(g) c(0, g$half_plane * g$positives)
+    function(g) c(0, g$half_plane * g$positives)
   )
 }

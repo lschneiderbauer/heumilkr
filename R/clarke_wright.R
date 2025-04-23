@@ -152,7 +152,7 @@ clarke_wright_stepwise <- function(demand, distances, vehicles,
       `_heumilkr_cpp_clarke_wright_stepwise`, as.numeric(demand), distances,
       vehicles$n, vehicles$caps, restrictions$site, restrictions$vehicle
     ),
-    \(x) heumilkr_solution(
+    function(x) heumilkr_solution(
       x,
       distances = distances
     )
