@@ -2,19 +2,23 @@
 % Please edit documentation in R/cvrplib.R
 \name{clarke_wright_cvrplib}
 \alias{clarke_wright_cvrplib}
-\title{Applying \code{\link[=clarke_wright]{clarke_wright()}} to CVRPLIB data}
+\title{Apply \code{\link[=clarke_wright]{clarke_wright()}} to CVRPLIB data}
 \usage{
 clarke_wright_cvrplib(instance)
 }
 \arguments{
-\item{instance}{A "\code{heumilkr_solution}". See \code{\link[=cvrplib_download]{cvrplib_download()}} or bundled CVRPLIB data
+\item{instance}{A "\code{cvrplib_instance}" object. See \code{\link[=cvrplib_download]{cvrplib_download()}} or bundled CVRPLIB data
 like \link{cvrplib_A}.}
 }
 \value{
 A "\code{heumilkr_solution}" object. See \code{\link[=clarke_wright]{clarke_wright()}}.
 }
 \description{
-Applying \code{\link[=clarke_wright]{clarke_wright()}} to CVRPLIB data
+Apply \code{\link[=clarke_wright]{clarke_wright()}} to CVRPLIB data
+}
+\examples{
+clarke_wright_cvrplib(cvrplib_A[[1]])
+
 }
 \seealso{
 Other cvrplib: 

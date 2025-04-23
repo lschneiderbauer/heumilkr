@@ -59,10 +59,10 @@ print.cvrplib_instance <- function(x, ...) {
   cat(format(x, ...), sep = "\n")
 }
 
-#' Applying [clarke_wright()] to CVRPLIB data
+#' Apply [clarke_wright()] to CVRPLIB data
 #'
 #' @param instance
-#'  A "`heumilkr_solution`". See [cvrplib_download()] or bundled CVRPLIB data
+#'  A "`cvrplib_instance`" object. See [cvrplib_download()] or bundled CVRPLIB data
 #'  like [cvrplib_A].
 #'
 #' @return
@@ -70,6 +70,9 @@ print.cvrplib_instance <- function(x, ...) {
 #'
 #' @family cvrplib
 #' @concept cvrplib
+#'
+#' @examples
+#' clarke_wright_cvrplib(cvrplib_A[[1]])
 #'
 #' @export
 clarke_wright_cvrplib <- function(instance) {
