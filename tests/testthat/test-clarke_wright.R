@@ -136,12 +136,41 @@ test_that("Vehicles are not assigned to restricted sites", {
         )
 
       expect_false(
-        0 %in% res[res$site == 0]$vehicle
+        0 %in% res[res$site == 0, ]$vehicle
       )
     }
   )
 })
 
+
+test_that("Vehicles are not assigned to restricted sites: edge case", {
+  res <-
+    clarke_wright(
+      demand = c(6.0, 8.0, 6.5, 11.5, 5.5),
+      distances =
+        as.dist(
+          matrix(c(
+            0.000, 44.2920, 3.554, 41.088, 32.0590, 28.355,
+            44.292, 0.0000, 46.886, 87.104, 81.9915, 18.932,
+            3.554, 46.8860, 0.000, 36.731, 27.7560, 30.949,
+            41.088, 87.1040, 36.731, 0.000, 7.7130, 67.273,
+            32.059, 81.9915, 27.756, 7.713, 0.0000, 58.298,
+            28.355, 18.9320, 30.949, 67.273, 58.2980, 0.000
+          ), nrow = 6)
+        ),
+      vehicles =
+        data.frame(
+          caps = c(38, 33),
+          n = NA_integer_
+        ),
+      restrictions = data.frame(
+        site = 3L,
+        vehicle = 0L
+      )
+    )
+
+  expect_false(0 %in% res[res$site == 3, ]$vehicle)
+})
 
 test_that("Not having enough vehicles is handled gracefully", {
   demand <- c(15, 3, 1)
