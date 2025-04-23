@@ -49,7 +49,12 @@ single source.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">clarke_wright</span><span class="op">(</span><span class="va">demand</span>, <span class="va">distances</span>, <span class="va">vehicles</span>, restrictions <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">clarke_wright</span><span class="op">(</span></span>
+<span>  <span class="va">demand</span>,</span>
+<span>  <span class="va">distances</span>,</span>
+<span>  <span class="va">vehicles</span>,</span>
+<span>  restrictions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>vehicle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="op">)</span>, site <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -97,7 +102,7 @@ particular sites in the form of a blacklist.
 The data frame is expected to have two columns:</p><ul><li><p><code>vehicle</code> - The vehicle type index.</p></li>
 <li><p><code>site</code> - The site index (i.e. the index of the <code>demand</code> vector)</p></li>
 </ul><p>Each row defines a restriction: vehicle type <code>vehicle</code> can not approach site
-<code>site</code>. Defaults to <code>NULL</code>, i.e. no restrictions are enforced.</p></dd>
+<code>site</code>. Defaults to an empty <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code>, i.e. no restrictions are enforced.</p></dd>
 
 </dl></div>
     <div class="section level2">

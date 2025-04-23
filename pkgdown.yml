@@ -3,7 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   clarke_wright_performance: clarke_wright_performance.html
-last_built: 2025-04-23T19:27Z
+last_built: 2025-04-23T19:32Z
 urls:
   reference: https://lschneiderbauer.github.io/heumilkr/reference
   article: https://lschneiderbauer.github.io/heumilkr/articles
