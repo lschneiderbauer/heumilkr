@@ -4,7 +4,12 @@
 \alias{clarke_wright}
 \title{Clarke-Wright algorithm, a Capacitated Vehicle Routing Problem solver}
 \usage{
-clarke_wright(demand, distances, vehicles, restrictions = NULL)
+clarke_wright(
+  demand,
+  distances,
+  vehicles,
+  restrictions = data.frame(vehicle = integer(), site = integer())
+)
 }
 \arguments{
 \item{demand}{A numeric vector consisting of "demands" indexed by sites.
@@ -49,7 +54,7 @@ The data frame is expected to have two columns:
 }
 
 Each row defines a restriction: vehicle type \code{vehicle} can not approach site
-\code{site}. Defaults to \code{NULL}, i.e. no restrictions are enforced.}
+\code{site}. Defaults to an empty \code{\link[=data.frame]{data.frame()}}, i.e. no restrictions are enforced.}
 }
 \value{
 Returns a "\code{heumilkr_solution}" object, a \code{\link[=data.frame]{data.frame()}} with one row per
