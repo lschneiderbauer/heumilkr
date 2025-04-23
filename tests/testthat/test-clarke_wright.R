@@ -193,6 +193,25 @@ test_that("Having NA dist values aborts", {
   )
 })
 
+test_that("Example that previously caused integer overflow does not crash anymore", {
+  f_demand <- 399
+  dist_matrix <-
+    structure(17.84195,
+      Labels = c("100402", "40238"), Size = 2L,
+      class = "dist", Diag = FALSE, Upper = FALSE
+    )
+
+  vehicle_types <-
+    data.frame(
+      n = c(NA_integer_, NA_integer_),
+      caps = c(33, 38)
+    )
+
+  expect_no_error(
+    clarke_wright(f_demand, dist_matrix, vehicle_types)
+  )
+})
+
 test_that("README example result is preserved.", {
   set.seed(42)
   demand <- runif(20, 5, 15)

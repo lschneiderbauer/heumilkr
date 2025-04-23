@@ -7,6 +7,7 @@
 #include <map>
 #include <algorithm>
 #include <stdexcept>
+#include <limits.h>
 
 // we create a symmat that is one size smaller than the distances
 // (only calculate for sites)
@@ -98,10 +99,16 @@ int select_vehicle(const std::vector<int> &vehicle_avail,
     int vehicle = std::distance(vehicle_caps.begin(), it);
 
     int avail = vehicle_avail[vehicle];
-    // printf("veh avail %i: %d\n", vehicle, avail);
+
+    // if vehicle is already in use at this route we artificially increase
+    // availability by one, since we can reuse the same vehicle.
     if (site_vehicle[a] == vehicle || site_vehicle[b] == vehicle)
     {
-      avail += 1;
+      // check for integer overflow:
+      // if vehicle number is "infinite" there is no need to increase avail.
+      if (avail < INT_MAX) {
+        avail += 1;
+      }
     }
 
     if (avail >= 1 &&
@@ -274,7 +281,10 @@ bool routing_state::opt_vehicles()
     int site = *((*cyc).begin());
 
     // free current vehicle before we look for the next best one
-    vehicle_avail[site_vehicle[site]] += 1;
+    // only free if not "infinite"
+    if (vehicle_avail[site_vehicle[site]] < INT_MAX) {
+      vehicle_avail[site_vehicle[site]] += 1;
+    }
 
     // unionize vehicle restrictions
     std::unordered_set<int> restr_vehicles;
