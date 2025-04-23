@@ -12,6 +12,8 @@
 
     -   Fixed integer overflow bugs which caused the R session to crash in certain circumstances.
 
+-   `plot()` / `autoplot()`: plotting of a milk run result with a single site now also works.
+
 # heumilkr 0.2.0
 
 ## Enhancements

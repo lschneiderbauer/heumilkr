@@ -1,4 +1,3 @@
-#' @importFrom stats cmdscale
 #' @importFrom ggplot2 autoplot ggplot aes geom_point geom_path
 #'                              scale_color_discrete
 #'                              scale_shape_identity
@@ -39,12 +38,22 @@ plot.heumilkr_solution <- function(x, ...) {
   print(autoplot(x, ...))
 }
 
+#' @importFrom stats cmdscale
 plot_data <- function(x) {
   stopifnot(inherits(x, "heumilkr_solution"))
 
   # recalculate positions
-  pos <- as.data.frame(cmdscale(attr(x, "distances")))
-  colnames(pos) <- c("pos_x", "pos_y")
+  if (length(attr(x, "distances")) <= 1) {
+    # special case when we only have two positions:
+    # effectively a one dimensional problem
+    # we embed it in 2D in the y = 0 line.
+    pos <- as.data.frame(cmdscale(attr(x, "distances"), k = 1))
+    colnames(pos) <- c("pos_x")
+    pos$pos_y <- 0
+  } else {
+    pos <- as.data.frame(cmdscale(attr(x, "distances"), k = 2))
+    colnames(pos) <- c("pos_x", "pos_y")
+  }
   pos$site <- seq.int(nrow(pos)) - 1
 
   runs <-
