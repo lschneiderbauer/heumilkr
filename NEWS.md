@@ -4,6 +4,12 @@
 
 -   `clarke_wright()`: The default argument of `restrictions` changed from `NULL` to an empty data frame. Passing `restrictions = NULL` now fails.
 
+## Bugfixes
+
+-   `clarke_wright()`:
+
+    -   Fixed a bug where vehicle restrictions would not be applied correctly if two tours were linked whose end points did not have vehicle restrictions maintained, but the tours included other edges with vehicle restrictions.
+
 # heumilkr 0.2.0
 
 ## Enhancements

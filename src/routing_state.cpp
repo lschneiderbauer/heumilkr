@@ -92,6 +92,7 @@ int select_vehicle(const std::vector<int> &vehicle_avail,
                    const std::vector<int> &site_vehicle,
                    const std::vector<double> &load,
                    const std::vector<std::unordered_set<int>> &restricted_vehicles,
+                   const udg &graph,
                    const int a, const int b)
 {
   for (auto it = vehicle_caps.begin(); it != vehicle_caps.end(); it++)
@@ -111,10 +112,25 @@ int select_vehicle(const std::vector<int> &vehicle_avail,
       }
     }
 
+    bool vehicle_restricted = false;
+
+    // it is not enough to check for vehicle restrictions of the
+    // two sites in question: we need to check restrictions of all sites that are
+    // already on the same tour as those sites.
+    for (auto &site : graph.sites_in_cycle(a)) {
+      vehicle_restricted =
+        vehicle_restricted ||
+          is_vehicle_restricted(restricted_vehicles[site], vehicle);
+    }
+    for (auto &site : graph.sites_in_cycle(b)) {
+      vehicle_restricted =
+        vehicle_restricted ||
+          is_vehicle_restricted(restricted_vehicles[site], vehicle);
+    }
+
     if (avail >= 1 &&
         load[a] + load[b] <= vehicle_caps[vehicle] &&
-        !is_vehicle_restricted(restricted_vehicles[a], vehicle) &&
-        !is_vehicle_restricted(restricted_vehicles[b], vehicle))
+        !vehicle_restricted)
     {
       return vehicle;
     }
@@ -143,7 +159,7 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
       // printf("Link (%d,%d)\n", i, j);
       // printf("orig1 %d\n", graph.links_to_origin(i));
       // printf("orig2 %d\n", graph.links_to_origin(j));
-      // printf("selected vehicle %d\n", select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, i, j));
+      // printf("selected vehicle %d\n", select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, restricted_vehicles, graph, i, j));
       // printf("share cycle %d\n", graph.edges_share_cycle(i, j));
 
       int selected_vehicle;
@@ -152,7 +168,7 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
           !graph.edges_share_cycle(i, j) &&
           (selected_vehicle =
                select_vehicle(vehicle_avail, vehicle_caps, site_vehicle,
-                              load, restricted_vehicles, i, j)) != -1)
+                              load, restricted_vehicles, graph, i, j)) != -1)
       {
 
         if (savings.get(i, j) > max_val)
@@ -236,6 +252,13 @@ bool routing_state::relink_best()
       best_link(savings, load,
                 site_vehicle, vehicle_avail,
                 vehicle_caps, restricted_vehicles, graph);
+
+  // printf("---\n");
+  // printf("Best Link (%d,%d)\n", a, b);
+  // printf("orig1 %d\n", graph.links_to_origin(a));
+  // printf("orig2 %d\n", graph.links_to_origin(b));
+  // printf("selected vehicle %d\n", vehicle);
+  // printf("share cycle %d\n", graph.edges_share_cycle(a, b));
 
   if (!((a == b) && (a == -1)))
   {
@@ -386,6 +409,7 @@ col_types routing_state::runs_as_cols() const
     else // if we did not see it before
     {
       visited_elements.insert({cyc, run_id});
+      // we reorder each run again (by solving the TSP)
       order = tsp_greedy(*cyc, distances);
       run_dist = run_distance(order, routing_state::distances);
 
