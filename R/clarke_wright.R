@@ -51,7 +51,7 @@
 #'  * `site` - The site index (i.e. the index of the `demand` vector)
 #'
 #'  Each row defines a restriction: vehicle type `vehicle` can not approach site
-#'  `site`. Defaults to `NULL`, i.e. no restrictions are enforced.
+#'  `site`. Defaults to an empty [data.frame()], i.e. no restrictions are enforced.
 #'
 #' @return
 #'  Returns a "`heumilkr_solution`" object, a [data.frame()] with one row per
@@ -85,7 +85,11 @@
 #' )
 #'
 #' @export
-clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
+clarke_wright <- function(demand, distances, vehicles,
+                          restrictions = data.frame(
+                            vehicle = integer(),
+                            site = integer()
+                          )) {
   stopifnot(is.numeric(demand))
   stopifnot(all(!is.na(demand)))
   stopifnot(inherits(distances, "dist"))
@@ -97,30 +101,19 @@ clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
   stopifnot(is.integer(vehicles$n))
   stopifnot(is.numeric(vehicles$caps))
   stopifnot(vehicles$caps > 0)
+  stopifnot(is.data.frame(restrictions))
+  stopifnot(c("site", "vehicle") %in% colnames(restrictions))
 
   # replace NAs by maximal machine integer value
   vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max
 
-  if (!is.null(restrictions)) {
-    stopifnot(is.data.frame(restrictions))
-    stopifnot(c("site", "vehicle") %in% colnames(restrictions))
-
-    heumilkr_solution(
-      .Call(
-        `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
-        vehicles$n, vehicles$caps, restrictions$site, restrictions$vehicle
-      ),
-      distances = distances
-    )
-  } else {
-    heumilkr_solution(
-      .Call(
-        `_heumilkr_cpp_clarke_wright_unr`, as.numeric(demand), distances,
-        vehicles$n, vehicles$caps
-      ),
-      distances = distances
-    )
-  }
+  heumilkr_solution(
+    .Call(
+      `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
+      vehicles$n, vehicles$caps, restrictions$site, restrictions$vehicle
+    ),
+    distances = distances
+  )
 }
 
 #' Stepwise Clarke-Wright algorithm, a Capacitated Vehicle Routing
@@ -133,7 +126,11 @@ clarke_wright <- function(demand, distances, vehicles, restrictions = NULL) {
 #' @inheritParams clarke_wright
 #' @seealso [clarke_wright()]
 #' @noRd
-clarke_wright_stepwise <- function(demand, distances, vehicles, restrictions = NULL) {
+clarke_wright_stepwise <- function(demand, distances, vehicles,
+                                   restrictions = data.frame(
+                                     vehicle = integer(),
+                                     site = integer()
+                                   )) {
   stopifnot(is.numeric(demand))
   stopifnot(all(!is.na(demand)))
   stopifnot(inherits(distances, "dist"))
@@ -144,11 +141,8 @@ clarke_wright_stepwise <- function(demand, distances, vehicles, restrictions = N
   stopifnot(is.integer(vehicles$n))
   stopifnot(is.numeric(vehicles$caps))
   stopifnot(vehicles$caps > 0)
-
-  if (!is.null(restrictions)) {
-    stopifnot(is.data.frame(restrictions))
-    stopifnot(c("site", "vehicle") %in% colnames(restrictions))
-  }
+  stopifnot(is.data.frame(restrictions))
+  stopifnot(c("site", "vehicle") %in% colnames(restrictions))
 
   # replace NAs by maximal machine integer value
   vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max

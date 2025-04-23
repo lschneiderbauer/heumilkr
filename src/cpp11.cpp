@@ -13,13 +13,6 @@ extern "C" SEXP _heumilkr_cpp_clarke_wright(SEXP demand, SEXP distances, SEXP n_
   END_CPP11
 }
 // clarke_wright.cpp
-data_frame cpp_clarke_wright_unr(const std::vector<double> & demand, const std::vector<double> & distances, const std::vector<int> & n_res, const std::vector<double> & capacities);
-extern "C" SEXP _heumilkr_cpp_clarke_wright_unr(SEXP demand, SEXP distances, SEXP n_res, SEXP capacities) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(cpp_clarke_wright_unr(cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(demand), cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(distances), cpp11::as_cpp<cpp11::decay_t<const std::vector<int> &>>(n_res), cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(capacities)));
-  END_CPP11
-}
-// clarke_wright.cpp
 list cpp_clarke_wright_stepwise(const std::vector<double> & demand, const std::vector<double> & distances, const std::vector<int> & n_res, const std::vector<double> & capacities, const std::vector<int> & restr_sites, const std::vector<int> & restr_vehicles);
 extern "C" SEXP _heumilkr_cpp_clarke_wright_stepwise(SEXP demand, SEXP distances, SEXP n_res, SEXP capacities, SEXP restr_sites, SEXP restr_vehicles) {
   BEGIN_CPP11
@@ -31,7 +24,6 @@ extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_heumilkr_cpp_clarke_wright",          (DL_FUNC) &_heumilkr_cpp_clarke_wright,          6},
     {"_heumilkr_cpp_clarke_wright_stepwise", (DL_FUNC) &_heumilkr_cpp_clarke_wright_stepwise, 6},
-    {"_heumilkr_cpp_clarke_wright_unr",      (DL_FUNC) &_heumilkr_cpp_clarke_wright_unr,      4},
     {NULL, NULL, 0}
 };
 }

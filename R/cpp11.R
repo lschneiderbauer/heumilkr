@@ -4,10 +4,6 @@ cpp_clarke_wright <- function(demand, distances, n_res, capacities, restr_sites,
   .Call(`_heumilkr_cpp_clarke_wright`, demand, distances, n_res, capacities, restr_sites, restr_vehicles)
 }
 
-cpp_clarke_wright_unr <- function(demand, distances, n_res, capacities) {
-  .Call(`_heumilkr_cpp_clarke_wright_unr`, demand, distances, n_res, capacities)
-}
-
 cpp_clarke_wright_stepwise <- function(demand, distances, n_res, capacities, restr_sites, restr_vehicles) {
   .Call(`_heumilkr_cpp_clarke_wright_stepwise`, demand, distances, n_res, capacities, restr_sites, restr_vehicles)
 }

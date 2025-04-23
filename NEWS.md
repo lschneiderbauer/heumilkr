@@ -1,5 +1,9 @@
 # heumilkr (development version)
 
+## Breaking changes
+
+-   `clarke_wright()`: The default argument of `restrictions` changed from `NULL` to an empty data frame. Passing `restrictions = NULL` now fails.
+
 # heumilkr 0.2.0
 
 ## Enhancements

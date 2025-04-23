@@ -45,19 +45,6 @@ data_frame cpp_clarke_wright(const std::vector<double> &demand,
   return arrvec_to_dataframe(state.runs_as_cols());
 }
 
-[[cpp11::register]]
-data_frame cpp_clarke_wright_unr(const std::vector<double> &demand,
-                                 const std::vector<double> &distances,
-                                 const std::vector<int> &n_res,
-                                 const std::vector<double> &capacities)
-{
-  std::vector<int> restr_sites;
-  std::vector<int> restr_vehicles;
-
-  return cpp_clarke_wright(demand, distances, n_res, capacities,
-                    restr_sites, restr_vehicles);
-}
-
 
 [[cpp11::register]]
 list cpp_clarke_wright_stepwise(const std::vector<double> &demand,
