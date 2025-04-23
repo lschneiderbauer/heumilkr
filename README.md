@@ -123,7 +123,8 @@ of $\sim 12.9ms$.
 
 <img src="man/figures/README-benchmark_runtime-1.png" width="100%" />
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
 <div id="ref-clarke1964" class="csl-entry">
 
