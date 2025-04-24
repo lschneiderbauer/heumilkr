@@ -1,3 +1,17 @@
+#' Create ggplot for a CVRP solution
+#'
+#' The individual runs are distinguished by color.
+#' The demanding site locations are marked with round circles while the
+#' (single) supplying site is depicted as a square.
+#' The line types (solid/dashed/...) are associated to different vehicle types.
+#'
+#' @param object
+#'  A "`heumilkr_solution`" object, typically obtained by [clarke_wright()].
+#'
+#' @param ... Not used.
+#'
+#' @return A ggplot object.
+#'
 #' @importFrom ggplot2 autoplot ggplot aes geom_point geom_path
 #'                              scale_color_discrete
 #'                              scale_shape_identity
@@ -32,6 +46,12 @@ autoplot.heumilkr_solution <- function(object, ...) {
     theme(legend.position = "none")
 }
 
+#' Plot a CVRP solution
+#'
+#' @param x
+#'  A "`heumilkr_solution`" object, typically obtained by [clarke_wright()].
+#' @inheritParams autoplot.heumilkr_solution
+#'
 #' @importFrom graphics plot
 #' @export
 plot.heumilkr_solution <- function(x, ...) {

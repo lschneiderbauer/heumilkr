@@ -8,6 +8,9 @@ reference:
     input or to CVRPLIB instance data
   contents:
   - starts_with("clarke_wright")
+- title: "Plotting"
+  - autoplot.heumilkr_solution
+  - plot.heumilkr_solution
 - title: "Costs and Savings"
   desc: >
     Helper functions to retrieve costs as well as savings from CVRP solutions
