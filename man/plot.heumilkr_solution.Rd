@@ -12,5 +12,17 @@
 \item{...}{Not used.}
 }
 \description{
-Plot a CVRP solution
+Represents the sites and runs on a 2D plane so that the distances between
+sites on the drawn 2D plane correspond to \code{distances} provided to the
+solver \code{clarke_wright()}.
+
+The individual runs are distinguished by color.
+The demanding site locations are marked with round circles while the
+(single) supplying site is depicted as a square.
+The line types (solid/dashed/...) are associated to different vehicle types.
+}
+\details{
+Distance information between sites only determine
+site positions on a 2D plane up to rotations and translations:
+those are fixed arbitrarily.
 }
