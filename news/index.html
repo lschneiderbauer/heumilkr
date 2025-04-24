@@ -41,28 +41,33 @@
 <div class="section level3">
 <h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
 <ul><li>
-<code><a href="../reference/clarke_wright.html">clarke_wright()</a></code>: The default argument of <code>restrictions</code> changed from <code>NULL</code> to an empty data frame. Passing <code>restrictions = NULL</code> now fails.</li>
+<code><a href="../reference/clarke_wright.html">clarke_wright()</a></code>: The default argument of <code>restrictions</code> is changed from <code>NULL</code> to an empty data frame. Passing <code>restrictions = NULL</code> now fails.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bugfixes-development-version">Bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-development-version"></a></h3>
+<h3 id="minor-improvements-and-fixes-development-version">Minor improvements and fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-fixes-development-version"></a></h3>
 <ul><li>
 <p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code>:</p>
-<ul><li><p>Fixed a bug where vehicle restrictions would not be applied correctly if two tours were linked whose end points did not have vehicle restrictions maintained, but the tours included other edges with vehicle restrictions.</p></li>
-<li><p>Fixed integer overflow bugs which caused the R session to crash in certain circumstances.</p></li>
+<ul><li><p>Vehicle restrictions are now correctly applied if two tours are linked whose end points do not have vehicle restrictions maintained, but the tours include other edges with vehicle restrictions.</p></li>
+<li><p>R session does not crash anymore due to integer overflow issues in certain circumstances.</p></li>
 </ul></li>
-<li><p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> / <code>autoplot()</code>: plotting of a milk run result with a single site now also works.</p></li>
+<li>
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> / <code>autoplot()</code></p>
+<ul><li><p>Plotting of a milk run result with a single site now also works.</p></li>
+<li><p>The functions do have reference pages now.</p></li>
+</ul></li>
 </ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="heumilkr-020">heumilkr 0.2.0<a class="anchor" aria-label="anchor" href="#heumilkr-020"></a></h2><p class="text-muted">CRAN release: 2024-04-01</p>
 <div class="section level3">
-<h3 id="enhancements-0-2-0">Enhancements<a class="anchor" aria-label="anchor" href="#enhancements-0-2-0"></a></h3>
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
 <ul><li><p>Add the <code>cvrp_*()</code> function family for handling <a href="http://vrp.atd-lab.inf.puc-rio.br/" class="external-link">CVRPLIB</a> data.</p></li>
 <li><p>New vignette with performance benchmarks: <code><a href="../articles/clarke_wright_performance.html">vignette("clarke_wright_performance")</a></code>.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bugfixes-0-2-0">Bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-0-2-0"></a></h3>
-<ul><li>Fix <code><a href="../reference/clarke_wright.html">clarke_wright()</a></code> crashing R when passing <code>NA</code> values to the <code>distances</code> argument: it stops gracefully instead.</li>
+<h3 id="minor-improvements-and-fixes-0-2-0">Minor improvements and fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-fixes-0-2-0"></a></h3>
+<ul><li>
+<code><a href="../reference/clarke_wright.html">clarke_wright()</a></code> does not crash R anymore when passing <code>NA</code> values to the <code>distances</code> argument: it stops gracefully instead.</li>
 </ul></div>
 </div>
     <div class="section level2">
