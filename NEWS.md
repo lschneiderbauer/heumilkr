@@ -1,4 +1,4 @@
-# heumilkr (development version)
+# heumilkr 0.3.0
 
 ## Breaking changes
 
