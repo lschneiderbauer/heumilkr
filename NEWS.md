@@ -12,7 +12,7 @@
 
     -   R session does not crash anymore due to integer overflow issues in certain circumstances.
 
--   `plot()` / `autoplot()`
+-   `plot()`/`autoplot()`:
 
     -   Plotting of a milk run result with a single site now also works.
 
