@@ -9,6 +9,7 @@ reference:
   contents:
   - starts_with("clarke_wright")
 - title: "Plotting"
+  contents:
   - autoplot.heumilkr_solution
   - plot.heumilkr_solution
 - title: "Costs and Savings"
