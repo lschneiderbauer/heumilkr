@@ -399,7 +399,7 @@ col_types routing_state::runs_as_cols() const
     double run_dist;
     T cyc = cycs[i];
 
-    std::get<0>(cols)[i] = i;
+    std::get<0>(cols)[i] = i + 1;
     std::get<3>(cols)[i] = routing_state::site_vehicle[i];
     std::get<4>(cols)[i] = routing_state::load[i];
 
@@ -437,7 +437,7 @@ col_types routing_state::runs_as_cols() const
     {
       for (int j = 0; j < singleton_runs[vehicle][site]; j++)
       {
-        std::get<0>(cols)[i] = site;
+        std::get<0>(cols)[i] = site + 1;
         std::get<1>(cols)[i] = run_id;
         std::get<2>(cols)[i] = 0;
         std::get<3>(cols)[i] = vehicle;
