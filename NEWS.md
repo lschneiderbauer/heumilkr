@@ -1,5 +1,9 @@
 # heumilkr (development version)
 
+## Breaking changes
+
+-   `clarke_wright()`: The resulting site-index is now 1-indexed, to be consistent with R usage and reserve index 0 for the origin.
+
 # heumilkr 0.3.0
 
 ## Breaking changes

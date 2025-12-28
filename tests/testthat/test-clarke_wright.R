@@ -16,6 +16,28 @@ test_that("runs without error", {
   )
 })
 
+test_that("every site is represented in output", {
+  demand <- c(1, 1)
+
+  pos <-
+    data.frame(
+      pos_x = c(0, 1, -1),
+      pos_y = c(0, 1, 1)
+    )
+
+  res <-
+    clarke_wright(
+      demand,
+      dist(pos),
+      data.frame(n = NA_integer_, caps = 99999)
+    )
+  
+  expect_equal(
+    sort(unique(res$site)),
+    1:length(demand)
+  )
+})
+
 test_that("Sum of loads over all runs equals sum of demands", {
   skip_if_not_installed("hedgehog")
 
