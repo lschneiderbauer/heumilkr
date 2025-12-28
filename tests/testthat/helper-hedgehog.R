@@ -1,10 +1,10 @@
-gen.demand_net <- function(max_sites = 10L) {
+gen.demand_net <- function(max_sites = 10L, min_demand = -33, max_demand = 33) {
   hedgehog::gen.and_then(
     hedgehog::gen.int(max_sites),
     function(n_sites) {
       hedgehog::gen.list
       list(
-        demand = gen.demand(n_sites),
+        demand = gen.demand(n_sites, min_demand, max_demand),
         distances = hedgehog::gen.with(
           gen.pos(n_sites),
           function(pos) dist(pos, method = "euclidean")
@@ -14,12 +14,12 @@ gen.demand_net <- function(max_sites = 10L) {
   )
 }
 
-gen.demand <- function(n_sites) {
+gen.demand <- function(n_sites, min_demand, max_demand) {
   hedgehog::gen.shrink(
     shrink_demand,
     hedgehog::gen.c(
       hedgehog::gen.no.shrink(
-        hedgehog::gen.unif(1, 33, shrink.median = FALSE)
+        hedgehog::gen.unif(min_demand, max_demand, shrink.median = FALSE)
       ),
       of = n_sites
     )
