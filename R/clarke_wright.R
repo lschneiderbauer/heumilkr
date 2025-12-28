@@ -85,11 +85,15 @@
 #' )
 #'
 #' @export
-clarke_wright <- function(demand, distances, vehicles,
-                          restrictions = data.frame(
-                            vehicle = integer(),
-                            site = integer()
-                          )) {
+clarke_wright <- function(
+  demand,
+  distances,
+  vehicles,
+  restrictions = data.frame(
+    vehicle = integer(),
+    site = integer()
+  )
+) {
   stopifnot(is.numeric(demand))
   stopifnot(all(!is.na(demand)))
   stopifnot(inherits(distances, "dist"))
@@ -109,8 +113,13 @@ clarke_wright <- function(demand, distances, vehicles,
 
   heumilkr_solution(
     .Call(
-      `_heumilkr_cpp_clarke_wright`, as.numeric(demand), distances,
-      vehicles$n, vehicles$caps, restrictions$site, restrictions$vehicle
+      `_heumilkr_cpp_clarke_wright`,
+      as.numeric(demand),
+      distances,
+      vehicles$n,
+      vehicles$caps,
+      restrictions$site,
+      restrictions$vehicle
     ),
     distances = distances
   )
@@ -126,11 +135,15 @@ clarke_wright <- function(demand, distances, vehicles,
 #' @inheritParams clarke_wright
 #' @seealso [clarke_wright()]
 #' @noRd
-clarke_wright_stepwise <- function(demand, distances, vehicles,
-                                   restrictions = data.frame(
-                                     vehicle = integer(),
-                                     site = integer()
-                                   )) {
+clarke_wright_stepwise <- function(
+  demand,
+  distances,
+  vehicles,
+  restrictions = data.frame(
+    vehicle = integer(),
+    site = integer()
+  )
+) {
   stopifnot(is.numeric(demand))
   stopifnot(all(!is.na(demand)))
   stopifnot(inherits(distances, "dist"))
@@ -149,12 +162,19 @@ clarke_wright_stepwise <- function(demand, distances, vehicles,
 
   lapply(
     .Call(
-      `_heumilkr_cpp_clarke_wright_stepwise`, as.numeric(demand), distances,
-      vehicles$n, vehicles$caps, restrictions$site, restrictions$vehicle
+      `_heumilkr_cpp_clarke_wright_stepwise`,
+      as.numeric(demand),
+      distances,
+      vehicles$n,
+      vehicles$caps,
+      restrictions$site,
+      restrictions$vehicle
     ),
-    function(x) heumilkr_solution(
-      x,
-      distances = distances
-    )
+    function(x) {
+      heumilkr_solution(
+        x,
+        distances = distances
+      )
+    }
   )
 }

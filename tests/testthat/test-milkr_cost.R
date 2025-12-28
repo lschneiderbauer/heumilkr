@@ -8,7 +8,8 @@ test_that("milkr_cost returns correct result", {
     )
 
   res <- clarke_wright(
-    demand, dist(pos),
+    demand,
+    dist(pos),
     data.frame(n = NA_integer_, caps = 1)
   )
 
@@ -28,7 +29,8 @@ test_that("milkr_saving returns correct result", {
     )
 
   res <- clarke_wright(
-    demand, dist(pos),
+    demand,
+    dist(pos),
     data.frame(n = NA_integer_, caps = 1)
   )
 

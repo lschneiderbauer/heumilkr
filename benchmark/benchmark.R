@@ -3,7 +3,7 @@ library(purrr)
 library(dplyr)
 library(tidyr)
 
-sha <- system("git rev-parse HEAD", intern=TRUE)
+sha <- system("git rev-parse HEAD", intern = TRUE)
 
 set.seed(42)
 

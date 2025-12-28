@@ -11,7 +11,6 @@ test_that("autoplot does not err", {
           vehicles = data.frame(n = NA_integer_, caps = 99999)
         )
 
-
       expect_no_error(
         pl <- autoplot(res)
       )

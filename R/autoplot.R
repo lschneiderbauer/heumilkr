@@ -38,7 +38,8 @@ autoplot.heumilkr_solution <- function(object, ...) {
   ggplot(
     data = data[order(data$run, data$order), ],
     aes(
-      x = .data$pos_x, y = .data$pos_y,
+      x = .data$pos_x,
+      y = .data$pos_y,
       color = as.factor(.data$run),
       group = .data$run,
       linetype = as.factor(.data$vehicle)
@@ -102,11 +103,13 @@ plot_data <- function(x) {
         by(
           x,
           x$run,
-          function(y) data.frame(
-            run = unique(y$run),
-            order = 1 + max(y$order),
-            site = 0
-          )
+          function(y) {
+            data.frame(
+              run = unique(y$run),
+              order = 1 + max(y$order),
+              site = 0
+            )
+          }
         )
       )
     )

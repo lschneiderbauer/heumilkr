@@ -1,7 +1,7 @@
 library(heumilkr)
 library(purrr)
 
-sha <- system("git rev-parse HEAD", intern=TRUE)
+sha <- system("git rev-parse HEAD", intern = TRUE)
 
 # TAI - solution files contain optimal solution according to website
 selected_instances <-
