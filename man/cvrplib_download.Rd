@@ -16,7 +16,7 @@ Returns a "\code{cvrplib_instance}" object which contains CVRPLIB problem
 instance data.
 }
 \description{
-\href{http://vrp.atd-lab.inf.puc-rio.br/}{CVRLIB} offers a selection of
+\href{https://galgos.inf.puc-rio.br/}{CVRLIB} offers a selection of
 CVRP problem instances. This function downloads the instance data and
 conveniently makes it available to be fed into solver functions, e.g. with
 \code{\link[=clarke_wright_cvrplib]{clarke_wright_cvrplib()}}. The primary purpose for those instances is

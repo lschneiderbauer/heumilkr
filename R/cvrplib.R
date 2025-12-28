@@ -35,11 +35,7 @@ new_cvrplib_instance <- function(name, type, comment, dimension, capacity,
 #' @import cli
 #' @export
 format.cvrplib_instance <- function(x, ...) {
-  url <-
-    paste0(
-      "http://vrp.atd-lab.inf.puc-rio.br/index.php/en/plotted-instances?data=",
-      x$name
-    )
+  url <- "https://galgos.inf.puc-rio.br/cvrplib/en/instances"
 
   cli_format_method({
     cli_h1("CVRPLIB data {cli::symbol$line} {x$name}")
@@ -50,7 +46,7 @@ format.cvrplib_instance <- function(x, ...) {
       "Demand: ({.val {x$demand$demand}})",
       "Comment: '{x$comment}'"
     ))
-    cli_text("See more at {.href [vrp.atd-lab.inf.puc-rio.br]({url})}.")
+    cli_text("See more at {.href [https://galgos.inf.puc-rio.br/]({url})}.")
   })
 }
 
@@ -114,8 +110,7 @@ cvrplib_clarke_wright_perf2 <- function(cvrplib_instance) {
   )
 }
 
-cvrplib_url <- "http://vrp.atd-lab.inf.puc-rio.br/media/com_vrp/instances/"
-
+cvrplib_url <- "https://galgos.inf.puc-rio.br/"
 
 #' List available CVRPLIB online data
 #'
@@ -130,49 +125,17 @@ cvrplib_url <- "http://vrp.atd-lab.inf.puc-rio.br/media/com_vrp/instances/"
 #' @export
 cvrplib_ls <- function() {
   # reading directories first
-  rel_dirs <-
-    setdiff(
-      xml2::xml_attr(
-        xml2::xml_find_all(
-          xml2::read_html(paste0(readLines(url(cvrplib_url)), collapse = "\n")),
-          "//a[substring(@href, string-length(@href) - string-length('/') +1) = '/']"
-        ),
-        "href"
+  all_hrefs <-
+    xml2::xml_attr(
+      xml2::xml_find_all(
+        xml2::read_html(paste0(readLines(url(paste0(cvrplib_url, "cvrplib/en/instances"))), collapse = "\n")),
+        "//a[@href]"
       ),
-      c("/media/com_vrp/", "test/", "CMT/")
-    )
-  # CMT has buggy .sol files
-
-  # iterate over all directories and collect file names
-  vrp_files <-
-    grep(
-      ".vrp$",
-      unlist(
-        lapply(
-          rel_dirs,
-          function(rel_dir) {
-            paste0(
-              rel_dir,
-              xml2::xml_attr(
-                xml2::xml_find_all(
-                  xml2::read_html(
-                    paste0(
-                      readLines(url(paste0(cvrplib_url, rel_dir))),
-                      collapse = "\n"
-                    )
-                  ),
-                  "//a[substring(@href, string-length(@href) - string-length('.vrp') +1) = '.vrp']"
-                ),
-                "href"
-              )
-            )
-          }
-        )
-      ),
-      value = TRUE
+      "href"
     )
 
-  substr(vrp_files, 1, nchar(vrp_files) - 4)
+  is_vrp <- grepl("/cvrplib/uploads/instances/CVRP/(.*)\\.vrp$", all_hrefs)
+  sub("/cvrplib/uploads/instances/CVRP/(.*)\\.vrp$", "\\1", all_hrefs[is_vrp])
 }
 
 extract_header <- function(content, header) {
@@ -188,7 +151,7 @@ extract_cost <- function(content) {
 
 #' CVRPLIB problem instance downloader
 #'
-#' [CVRLIB](http://vrp.atd-lab.inf.puc-rio.br/) offers a selection of
+#' [CVRLIB](https://galgos.inf.puc-rio.br/) offers a selection of
 #' CVRP problem instances. This function downloads the instance data and
 #' conveniently makes it available to be fed into solver functions, e.g. with
 #' [clarke_wright_cvrplib()]. The primary purpose for those instances is
@@ -211,7 +174,9 @@ extract_cost <- function(content) {
 cvrplib_download <- function(qualifier) {
   stopifnot(is.character(qualifier))
 
-  content <- readLines(url(paste0(cvrplib_url, qualifier, ".vrp")))
+  download_url <- paste0(cvrplib_url, "/cvrplib/uploads/instances/CVRP/")
+
+  content <- readLines(url(paste0(download_url, qualifier, ".vrp")))
 
   name <- extract_header(content, "NAME")
   comment <- extract_header(content, "COMMENT")
@@ -273,7 +238,6 @@ cvrplib_download <- function(qualifier) {
     stop(paste0("Unknown edge weight type '", edge_weight_type, "'."))
   }
 
-
   demand_section <- grep("DEMAND_SECTION", content, fixed = TRUE) + 1
 
   demand <-
@@ -290,7 +254,7 @@ cvrplib_download <- function(qualifier) {
   ## solution file
   optimum <-
     as.numeric(
-      extract_cost(readLines(url(paste0(cvrplib_url, qualifier, ".sol"))))
+      extract_cost(readLines(url(paste0(download_url, qualifier, ".sol"))))
     )
 
   cvrplib_instance(
