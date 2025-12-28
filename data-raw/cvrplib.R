@@ -7,7 +7,10 @@ instances <- cvrplib_ls()
 selected_instances <-
   list(
     # Rochat and Taillard, 1995
-    Tai = setdiff(instances[grepl("tai", instances, fixed = TRUE)], "tai/tai385"),
+    Tai = setdiff(
+      instances[grepl("tai", instances, fixed = TRUE)],
+      "tai/tai385"
+    ),
     # Augerat, 1995
     A = instances[grepl("A/", instances, fixed = TRUE)],
     # Augerat, 1995

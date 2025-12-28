@@ -1,13 +1,35 @@
-cvrplib_instance <- function(name, type, comment = "", dimension, capacity,
-                             pos, demand, optimum) {
+cvrplib_instance <- function(
+  name,
+  type,
+  comment = "",
+  dimension,
+  capacity,
+  pos,
+  demand,
+  optimum
+) {
   new_cvrplib_instance(
-    name, type, comment, dimension, capacity,
-    pos, demand, optimum
+    name,
+    type,
+    comment,
+    dimension,
+    capacity,
+    pos,
+    demand,
+    optimum
   )
 }
 
-new_cvrplib_instance <- function(name, type, comment, dimension, capacity,
-                                 pos, demand, optimum) {
+new_cvrplib_instance <- function(
+  name,
+  type,
+  comment,
+  dimension,
+  capacity,
+  pos,
+  demand,
+  optimum
+) {
   stopifnot(is.character(name))
   stopifnot(is.character(type))
   stopifnot(is.character(comment))
@@ -82,12 +104,20 @@ clarke_wright_cvrplib <- function(instance) {
     )
 
   origin <-
-    instance$pos[instance$pos$site == setdiff(instance$pos$site, instance$demand$site), c("x", "y")]
+    instance$pos[
+      instance$pos$site == setdiff(instance$pos$site, instance$demand$site),
+      c("x", "y")
+    ]
 
   demand <- merged$demand
-  dist <- dist(rbind(data.frame(x = origin$x, y = origin$y), merged[, c("x", "y")]))
+  dist <- dist(rbind(
+    data.frame(x = origin$x, y = origin$y),
+    merged[, c("x", "y")]
+  ))
 
-  clarke_wright(demand, dist,
+  clarke_wright(
+    demand,
+    dist,
     vehicles = data.frame(n = NA_integer_, caps = instance$capacity)
   )
 }
@@ -128,7 +158,10 @@ cvrplib_ls <- function() {
   all_hrefs <-
     xml2::xml_attr(
       xml2::xml_find_all(
-        xml2::read_html(paste0(readLines(url(paste0(cvrplib_url, "cvrplib/en/instances"))), collapse = "\n")),
+        xml2::read_html(paste0(
+          readLines(url(paste0(cvrplib_url, "cvrplib/en/instances"))),
+          collapse = "\n"
+        )),
         "//a[@href]"
       ),
       "href"
@@ -200,13 +233,17 @@ cvrplib_download <- function(qualifier) {
     pos$y <- as.numeric(pos$y)
   } else if (edge_weight_type == "EXPLICIT") {
     edge_weight_format <- extract_header(content, "EDGE_WEIGHT_FORMAT")
-    edge_weight_section <- grep("EDGE_WEIGHT_SECTION", content, fixed = TRUE) + 1
+    edge_weight_section <- grep("EDGE_WEIGHT_SECTION", content, fixed = TRUE) +
+      1
 
     if (edge_weight_format == "LOWER_DIAG_ROW") {
       demand_section <- grep("DEMAND_SECTION", content, fixed = TRUE)
       edge_content <- content[edge_weight_section:(demand_section - 1)]
 
-      lower_triang <- as.numeric(unlist(lapply(strsplit(edge_content, "\\s+"), function(x) x[x != ""])))
+      lower_triang <- as.numeric(unlist(lapply(
+        strsplit(edge_content, "\\s+"),
+        function(x) x[x != ""]
+      )))
       dmat <- matrix(0, nrow = dimension, ncol = dimension)
       dmat[upper.tri(dmat, diag = TRUE)] <- lower_triang
       pos <- as.data.frame(cmdscale(dist(dmat + t(dmat))))
@@ -216,16 +253,24 @@ cvrplib_download <- function(qualifier) {
       demand_section <- grep("DEMAND_SECTION", content, fixed = TRUE)
       edge_content <- content[edge_weight_section:(demand_section - 1)]
 
-      lower_triang <- as.numeric(unlist(lapply(strsplit(edge_content, "\\s+"), function(x) x[x != ""])))
+      lower_triang <- as.numeric(unlist(lapply(
+        strsplit(edge_content, "\\s+"),
+        function(x) x[x != ""]
+      )))
       dmat <- matrix(0, nrow = dimension, ncol = dimension)
       dmat[upper.tri(dmat)] <- lower_triang
       pos <- as.data.frame(cmdscale(dist(dmat + t(dmat))))
       colnames(pos) <- c("x", "y")
       pos$site <- 1:nrow(pos)
     } else if (edge_weight_format == "FULL_MATRIX") {
-      edge_content <- content[edge_weight_section:(edge_weight_section + dimension - 1)]
+      edge_content <- content[
+        edge_weight_section:(edge_weight_section + dimension - 1)
+      ]
 
-      dmat <- as.numeric(unlist(lapply(strsplit(edge_content, "\\s+"), function(x) x[x != ""])))
+      dmat <- as.numeric(unlist(lapply(
+        strsplit(edge_content, "\\s+"),
+        function(x) x[x != ""]
+      )))
       dim(dmat) <- c(dimension, dimension)
 
       pos <- as.data.frame(cmdscale(dist(dmat)))
@@ -258,7 +303,13 @@ cvrplib_download <- function(qualifier) {
     )
 
   cvrplib_instance(
-    name, type, comment, dimension, capacity,
-    pos, demand, optimum
+    name,
+    type,
+    comment,
+    dimension,
+    capacity,
+    pos,
+    demand,
+    optimum
   )
 }

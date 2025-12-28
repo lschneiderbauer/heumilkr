@@ -25,7 +25,8 @@ test_that("Sum of loads over all runs equals sum of demands", {
       res <-
         clarke_wright(
           demand_net$demand,
-          demand_net$distances, data.frame(n = c(NA_integer_, 3L), caps = c(60, 120))
+          demand_net$distances,
+          data.frame(n = c(NA_integer_, 3L), caps = c(60, 120))
         )
 
       expect_equal(
@@ -46,7 +47,8 @@ test_that("Distances add up correctly.", {
     )
 
   res <- clarke_wright(
-    demand, dist(pos),
+    demand,
+    dist(pos),
     data.frame(n = NA_integer_, caps = 1)
   )
 
@@ -89,7 +91,8 @@ test_that("A vehicle with infinite capacity covers everything in a single run", 
       res <-
         clarke_wright(
           demand_net$demand,
-          demand_net$distances, data.frame(n = NA_integer_, caps = 99999)
+          demand_net$distances,
+          data.frame(n = NA_integer_, caps = 99999)
         )
 
       expect_equal(unique(res$run), 0)
@@ -131,7 +134,10 @@ test_that("Vehicles are not assigned to restricted sites", {
         clarke_wright(
           demand_net$demand,
           demand_net$distances,
-          vehicles = data.frame(n = c(NA_integer_, NA_integer_), caps = c(99999, 99999)),
+          vehicles = data.frame(
+            n = c(NA_integer_, NA_integer_),
+            caps = c(99999, 99999)
+          ),
           restrictions = data.frame(site = 0L, vehicle = 0L)
         )
 
@@ -147,22 +153,53 @@ test_that("Vehicles are not assigned to restricted sites: edge case", {
   res <-
     clarke_wright(
       demand = c(6.0, 8.0, 6.5, 11.5, 5.5),
-      distances =
-        as.dist(
-          matrix(c(
-            0.000, 44.2920, 3.554, 41.088, 32.0590, 28.355,
-            44.292, 0.0000, 46.886, 87.104, 81.9915, 18.932,
-            3.554, 46.8860, 0.000, 36.731, 27.7560, 30.949,
-            41.088, 87.1040, 36.731, 0.000, 7.7130, 67.273,
-            32.059, 81.9915, 27.756, 7.713, 0.0000, 58.298,
-            28.355, 18.9320, 30.949, 67.273, 58.2980, 0.000
-          ), nrow = 6)
-        ),
-      vehicles =
-        data.frame(
-          caps = c(38, 33),
-          n = NA_integer_
-        ),
+      distances = as.dist(
+        matrix(
+          c(
+            0.000,
+            44.2920,
+            3.554,
+            41.088,
+            32.0590,
+            28.355,
+            44.292,
+            0.0000,
+            46.886,
+            87.104,
+            81.9915,
+            18.932,
+            3.554,
+            46.8860,
+            0.000,
+            36.731,
+            27.7560,
+            30.949,
+            41.088,
+            87.1040,
+            36.731,
+            0.000,
+            7.7130,
+            67.273,
+            32.059,
+            81.9915,
+            27.756,
+            7.713,
+            0.0000,
+            58.298,
+            28.355,
+            18.9320,
+            30.949,
+            67.273,
+            58.2980,
+            0.000
+          ),
+          nrow = 6
+        )
+      ),
+      vehicles = data.frame(
+        caps = c(38, 33),
+        n = NA_integer_
+      ),
       restrictions = data.frame(
         site = 3L,
         vehicle = 0L
@@ -225,9 +262,13 @@ test_that("Having NA dist values aborts", {
 test_that("Example that previously caused integer overflow does not crash anymore", {
   f_demand <- 399
   dist_matrix <-
-    structure(17.84195,
-      Labels = c("100402", "40238"), Size = 2L,
-      class = "dist", Diag = FALSE, Upper = FALSE
+    structure(
+      17.84195,
+      Labels = c("100402", "40238"),
+      Size = 2L,
+      class = "dist",
+      Diag = FALSE,
+      Upper = FALSE
     )
 
   vehicle_types <-
