@@ -4,6 +4,10 @@
 
 -   `clarke_wright()`: The resulting site-index is now 1-indexed, to be consistent with R usage and reserve index 0 for the origin.
 
+## Bugfixes
+
+-   `cvrplib_ls()`, `cvrplib_download()`: Upstream website has changed. Fix malfunctioning functions by adjusting webscraping accordingly.
+
 # heumilkr 0.3.0
 
 ## Breaking changes
