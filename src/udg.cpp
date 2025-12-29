@@ -5,19 +5,21 @@
 #include <vector>
 #include <memory>
 
-udg::udg(int n_vertices)
+udg::udg(const std::vector<double> demand)
+  : runs(demand.size()),
+    adj(demand.size())
 {
-  adj = std::vector<std::unordered_set<int>>(n_vertices);
+  // adj = std::vector<std::unordered_set<int>>(n_vertices);
   for (auto it = adj.begin(); it != adj.end(); it++)
   {
-    *it = std::unordered_set<int>{-1};
+    *it = std::unordered_set<int>{ORIGIN};
   }
 
-  cycs = std::vector<std::shared_ptr<std::unordered_set<int>>>(n_vertices);
-  for (auto it = cycs.begin(); it != cycs.end(); it++)
+  // runs = std::vector<std::shared_ptr<run>>(n_vertices);
+  runs.reserve(demand.size()); // just in case
+  for (size_t i = 0; i < demand.size(); i++)
   {
-    int i = std::distance(cycs.begin(), it);
-    *it = std::make_shared<std::unordered_set<int>>(std::unordered_set<int>{i});
+    runs[i] = std::make_shared<run>(i, demand[i]);
   }
 }
 
@@ -25,51 +27,51 @@ void udg::relink_edge(const int a, const int b)
 {
   add_edge(a, b);
 
-  // a vertex can only be connected to either the source alone (-1),
-  // or to another vertex v (-1, v). If a vertex v is to be connected to another
-  // vertex v2, we always have (v, v2), not (-1, v2).
+  // a vertex can only be connected to either the source alone (ORIGIN),
+  // or to another vertex v (ORIGIN, v). If a vertex v is to be connected to another
+  // vertex v2, we always have (v, v2), not (ORIGIN, v2).
   if (adj[a].size() > 2)
   {
-    adj[a].erase(-1);
+    adj[a].erase(ORIGIN);
   }
   if (adj[b].size() > 2)
   {
-    adj[b].erase(-1);
+    adj[b].erase(ORIGIN);
+  }
+
+}
+
+void udg::combine_runs(const int a, const int b, const int new_vehicle)
+{
+  if (a == b) throw std::runtime_error("should not be reachable");
+  if (runs[a] == runs[b]) throw std::runtime_error("should not be reachable");
+
+  relink_edge(a, b);
+  runs[a]->combine(*runs[b], new_vehicle);
+
+  // all vertices in the cycles are affected,
+  // we need to reset the pointer of the ones that b pointed
+  // to to point to the same cycle
+  for (auto site : (*runs[a]).sites)
+  {
+    runs[site] = runs[a];
   }
 }
 
 void udg::add_edge(const int a, const int b)
 {
+  if (a == b) return;
+
   adj[a].insert(b);
   adj[b].insert(a);
-
-  (*cycs[a]).merge(*cycs[b]);
-
-  // all vertices in the cycles are affected,
-  // we need to reset the pointer of the ones that b pointed
-  // to to point to the same cycle
-  for (auto site : *cycs[a])
-  {
-    cycs[site] = cycs[a];
-  }
 }
 
 bool udg::links_to_origin(const int a) const
 {
-  return (adj[a].find(-1) != adj[a].end());
+  return (adj[a].find(ORIGIN) != adj[a].end());
 }
 
 bool udg::edges_share_cycle(const int a, const int b) const
 {
-  return (cycs[a] == cycs[b]);
-}
-
-std::unordered_set<int> udg::sites_in_cycle(const int a) const
-{
-  return *cycs[a];
-}
-
-std::vector<std::shared_ptr<std::unordered_set<int>>> udg::get_cycs() const
-{
-  return cycs;
+  return (runs[a] == runs[b]);
 }
