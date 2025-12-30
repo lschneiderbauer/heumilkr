@@ -13,7 +13,7 @@ public:
   udg(const std::vector<double> demand);
   void combine_runs(const int a, const int b, const int new_vehicle);
   bool links_to_origin(const int a) const;
-  bool edges_share_cycle(const int a, const int b) const;
+  bool edges_share_run(const int a, const int b) const;
   // a vector of runs (of length of the sites): each site has a reference to
   // the runs it belongs to (which in turn has all the other references)
   std::vector<std::shared_ptr<run>> runs;
@@ -21,7 +21,6 @@ public:
 private:
   static constexpr int ORIGIN = -1;
   void relink_edge(const int a, const int b);
-  void add_edge(const int a, const int b);
   std::vector<std::unordered_set<int>> adj;
 };
 

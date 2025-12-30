@@ -25,7 +25,10 @@ udg::udg(const std::vector<double> demand)
 
 void udg::relink_edge(const int a, const int b)
 {
-  add_edge(a, b);
+  if (a == b) return;
+
+  adj[a].insert(b);
+  adj[b].insert(a);
 
   // a vertex can only be connected to either the source alone (ORIGIN),
   // or to another vertex v (ORIGIN, v). If a vertex v is to be connected to another
@@ -38,7 +41,6 @@ void udg::relink_edge(const int a, const int b)
   {
     adj[b].erase(ORIGIN);
   }
-
 }
 
 void udg::combine_runs(const int a, const int b, const int new_vehicle)
@@ -58,20 +60,12 @@ void udg::combine_runs(const int a, const int b, const int new_vehicle)
   }
 }
 
-void udg::add_edge(const int a, const int b)
-{
-  if (a == b) return;
-
-  adj[a].insert(b);
-  adj[b].insert(a);
-}
-
 bool udg::links_to_origin(const int a) const
 {
   return (adj[a].find(ORIGIN) != adj[a].end());
 }
 
-bool udg::edges_share_cycle(const int a, const int b) const
+bool udg::edges_share_run(const int a, const int b) const
 {
   return (runs[a] == runs[b]);
 }
