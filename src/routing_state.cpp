@@ -161,21 +161,20 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
       // printf("share cycle %d\n", graph.edges_share_cycle(i, j));
 
       int selected_vehicle;
+      double saving;
 
-      if (graph.links_to_origin(i) && graph.links_to_origin(j) &&
-          !graph.edges_share_cycle(i, j) &&
+      // primitive benchmarking shows that
+      // it seems important for performance that "links_to_origin()" is checked last
+      // (probably as it is the most expensive operation)
+      if (!graph.edges_share_run(i, j) &&
+            ((saving = savings.get(i, j)) > max_val) &&
+            graph.links_to_origin(i) && graph.links_to_origin(j) &&
           (selected_vehicle =
                select_vehicle(vehicle_avail, vehicle_caps,
                               restricted_vehicles, graph, i, j)) != -1)
       {
-
-        if (savings.get(i, j) > max_val)
-        {
-          max_val = savings.get(i, j);
-          std::get<0>(best_link) = i;
-          std::get<1>(best_link) = j;
-          std::get<2>(best_link) = selected_vehicle;
-        }
+        max_val = saving;
+        best_link = {i, j, selected_vehicle};
       }
     }
   }
