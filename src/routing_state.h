@@ -25,7 +25,7 @@ public:
                 const std::vector<std::unordered_set<int>> &restricted_vehicles);
   col_types runs_as_cols() const;
   bool relink_best();
-  bool opt_vehicles();
+  void opt_vehicles();
 
 private:
   distmat<double> distances;
