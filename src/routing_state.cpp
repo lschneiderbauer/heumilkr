@@ -155,15 +155,17 @@ bool routing_state::relink_best()
   }
 }
 
-bool routing_state::opt_vehicles()
+void routing_state::opt_vehicles()
 {
-  bool changed = false;
-
+  // first release all vehicles
   for (auto &run : graph.runs)
   {
-    // free current vehicle before we look for the next best one
     fleet.release_vehicle(run->vehicle);
+  }
 
+  // then reassign fitting vehicles
+  for (auto &run : graph.runs)
+  {
     int vehicle =
       fleet.find_fitting_vehicle(
         run->sites,
@@ -172,15 +174,8 @@ bool routing_state::opt_vehicles()
       );
 
     fleet.reserve_vehicle(vehicle);                                          
-    
-    if (vehicle != run->vehicle)
-    {
-      run->vehicle = vehicle;
-
-      changed = true;
-    }
+    run->vehicle = vehicle;
   }
-  return changed;
 }
 
 double run_distance(const std::vector<int> ordered_sites,

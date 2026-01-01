@@ -40,7 +40,7 @@ data_frame cpp_clarke_wright(const std::vector<double> &demand,
   // better vehicles for each route
   // (we might have released some high-priority vehicles on the way which
   // are now unused)
-   while(state.opt_vehicles()) {};
+  state.opt_vehicles();
 
   return arrvec_to_dataframe(state.runs_as_cols());
 }
