@@ -1,12 +1,5 @@
 #include "run.h"
 
-// initialize a run with a single site
-run::run(int site, double max_load)
-  : sites(std::unordered_set<int>{site}),
-    max_load(max_load),
-    vehicle(-1)
-{ }
-
 void run::combine(run &other_run, int new_vehicle)
 {
     sites.merge(other_run.sites);

@@ -25,7 +25,7 @@ void Fleet::reserve_vehicle(const int vehicle) {
 }
 
 template<typename ForwardIt>
-bool Fleet::is_vehicle_restricted(const int vehicle, ForwardIt sites)
+bool Fleet::is_vehicle_restricted(const int vehicle, ForwardIt sites) const
 {
     bool restricted = false;
 
@@ -40,7 +40,7 @@ bool Fleet::is_vehicle_restricted(const int vehicle, ForwardIt sites)
 
 
 template<typename ForwardIt>
-int Fleet::find_fitting_vehicle(ForwardIt sites, const double max_load, bool max_load_soft) {
+int Fleet::find_fitting_vehicle(ForwardIt sites, const double max_load, bool max_load_soft) const {
     for (size_t vehicle = 0; vehicle < vehicle_caps.size(); vehicle++)
     {    
         if (vehicle_avail[vehicle] >= 1 &&
@@ -69,5 +69,5 @@ int Fleet::find_fitting_vehicle(ForwardIt sites, const double max_load, bool max
     return -1;
 }
 
-template int Fleet::find_fitting_vehicle(union_view<int>, const double, bool);
-template int Fleet::find_fitting_vehicle(std::unordered_set<int>, const double, bool);
+template int Fleet::find_fitting_vehicle(union_view<int>, const double, bool) const;
+template int Fleet::find_fitting_vehicle(std::unordered_set<int>, const double, bool) const;

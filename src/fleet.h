@@ -17,7 +17,7 @@ public:
 
     template<typename ForwardIt>
     int find_fitting_vehicle(ForwardIt sites, const double max_load,
-                            bool max_load_soft);
+                            bool max_load_soft) const;
   
     int capacity(const int vehicle) const;
 
@@ -30,7 +30,7 @@ private:
   std::vector<std::unordered_set<int>> restricted_vehicles;
 
   template<typename ForwardIt>
-  bool is_vehicle_restricted(int vehicle, ForwardIt sites);
+  bool is_vehicle_restricted(int vehicle, ForwardIt sites) const;
 };
 
 #endif
