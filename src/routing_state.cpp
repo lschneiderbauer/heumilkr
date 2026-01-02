@@ -28,7 +28,7 @@ distmat<double> calc_savings(const distmat<double> &d)
 // returns Site 1, Site 2, Used vehicle
 std::tuple<int, int, int> best_link(const distmat<double> &savings,
                                     Fleet &fleet,
-                                    const udg &graph)
+                                    const RunManager &graph)
 {
   std::tuple<int, int, int> best_link = {-1, -1, -1};
   double max_val = 0;
