@@ -7,7 +7,7 @@
 class Fleet
 {
 public:
-    Fleet(std::vector<int> &vehicle_avail, const std::vector<double> &vehicle_caps,
+    Fleet(std::vector<int> vehicle_avail, const std::vector<double> &vehicle_caps,
           const std::vector<std::unordered_set<int>> &restricted_vehicles)
         : vehicle_avail(vehicle_avail),
           vehicle_caps(vehicle_caps),

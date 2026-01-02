@@ -1,4 +1,4 @@
-#include "routing_state.h"
+#include "routingstate.h"
 #include <vector>
 // #include <stdio.h>
 #include <map>
@@ -51,7 +51,9 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
       // (probably as it is the most expensive operation)
       if (!graph.edges_share_run(i, j) &&
             ((saving = savings.get(i, j)) > max_val) &&
-            graph.links_to_origin(i) && graph.links_to_origin(j))
+            graph.links_to_origin(i) && graph.links_to_origin(j) &&
+            // we want to ignore (empty) runs with <= 0 load
+            graph.runs[i]->max_load > 0 && graph.runs[j]->max_load > 0)
       {
 
         fleet.release_vehicle(graph.runs[i]->vehicle);
@@ -78,10 +80,10 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
   return best_link;
 }
 
-routing_state::routing_state(
-    const std::vector<double> demand, // we want a copy of this vector
+RoutingState::RoutingState(
+    const std::vector<double> &demand,
     const distmat<double> &distances,
-    std::vector<int> vehicle_avail, // we want a copy of this vector
+    const std::vector<int> &vehicle_avail,
     const std::vector<double> &vehicle_caps,
     const std::vector<std::unordered_set<int>> &restricted_vehicles)
     : distances(distances),
@@ -99,7 +101,11 @@ routing_state::routing_state(
                                              run->max_load,
                                              true);
 
-    fleet.reserve_vehicle(vehicle);
+    if (run->max_load > 0) {
+      // only reserve vehicles for non-empty runs
+      fleet.reserve_vehicle(vehicle);
+    }
+    
 
     // special treatment for the case when demand is higher than capacity
     while (run->max_load > fleet.capacity(vehicle))
@@ -110,7 +116,10 @@ routing_state::routing_state(
       vehicle = fleet.find_fitting_vehicle(run->sites(),
                                            run->max_load,
                                            true);
-      fleet.reserve_vehicle(vehicle);
+      if (run->max_load > 0) {
+        // only reserve vehicles for non-empty runs
+        fleet.reserve_vehicle(vehicle);
+      }
     }
 
     // only add the last one to the state
@@ -120,7 +129,7 @@ routing_state::routing_state(
 
 // TRUE if something got relinked,
 // FALSE if nothing got relinked (i.e. the procedure stabilized)
-bool routing_state::relink_best()
+bool RoutingState::relink_best()
 {
   int a;
   int b;
@@ -151,7 +160,7 @@ bool routing_state::relink_best()
   }
 }
 
-void routing_state::opt_vehicles()
+void RoutingState::opt_vehicles()
 {
   // first release all vehicles
   for (auto &run : graph.runs)
@@ -195,7 +204,7 @@ double run_distance(const std::vector<int> ordered_sites,
 // 4 - vehicle per run
 // 5 - load per run
 // 6 - distance per run
-col_types routing_state::runs_as_cols() const
+col_types RoutingState::runs_as_cols() const
 {
   typedef std::shared_ptr<run> T;
   typedef long unsigned int lui;
@@ -243,7 +252,7 @@ col_types routing_state::runs_as_cols() const
       visited_elements.insert({cyc, run_id});
       // we reorder each run again (by solving the TSP)
       order = cyc->ordered_sites(distances);
-      run_dist = run_distance(order, routing_state::distances);
+      run_dist = run_distance(order, this->distances);
 
       orders.insert({run_id, order});
       run_dists.insert({run_id, run_dist});

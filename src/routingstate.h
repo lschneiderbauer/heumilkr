@@ -16,16 +16,21 @@ using col_types = std::tuple<
     std::vector<double>,
     std::vector<double>>;
 
-class routing_state
+class RoutingState
 {
 public:
-  routing_state(const std::vector<double> demand,
+  RoutingState(const std::vector<double> &demand,
                 const distmat<double> &dist,
-                std::vector<int> vehicle_avail,
+                const std::vector<int> &vehicle_avail,
                 const std::vector<double> &vehicle_caps,
                 const std::vector<std::unordered_set<int>> &restricted_vehicles);
   col_types runs_as_cols() const;
   bool relink_best();
+
+  // After we have the final routes, we might still be able to assign
+  // better vehicles for each route
+  // (we might have released some high-priority vehicles on the way which
+  // are now unused)
   void opt_vehicles();
 
 private:
