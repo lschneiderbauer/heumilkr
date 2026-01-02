@@ -1,11 +1,11 @@
-#include "udg.h"
+#include "runmanager.h"
 #include <unordered_set>
 #include <algorithm>
 #include <iterator>
 #include <vector>
 #include <memory>
 
-udg::udg(const std::vector<double> demand)
+RunManager::RunManager(const std::vector<double> demand)
   : runs(demand.size()),
     sites_relinked(demand.size(), 0)
 {
@@ -16,7 +16,7 @@ udg::udg(const std::vector<double> demand)
   }
 }
 
-void udg::combine_runs(const int a, const int b, const int new_vehicle)
+void RunManager::combine_runs(const int a, const int b, const int new_vehicle)
 {
   if (a == b) throw std::runtime_error("should not be reachable");
   if (runs[a] == runs[b]) throw std::runtime_error("should not be reachable");
@@ -48,12 +48,12 @@ void udg::combine_runs(const int a, const int b, const int new_vehicle)
   }
 }
 
-bool udg::links_to_origin(const int a) const
+bool RunManager::links_to_origin(const int a) const
 {
   return(sites_relinked[a] < 2);
 }
 
-bool udg::edges_share_run(const int a, const int b) const
+bool RunManager::edges_share_run(const int a, const int b) const
 {
   return (runs[a] == runs[b]);
 }

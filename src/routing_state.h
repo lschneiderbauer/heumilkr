@@ -2,7 +2,7 @@
 #define ROUTINGSTATE_H
 
 #include "distmat.h"
-#include "udg.h"
+#include "runmanager.h"
 #include "fleet.h"
 #include "run.h"
 #include <unordered_set>
@@ -33,7 +33,7 @@ private:
   Fleet fleet;
 
   distmat<double> savings;
-  udg graph;
+  RunManager graph;
 
   // indexed by vehicle x site
   std::vector<run> singleton_runs;

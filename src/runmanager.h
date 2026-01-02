@@ -3,14 +3,13 @@
 #include <unordered_set>
 #include "run.h"
 
-#ifndef UDG_H
-#define UDG_H
+#ifndef RUN_MANAGER_H
+#define RUN_MANAGER_H
 
-// undirected graph
-class udg
+class RunManager
 {
 public:
-  udg(const std::vector<double> demand);
+  RunManager(const std::vector<double> demand);
   void combine_runs(const int a, const int b, const int new_vehicle);
   bool links_to_origin(const int a) const;
   bool edges_share_run(const int a, const int b) const;
