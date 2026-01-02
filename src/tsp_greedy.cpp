@@ -1,3 +1,6 @@
+#ifndef TSP_GREEDY
+#define TSP_GREEDY
+
 #include <vector>
 #include <unordered_set>
 #include <limits>
@@ -18,7 +21,7 @@ std::vector<int> tsp_greedy(const std::unordered_set<int> sites,
   {
     double min_dist = std::numeric_limits<double>::max();
     // get the nearest site from origin
-    for (auto &site : sites)
+    for (const auto site : sites)
     {
       // if it's not already in the list check the distance
       if (std::find(run.begin(), run.end(), site) == run.end())
@@ -47,3 +50,5 @@ std::vector<int> tsp_greedy(const std::unordered_set<int> sites,
 
   return run;
 }
+
+#endif
