@@ -1,5 +1,4 @@
 #include "routing_state.h"
-#include "tsp_greedy.h"
 #include <vector>
 // #include <stdio.h>
 #include <map>
@@ -60,7 +59,7 @@ std::tuple<int, int, int> best_link(const distmat<double> &savings,
 
         selected_vehicle =
           fleet.find_fitting_vehicle(
-              union_view(graph.runs[i]->sites, graph.runs[j]->sites),
+              union_view(graph.runs[i]->sites(), graph.runs[j]->sites()),
               graph.runs[i]->max_load + graph.runs[j]->max_load,
               false
           );
@@ -95,8 +94,8 @@ routing_state::routing_state(
 
   // first vehicle assignments (iterate over runs)
   for (auto &run : graph.runs) {
-    int site = *(run->sites.begin()); // initial runs have only one site
-    int vehicle = fleet.find_fitting_vehicle(run->sites,
+    int site = *(run->sites().begin()); // initial runs have only one site
+    int vehicle = fleet.find_fitting_vehicle(run->sites(),
                                              run->max_load,
                                              true);
 
@@ -108,7 +107,7 @@ routing_state::routing_state(
       run->max_load -= fleet.capacity(vehicle);
       this->singleton_runs.emplace_back(site, fleet.capacity(vehicle), vehicle);
 
-      vehicle = fleet.find_fitting_vehicle(run->sites,
+      vehicle = fleet.find_fitting_vehicle(run->sites(),
                                            run->max_load,
                                            true);
       fleet.reserve_vehicle(vehicle);
@@ -165,7 +164,7 @@ void routing_state::opt_vehicles()
   {
     int vehicle =
       fleet.find_fitting_vehicle(
-        run->sites,
+        run->sites(),
         run->max_load,
         true
       );
@@ -243,7 +242,7 @@ col_types routing_state::runs_as_cols() const
     {
       visited_elements.insert({cyc, run_id});
       // we reorder each run again (by solving the TSP)
-      order = tsp_greedy(cyc->sites, distances);
+      order = cyc->ordered_sites(distances);
       run_dist = run_distance(order, routing_state::distances);
 
       orders.insert({run_id, order});
@@ -261,7 +260,7 @@ col_types routing_state::runs_as_cols() const
   // fill the rest up with singleton runs
   for (auto &run : this->singleton_runs)
   {
-    int site = *(run.sites.begin());
+    int site = *(run.sites().begin());
     std::get<0>(cols)[i] = site + 1;
     std::get<1>(cols)[i] = run_id;
     std::get<2>(cols)[i] = 0;

@@ -42,7 +42,7 @@ void RunManager::combine_runs(const int a, const int b, const int new_vehicle)
   // all vertices in the runs are affected,
   // we need to reset the pointer of the ones that b pointed
   // to to point to the same cycle
-  for (auto site : runs[a]->sites)
+  for (const auto site : runs[a]->sites())
   {
     runs[site] = runs[a];
   }
