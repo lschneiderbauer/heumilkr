@@ -19,9 +19,7 @@ public:
   std::vector<std::shared_ptr<run>> runs;
 
 private:
-  static constexpr int ORIGIN = -1;
-  void relink_edge(const int a, const int b);
-  std::vector<std::unordered_set<int>> adj;
+  std::vector<int> sites_relinked;
 };
 
 

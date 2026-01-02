@@ -4,6 +4,7 @@
 // #include <stdio.h>
 #include <map>
 #include <algorithm>
+#include <set>
 #include "union_view.h"
 
 
@@ -88,12 +89,9 @@ routing_state::routing_state(
       fleet(vehicle_avail, vehicle_caps, restricted_vehicles),
       graph(demand)
 {
-  routing_state::savings = calc_savings(distances);
+  this->savings = calc_savings(distances);
 
-  // this is potentially a big space waste because most of them will be 0.
-  // (but we do it anyways because time is more important than space)
-  routing_state::singleton_runs =
-    std::vector<std::vector<int>>(vehicle_caps.size(), std::vector<int>(demand.size(), 0));
+  this->singleton_runs = std::vector<run>();
 
   // first vehicle assignments (iterate over runs)
   for (auto &run : graph.runs) {
@@ -108,13 +106,12 @@ routing_state::routing_state(
     while (run->max_load > fleet.capacity(vehicle))
     {
       run->max_load -= fleet.capacity(vehicle);
+      this->singleton_runs.emplace_back(site, fleet.capacity(vehicle), vehicle);
 
       vehicle = fleet.find_fitting_vehicle(run->sites,
                                            run->max_load,
                                            true);
-      
       fleet.reserve_vehicle(vehicle);
-      routing_state::singleton_runs[vehicle][site] += 1;
     }
 
     // only add the last one to the state
@@ -206,12 +203,7 @@ col_types routing_state::runs_as_cols() const
 
   std::vector<T> runs = graph.runs;
 
-  int n_singleton_runs = 0;
-  for (auto &v : routing_state::singleton_runs)
-    for (auto &n : v)
-      n_singleton_runs += n;
-
-  lui col_size = runs.size() + n_singleton_runs;
+  lui col_size = runs.size() + this->singleton_runs.size();
 
   std::map<T, int> visited_elements;
   std::map<int, std::vector<int>> orders;
@@ -267,22 +259,17 @@ col_types routing_state::runs_as_cols() const
   }
 
   // fill the rest up with singleton runs
-  for (lui vehicle = 0; vehicle < singleton_runs.size(); vehicle++)
+  for (auto &run : this->singleton_runs)
   {
-    for (lui site = 0; site < singleton_runs[vehicle].size(); site++)
-    {
-      for (int j = 0; j < singleton_runs[vehicle][site]; j++)
-      {
-        std::get<0>(cols)[i] = site + 1;
-        std::get<1>(cols)[i] = run_id;
-        std::get<2>(cols)[i] = 0;
-        std::get<3>(cols)[i] = vehicle;
-        std::get<4>(cols)[i] = fleet.capacity(vehicle);
-        std::get<5>(cols)[i] = 2 * distances.get(0, 1 + site);
-        run_id++;
-        i++;
-      }
-    }
+    int site = *(run.sites.begin());
+    std::get<0>(cols)[i] = site + 1;
+    std::get<1>(cols)[i] = run_id;
+    std::get<2>(cols)[i] = 0;
+    std::get<3>(cols)[i] = run.vehicle;
+    std::get<4>(cols)[i] = fleet.capacity(run.vehicle);
+    std::get<5>(cols)[i] = 2 * distances.get(0, 1 + site);
+    run_id++;
+    i++;
   }
 
   return cols;

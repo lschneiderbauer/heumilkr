@@ -4,6 +4,7 @@
 #include "distmat.h"
 #include "udg.h"
 #include "fleet.h"
+#include "run.h"
 #include <unordered_set>
 #include <vector>
 
@@ -35,7 +36,7 @@ private:
   udg graph;
 
   // indexed by vehicle x site
-  std::vector<std::vector<int>> singleton_runs;
+  std::vector<run> singleton_runs;
 };
 
 #endif
