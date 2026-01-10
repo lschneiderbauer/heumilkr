@@ -16,5 +16,5 @@ void run::combine(run &other_run, int new_vehicle)
 
 std::vector<int> run::ordered_sites(const distmat<double> &distances) const
 {
-    return tsp_greedy(_sites, distances);;
+    return tsp_greedy(_sites, distances);
 }

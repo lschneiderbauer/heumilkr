@@ -1,14 +1,13 @@
 #ifndef UNION_VIEW_H
 #define UNION_VIEW_H
 
-#include <unordered_set>
 #include <iterator>
 #include <utility>
 
-template<typename T>
+template<typename T, template<typename...> class C>
 class union_view {
 public:
-  using set_t = std::unordered_set<T>;
+  using set_t = C<T>;
   using const_iterator_t = typename set_t::const_iterator;
 
   union_view(const set_t &a, const set_t &b) noexcept
@@ -89,9 +88,9 @@ public:
 
     void skip_b_duplicates() noexcept {
       if (!b_ || !a_) return;
-      while (it_b_ != end_b_ && a_->find(*it_b_) != a_->end()) {
-        ++it_b_;
-      }
+      // while (it_b_ != end_b_ && a_->find(*it_b_) != a_->end()) {
+      //   ++it_b_;
+      // }
       if (it_b_ == end_b_) {
         // mark as end sentinel
         a_ = nullptr;
