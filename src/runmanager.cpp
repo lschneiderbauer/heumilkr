@@ -11,17 +11,18 @@
 RunManager::RunManager(const std::vector<double> &demand,
                        std::unique_ptr<distmat<double>> distances,
                        std::shared_ptr<Fleet> fleet)
-  : fleet(fleet),
-    distances(std::move(distances)),
-    sites_relinked(demand.size(), 0),
-    runs(demand.size())
+    : fleet(fleet),
+      distances(std::move(distances)),
+      sites_relinked(demand.size(), 0),
+      runs(demand.size())
 {
   this->savings = calc_savings(*(this->distances));
 
   runs.reserve(demand.size()); // just in case
   for (size_t i = 0; i < demand.size(); i++)
   {
-    if (demand[i] <= 0) {
+    if (demand[i] <= 0)
+    {
       throw std::runtime_error("RunManager: demand has to be strictly positive");
     }
 
@@ -32,27 +33,26 @@ RunManager::RunManager(const std::vector<double> &demand,
 
   // first vehicle assignments (iterate over runs)
   // initial runs have only a single site
-  for (auto &run : runs) {
+  for (auto &run : runs)
+  {
     int vehicle = fleet->find_fitting_vehicle(run->sites(),
-                                          run->max_load,
-                                          true);
+                                              run->max_load,
+                                              true);
 
-  
     // only reserve vehicles for non-empty runs
     fleet->reserve_vehicle(vehicle);
-  
+
     // special treatment for the case when demand is higher than capacity
     while (run->max_load > fleet->capacity(vehicle))
     {
       run->max_load -= fleet->capacity(vehicle);
       this->fixed_singleton_runs.emplace_back(
-        *(run->sites().begin()), fleet->capacity(vehicle), vehicle
-      );
+          *(run->sites().begin()), fleet->capacity(vehicle), vehicle);
 
       vehicle = fleet->find_fitting_vehicle(run->sites(),
-                                          run->max_load,
-                                          true);
-      
+                                            run->max_load,
+                                            true);
+
       // only reserve vehicles for non-empty runs
       fleet->reserve_vehicle(vehicle);
     }
@@ -62,9 +62,11 @@ RunManager::RunManager(const std::vector<double> &demand,
   }
 }
 
-int unique_count(union_view<int, std::vector> uv) {
+int unique_count(union_view<int, std::vector> uv)
+{
   std::unordered_set<int> s;
-  for(auto it = uv.begin(); it != uv.end(); ++it) {
+  for (auto it = uv.begin(); it != uv.end(); ++it)
+  {
     s.insert(*it);
   }
   return s.size();
@@ -73,11 +75,11 @@ int unique_count(union_view<int, std::vector> uv) {
 RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
                        const distmat<double> &new_distances,
                        const std::vector<int> &site_ind_map1,
-                       const std::vector<int> &site_ind_map2) :
-                       fleet(runm1.fleet),
-                       distances(std::make_unique<distmat<double>>(new_distances))
+                       const std::vector<int> &site_ind_map2) : fleet(runm1.fleet),
+                                                                distances(std::make_unique<distmat<double>>(new_distances))
 {
-  if (runm1.fleet != runm2.fleet) {
+  if (runm1.fleet != runm2.fleet)
+  {
     throw std::runtime_error("RunManager: cannot combine two RunManagers with different fleets");
   }
 
@@ -93,41 +95,51 @@ RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
 
   // we have to mainly take care of identifying sites of run1 and run2 correctly
   size_t site_size = unique_count(union_view(site_ind_map1, site_ind_map2));
-  
+
   this->sites_relinked = std::vector<int>(site_size);
-  for (size_t i = 0; i < runm1.sites_relinked.size(); i++) {
+  for (size_t i = 0; i < runm1.sites_relinked.size(); i++)
+  {
     this->sites_relinked[site_ind_map1[i]] = runm1.sites_relinked[i];
   }
-  for (size_t i = 0; i < runm2.sites_relinked.size(); i++) {
+  for (size_t i = 0; i < runm2.sites_relinked.size(); i++)
+  {
     this->sites_relinked[site_ind_map2[i]] = runm2.sites_relinked[i];
   }
 
   this->runs = std::vector<std::shared_ptr<run>>(site_size);
-  for (const auto &rptr : runm1.runs) {
+  for (const auto &rptr : runm1.runs)
+  {
     std::unordered_set<int> new_sites;
-    for (auto site : rptr->sites()) {
+    for (auto site : rptr->sites())
+    {
       new_sites.insert(site_ind_map1[site]);
     }
     auto new_run = std::make_shared<run>(new_sites, rptr->max_load, rptr->vehicle);
-    for (const auto site : new_run->sites()) {
+    for (const auto site : new_run->sites())
+    {
       this->runs[site] = new_run;
     }
   }
-  for (const auto &rptr : runm2.runs) {
+  for (const auto &rptr : runm2.runs)
+  {
     std::unordered_set<int> new_sites;
-    for (auto site : rptr->sites()) {
+    for (auto site : rptr->sites())
+    {
       new_sites.insert(site_ind_map2[site]);
     }
     auto new_run = std::make_shared<run>(new_sites, rptr->max_load, rptr->vehicle);
-    for (const auto site : new_run->sites()) {
+    for (const auto site : new_run->sites())
+    {
       this->runs[site] = new_run;
     }
   }
 
   this->fixed_singleton_runs = std::vector<run>();
-  for (const auto &srun : runm1.fixed_singleton_runs) {
+  for (const auto &srun : runm1.fixed_singleton_runs)
+  {
     std::unordered_set<int> new_sites;
-    for (auto site : srun.sites()) {
+    for (auto site : srun.sites())
+    {
       new_sites.insert(site_ind_map1[site]);
     }
     this->fixed_singleton_runs.emplace_back(new_sites, srun.max_load, srun.vehicle);
@@ -136,8 +148,10 @@ RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
 
 void RunManager::combine_runs(const int a, const int b, const int new_vehicle)
 {
-  if (a == b) throw std::runtime_error("should not be reachable");
-  if (runs[a] == runs[b]) throw std::runtime_error("should not be reachable");
+  if (a == b)
+    throw std::runtime_error("should not be reachable");
+  if (runs[a] == runs[b])
+    throw std::runtime_error("should not be reachable");
   if (!links_to_origin(a) || !links_to_origin(b))
     throw std::runtime_error("should not be reachable");
 
@@ -168,7 +182,7 @@ void RunManager::combine_runs(const int a, const int b, const int new_vehicle)
 
 bool RunManager::links_to_origin(const int a) const
 {
-  return(sites_relinked[a] < 2);
+  return (sites_relinked[a] < 2);
 }
 
 bool RunManager::edges_share_run(const int a, const int b) const
@@ -217,24 +231,24 @@ std::tuple<int, int, int> RunManager::best_link() const
       // it seems important for performance that "links_to_origin()" is checked last
       // (probably as it is the most expensive operation)
       if (!edges_share_run(i, j) &&
-            ((saving = savings.get(i, j)) > max_val) &&
-            links_to_origin(i) && links_to_origin(j))
+          ((saving = savings.get(i, j)) > max_val) &&
+          links_to_origin(i) && links_to_origin(j))
       {
 
         fleet->release_vehicle(runs[i]->vehicle);
         fleet->release_vehicle(runs[j]->vehicle);
 
         selected_vehicle =
-          fleet->find_fitting_vehicle(
-              union_view(runs[i]->sites(), runs[j]->sites()),
-              runs[i]->max_load + runs[j]->max_load,
-              false
-          );
+            fleet->find_fitting_vehicle(
+                union_view(runs[i]->sites(), runs[j]->sites()),
+                runs[i]->max_load + runs[j]->max_load,
+                false);
 
         fleet->reserve_vehicle(runs[i]->vehicle);
         fleet->reserve_vehicle(runs[j]->vehicle);
 
-        if (selected_vehicle != -1) {
+        if (selected_vehicle != -1)
+        {
           max_val = saving;
           best_link = {i, j, selected_vehicle};
         }
@@ -290,13 +304,12 @@ void RunManager::opt_vehicles()
   for (auto &run : runs)
   {
     int vehicle =
-      fleet->find_fitting_vehicle(
-        run->sites(),
-        run->max_load,
-        true
-      );
+        fleet->find_fitting_vehicle(
+            run->sites(),
+            run->max_load,
+            true);
 
-    fleet->reserve_vehicle(vehicle);                                          
+    fleet->reserve_vehicle(vehicle);
     run->vehicle = vehicle;
   }
 }
@@ -331,7 +344,6 @@ col_types RunManager::runs_as_cols() const
   std::map<int, std::vector<int>> orders;
   std::map<int, double> run_dists;
 
-
   col_types cols = {
       std::vector<int>(col_size),
       std::vector<int>(col_size),
@@ -341,7 +353,6 @@ col_types RunManager::runs_as_cols() const
       std::vector<double>(col_size)};
 
   int run_id = 0;
-
 
   // Iterate over sites
   size_t i = 0;
@@ -398,4 +409,3 @@ col_types RunManager::runs_as_cols() const
 
   return cols;
 }
-

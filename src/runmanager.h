@@ -15,7 +15,6 @@ using col_types = std::tuple<
     std::vector<double>,
     std::vector<double>>;
 
-
 class RunManager
 {
 public:
@@ -28,9 +27,9 @@ public:
   // creates a new RunManager by combining two existing ones
   // note that their fleets have to be identical for that to make sense
   RunManager(const RunManager &runm1, const RunManager &runm2,
-                      const distmat<double> &new_distances,
-                       const std::vector<int> &site_ind_map1,
-                       const std::vector<int> &site_ind_map2);
+             const distmat<double> &new_distances,
+             const std::vector<int> &site_ind_map1,
+             const std::vector<int> &site_ind_map2);
 
   bool relink_best();
 
@@ -45,7 +44,6 @@ public:
 
   std::shared_ptr<Fleet> fleet;
   const std::unique_ptr<distmat<double>> distances;
-
 
 private:
   // combines the two runs traversing site a and site b with the new vehicle new_vehicle.
@@ -69,6 +67,5 @@ private:
   // the runs it belongs to (which in turn has all the other references)
   std::vector<std::shared_ptr<run>> runs;
 };
-
 
 #endif
