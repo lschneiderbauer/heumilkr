@@ -21,6 +21,10 @@ class run
       : max_load(max_load),
         vehicle(vehicle),
         _sites(std::unordered_set<int>{site}) { };
+    run(std::unordered_set<int> &sites, double max_load, int vehicle)
+      : max_load(max_load),
+        vehicle(vehicle),
+        _sites(sites) { };
     void combine(run &other_run, int new_vehicle);
     const std::unordered_set<int>& sites() const {
         return _sites;

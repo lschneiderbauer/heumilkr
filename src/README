@@ -1,0 +1,5 @@
+## Makefile.debug
+
+* Makefile.debug is for debugging purposes and compiles without any R requirements.
+* The reason Makefile.debug is not just called "Makefile" is that this would interfere with the R package compilation process.
+* Makefile.debug creates an executable "debug". The entry point `int main()` is only compiled in debug-mode and defines a specific debuggin scenario.
