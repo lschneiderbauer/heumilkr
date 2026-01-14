@@ -1,6 +1,7 @@
 #include <iterator>
 #include <vector>
 #include "runmanager.h"
+#include <cassert>
 
 // selects demand with a given sign, and always returns positive values
 std::tuple<std::vector<int>, std::vector<double>, distmat<double>>
@@ -46,6 +47,10 @@ col_types cpp_clarke_wright(const std::vector<double> &demand,
                             const std::vector<int> &restr_sites,
                             const std::vector<int> &restr_vehicles)
 {
+  // check that all inputs have the correct size
+  assert(distances.size() == (demand.size() + 1)*(demand.size())/2);
+  assert(capacities.size() == n_res.size());
+
   std::vector<std::unordered_set<int>> restricted_vehicles(demand.size());
   for (unsigned int i = 0; i < restr_sites.size(); i++)
   {
@@ -104,8 +109,10 @@ col_types cpp_clarke_wright(const std::vector<double> &demand,
     while (runm_pos.relink_best())
     {
     };
-    runm_pos.opt_vehicles();
-
+    while (runm_pos.opt_vehicles())
+    {
+    };
+    
     if (!have_neg)
     {
       return (runm_pos.runs_as_cols());
@@ -127,13 +134,16 @@ col_types cpp_clarke_wright(const std::vector<double> &demand,
   RunManager runm_neg(demand_neg,
                       std::make_unique<distmat<double>>(distances_neg),
                       fleet);
-
+  
   if (have_neg)
   {
     while (runm_neg.relink_best())
     {
     };
-    runm_neg.opt_vehicles();
+    
+    while (runm_neg.opt_vehicles())
+    {
+    };
 
     if (!have_pos)
     {
@@ -141,14 +151,17 @@ col_types cpp_clarke_wright(const std::vector<double> &demand,
     }
   }
 
-  return (
-      RunManager(
-          runm_pos,
-          runm_neg,
-          distm,
-          ind_pos,
-          ind_neg)
-          .runs_as_cols());
+  // if we have both, combine then and optimize again
+  RunManager runm_all(runm_pos, runm_neg, distm, ind_pos, ind_neg);
+
+  while(runm_all.relink_best([](double l1, double l2){return(std::max(l1, l2));}))
+  {
+  };
+  while (runm_all.opt_vehicles())
+  {
+  };
+
+  return(runm_all.runs_as_cols());
 }
 
 #ifndef NDEBUG
@@ -157,10 +170,10 @@ int main()
 {
   col_types cols =
       cpp_clarke_wright(
-          std::vector<double>{-1, 1},
-          std::vector<double>{5, 10, 5},
+          std::vector<double>{-3, -2, 1, 2},
+          std::vector<double>{5, 10, 5, 4, 5, 2, 12, 13, 10, 3},
           std::vector<int>{100},
-          std::vector<double>{99999},
+          std::vector<double>{5},
           std::vector<int>{},
           std::vector<int>{});
 
