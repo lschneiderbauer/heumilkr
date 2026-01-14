@@ -364,12 +364,12 @@ double run_distance(const std::vector<int> ordered_sites,
                     const distmat<double> &d)
 {
   auto it = ordered_sites.begin();
-  double distance = 2 * d.get(0, 1 + *it);
-
+  double distance = d.get(0, 1 + *it);
   for (; it < (ordered_sites.end() - 1); it++)
   {
     distance += d.get(1 + *it, 1 + *(it + 1));
   }
+  distance += d.get(0, 1 + *it);
 
   return distance;
 }
