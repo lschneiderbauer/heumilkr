@@ -1,11 +1,12 @@
 #include "runmanager.h"
+#include "union_view.h"
+
 #include <unordered_set>
 #include <map>
 #include <algorithm>
 #include <iterator>
 #include <vector>
 #include <memory>
-#include "union_view.h"
 #include <cassert>
 
 RunManager::RunManager(const std::vector<double> &demand,
@@ -38,8 +39,6 @@ RunManager::RunManager(const std::vector<double> &demand,
     int vehicle = fleet->find_fitting_vehicle(run->sites(),
                                               run->max_load,
                                               true);
-
-    // only reserve vehicles for non-empty runs
     fleet->reserve_vehicle(vehicle);
 
     // special treatment for the case when demand is higher than capacity
@@ -140,6 +139,7 @@ RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
   }
 
   this->fixed_singleton_runs = std::vector<run>();
+  this->fixed_singleton_runs.reserve(runm1.fixed_singleton_runs.size() + runm2.fixed_singleton_runs.size());
   for (const auto &srun : runm1.fixed_singleton_runs)
   {
     std::unordered_set<int> new_sites;
@@ -149,16 +149,35 @@ RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
     }
     this->fixed_singleton_runs.emplace_back(new_sites, srun.max_load, srun.vehicle);
   }
+  for (const auto &srun : runm2.fixed_singleton_runs)
+  {
+    std::unordered_set<int> new_sites;
+    for (auto site : srun.sites())
+    {
+      new_sites.insert(site_ind_map2[site]);
+    }
+    this->fixed_singleton_runs.emplace_back(new_sites, srun.max_load, srun.vehicle);
+  }
+
+  // we only want to consider connecting runs from one set to the other
+  this->consider_optim1 = std::vector<int>(site_size, false);
+  this->consider_optim2 = std::vector<int>(site_size, false);
+  for (const auto site : site_ind_map1) {
+    this->consider_optim1[site] = true;
+  }
+  for (const auto site : site_ind_map2) {
+    this->consider_optim2[site] = true;
+  }
+
+  // recalculate savings (there are more efficient ways)
+  this->savings = calc_savings(*(this->distances));
 }
 
-void RunManager::combine_runs(const int a, const int b, const int new_vehicle)
+void RunManager::combine_runs(const int a, const int b, const int new_vehicle, binop_dbl combine_load)
 {
-  if (a == b)
-    throw std::runtime_error("should not be reachable");
-  if (runs[a] == runs[b])
-    throw std::runtime_error("should not be reachable");
-  if (!links_to_origin(a) || !links_to_origin(b))
-    throw std::runtime_error("should not be reachable");
+  assert(a != b);
+  assert(runs[a] != runs[b]);
+  assert(links_to_origin(a) && links_to_origin(b));
 
   /*
   In the original algorithm we are only supposed to attempt to combine vertices that
@@ -174,7 +193,7 @@ void RunManager::combine_runs(const int a, const int b, const int new_vehicle)
 
   sites_relinked[a] += 1;
   sites_relinked[b] += 1;
-  runs[a]->combine(*runs[b], new_vehicle);
+  runs[a]->combine(*runs[b], new_vehicle, combine_load);
 
   // all vertices in the runs are affected,
   // we need to reset the pointer of the ones that b pointed
@@ -213,7 +232,7 @@ distmat<double> RunManager::calc_savings(const distmat<double> &d) const
 }
 
 // returns Site 1, Site 2, Used vehicle
-std::tuple<int, int, int> RunManager::best_link() const
+std::tuple<int, int, int> RunManager::best_link(binop_dbl combine_load) const
 {
   std::tuple<int, int, int> best_link = {-1, -1, -1};
   double max_val = 0;
@@ -232,21 +251,18 @@ std::tuple<int, int, int> RunManager::best_link() const
       int selected_vehicle;
       double saving;
 
-      // primitive benchmarking shows that
-      // it seems important for performance that "links_to_origin()" is checked last
-      // (probably as it is the most expensive operation)
-      if (!edges_share_run(i, j) &&
+      if (is_considered(i, j) &&
+          !edges_share_run(i, j) &&
           ((saving = savings.get(i, j)) > max_val) &&
           links_to_origin(i) && links_to_origin(j))
       {
-
         fleet->release_vehicle(runs[i]->vehicle);
         fleet->release_vehicle(runs[j]->vehicle);
 
         selected_vehicle =
             fleet->find_fitting_vehicle(
                 union_view(runs[i]->sites(), runs[j]->sites()),
-                runs[i]->max_load + runs[j]->max_load,
+                combine_load(runs[i]->max_load, runs[j]->max_load),
                 false);
 
         fleet->reserve_vehicle(runs[i]->vehicle);
@@ -266,12 +282,12 @@ std::tuple<int, int, int> RunManager::best_link() const
 
 // TRUE if something got relinked,
 // FALSE if nothing got relinked (i.e. the procedure stabilized)
-bool RunManager::relink_best()
+bool RunManager::relink_best(binop_dbl combine_load)
 {
   int a;
   int b;
   int vehicle;
-  std::tie(a, b, vehicle) = best_link();
+  std::tie(a, b, vehicle) = best_link(combine_load);
 
   // printf("---\n");
   // printf("Best Link (%d,%d)\n", a, b);
@@ -287,7 +303,7 @@ bool RunManager::relink_best()
     fleet->release_vehicle(this->runs[b]->vehicle);
     fleet->reserve_vehicle(vehicle);
 
-    combine_runs(a, b, vehicle);
+    combine_runs(a, b, vehicle, combine_load);
 
     return true;
   }
@@ -297,26 +313,51 @@ bool RunManager::relink_best()
   }
 }
 
-void RunManager::opt_vehicles()
+bool RunManager::opt_vehicles()
 {
-  // first release all vehicles
-  for (auto &run : this->runs)
-  {
-    fleet->release_vehicle(run->vehicle);
-  }
+  /* 
+  It might seem more efficient to release all vehicles first and then determine them from
+  the ground up.
+  However, we run the risk that we cannot reconstruct a vehicle configuration that
+  satisfies all requirements (so that we run out of required vehicles).
+  -> We simply try one after another, and iterate.
+  */
+
+  bool changed = false;
 
   // then reassign fitting vehicles
   for (auto &run : runs)
   {
+    int old_vehicle = run->vehicle;
+
+    // we are guaranteed to find at least that vehicle one again
+    fleet->release_vehicle(old_vehicle);
+
     int vehicle =
         fleet->find_fitting_vehicle(
             run->sites(),
             run->max_load,
-            true);
+            false);
 
     fleet->reserve_vehicle(vehicle);
-    run->vehicle = vehicle;
+
+    if (old_vehicle != vehicle) {
+      run->vehicle = vehicle;
+      changed = true;
+    }
   }
+
+  return changed;
+}
+
+bool RunManager::is_considered(const int site1, const int site2) const
+{
+  //printf("site %d-%d: %d\n", site1, site2, consider_optim1.size() == 0 ||
+  //        (consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1]));
+
+  return(consider_optim1.size() == 0 ||
+          (consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1])
+        );
 }
 
 double run_distance(const std::vector<int> ordered_sites,

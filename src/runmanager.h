@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_set>
+
 #include "run.h"
 #include "fleet.h"
 
@@ -14,6 +15,8 @@ using col_types = std::tuple<
     std::vector<int>,
     std::vector<double>,
     std::vector<double>>;
+
+
 
 class RunManager
 {
@@ -31,13 +34,13 @@ public:
              const std::vector<int> &site_ind_map1,
              const std::vector<int> &site_ind_map2);
 
-  bool relink_best();
+  bool relink_best(binop_dbl combine_load = [](double l1, double l2) {return(l1 + l2);});
 
   // After we have the final routes, we might still be able to assign
   // better vehicles for each route
   // (we might have released some high-priority vehicles on the way which
   // are now unused)
-  void opt_vehicles();
+  bool opt_vehicles();
 
   // returns the current runs as column vectors for data frame creation
   col_types runs_as_cols() const;
@@ -47,7 +50,7 @@ public:
 
 private:
   // combines the two runs traversing site a and site b with the new vehicle new_vehicle.
-  void combine_runs(const int a, const int b, const int new_vehicle);
+  void combine_runs(const int a, const int b, const int new_vehicle, binop_dbl combine_load);
 
   // is site a directly linked to the origin via its traversing run?
   bool links_to_origin(const int a) const;
@@ -57,7 +60,7 @@ private:
 
   distmat<double> calc_savings(const distmat<double> &d) const;
 
-  std::tuple<int, int, int> best_link() const;
+  std::tuple<int, int, int> best_link(binop_dbl combine_load) const;
 
   distmat<double> savings;
   std::vector<int> sites_relinked;
@@ -66,6 +69,13 @@ private:
   // a vector of runs (of length of the sites): each site has a reference to
   // the runs it belongs to (which in turn has all the other references)
   std::vector<std::shared_ptr<run>> runs;
+
+  bool is_considered(const int site1, const int site2) const;
+
+  // site-indexed: consider only site1-site2 combination for optimization
+  // if vectors are not empty
+  std::vector<int> consider_optim1;
+  std::vector<int> consider_optim2;
 };
 
 #endif

@@ -1,10 +1,11 @@
 #ifndef RUN_H
 #define RUN_H
 
-#include <vector>
-#include <memory>
 #include <unordered_set>
+#include <functional>
 #include "distmat.h"
+
+using binop_dbl = std::function<double(const double, const double)>;
 
 class run
 {
@@ -24,7 +25,7 @@ public:
       : max_load(max_load),
         vehicle(vehicle),
         _sites(sites) {};
-  void combine(run &other_run, int new_vehicle);
+  void combine(run &other_run, int new_vehicle, binop_dbl combine_load);
   const std::unordered_set<int> &sites() const
   {
     return _sites;
