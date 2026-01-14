@@ -53,7 +53,12 @@ RunManager::RunManager(const std::vector<double> &demand,
                                             run->max_load,
                                             true);
 
-      // only reserve vehicles for non-empty runs
+      if (vehicle == -1) {
+        throw std::runtime_error(
+          "Not enough vehicles available to fulfill all demands trivially."
+          " Solver cannot proceed in that case.");
+      }
+
       fleet->reserve_vehicle(vehicle);
     }
 
