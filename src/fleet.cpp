@@ -19,6 +19,10 @@ void Fleet::release_vehicle(const int vehicle)
 
 void Fleet::reserve_vehicle(const int vehicle)
 {
+    if (vehicle == -1) {
+        throw std::runtime_error("blah.");
+    }
+
     if (vehicle_avail[vehicle] <= 0)
     {
         throw std::runtime_error("No available vehicles of this type to pop.");
@@ -69,10 +73,6 @@ int Fleet::find_fitting_vehicle(ForwardIt sites, const double max_load, bool max
                 return vehicle;
             }
         }
-
-        throw std::runtime_error(
-            "Not enough vehicles available to fulfill all demands trivially."
-            " Solver cannot proceed in that case.");
     }
 
     return -1;
