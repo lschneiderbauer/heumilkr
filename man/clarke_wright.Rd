@@ -16,7 +16,9 @@ clarke_wright(
 The \code{i}th entry refers to the demand of site \code{i} (and the length
 of the vector equals the number of sites \code{N} with demands). The
 units of demand values need to match the units of vehicle capacity values.
-\code{NA} values are not allowed.}
+\code{NA} values are not allowed. Negative values are also allowed and are
+interpreted as freight volume that needs to be delivered to the source
+(origin site).}
 
 \item{distances}{An object of class \code{dist}, created by \code{\link[stats:dist]{stats::dist()}}, with
 \code{(N + 1)} locations describing the distances between individual
@@ -58,16 +60,17 @@ Each row defines a restriction: vehicle type \code{vehicle} can not approach sit
 }
 \value{
 Returns a "\code{heumilkr_solution}" object, a \code{\link[=data.frame]{data.frame()}} with one row per
-site-run combination bestowed with additional attributes. Its columns
-consist of:
+site-run combination bestowed with additional attributes. Each records reflects
+a run visit of a particular site. It is implied that each run starts and ends at the origin.
+Its columns consist of:
 \itemize{
-\item \code{site} - The site index (i.e. the index of the \code{demand} vector) associated
+\item \code{site} - The site index (i.e. the index of the (1-indexed) \code{demand} vector) associated
 to the run.
-\item \code{run} - Identifies the run the site is assigned to.
+\item \code{run} - Identifies the run/tour the site is assigned to.
 \item \code{order}  - Integer values providing the visiting order within each run.
 \item \code{vehicle} - The vehicle type index (as provided in \code{vehicles}) associated
 to the run.
-\item \code{load} - The actual load in units of \code{demand} on the particular run.
+\item \code{load} - The initial load in units of \code{demand} per particular run.
 \item \code{distance} - The travel distance of the particular run.
 }
 
@@ -77,7 +80,7 @@ to only a single run.
 \description{
 Finds a quasi-optimal solution to the Capacitated Vehicle Routing
 Problem (CVRP). It is assumed that all demands will be satisfied by a
-single source.
+single source (i.e. "depot") which is the origin of all runs.
 }
 \details{
 See the original paper,
