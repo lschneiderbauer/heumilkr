@@ -114,9 +114,9 @@ RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
   for (const auto &rptr : runm1.runs)
   {
     std::unordered_set<int> new_sites;
-    for (auto site : rptr->sites())
+    for (auto old_site : rptr->sites())
     {
-      new_sites.insert(site_ind_map1[site]);
+      new_sites.insert(site_ind_map1[old_site]);
     }
     auto new_run = std::make_shared<run>(new_sites, rptr->max_load, rptr->vehicle);
     for (const auto site : new_run->sites())
@@ -127,9 +127,9 @@ RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
   for (const auto &rptr : runm2.runs)
   {
     std::unordered_set<int> new_sites;
-    for (auto site : rptr->sites())
+    for (auto old_site : rptr->sites())
     {
-      new_sites.insert(site_ind_map2[site]);
+      new_sites.insert(site_ind_map2[old_site]);
     }
     auto new_run = std::make_shared<run>(new_sites, rptr->max_load, rptr->vehicle);
     for (const auto site : new_run->sites())
@@ -352,9 +352,18 @@ bool RunManager::opt_vehicles()
 
 bool RunManager::is_considered(const int site1, const int site2) const
 {
-  //printf("site %d-%d: %d\n", site1, site2, consider_optim1.size() == 0 ||
-  //        (consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1]));
+  if (consider_optim1.size() > 0 &&
+          ((consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1]))) {
+    
+  printf("---\n");
+  printf("site %d-%d\n", site1, site2);
+  printf("c 11: %d\n", consider_optim1[site1]);
+  printf("c 22: %d\n", consider_optim2[site2]);
+  printf("c 21: %d\n", consider_optim2[site1]);
+  printf("c 12: %d\n", consider_optim1[site2]);
+  fflush(stdout);
 
+  }
   return(consider_optim1.size() == 0 ||
           (consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1])
         );

@@ -2,7 +2,7 @@
 #'
 #' Finds a quasi-optimal solution to the Capacitated Vehicle Routing
 #' Problem (CVRP). It is assumed that all demands will be satisfied by a
-#' single source.
+#' single source (i.e. "depot") which is the origin of all runs.
 #'
 #' @details
 #' See the original paper,
@@ -14,7 +14,10 @@
 #'  The `i`th entry refers to the demand of site `i` (and the length
 #'  of the vector equals the number of sites `N` with demands). The
 #'  units of demand values need to match the units of vehicle capacity values.
-#'  `NA` values are not allowed.
+#'  `NA` values are not allowed. Negative values are also allowed and are
+#'  interpreted as freight volume that needs to be delivered from site `i`
+#'  to the source (origin), i.e. "backhaul". Note that those sites can only
+#'  occur at the end of runs that visit sites with positive demand.
 #'
 #' @param distances
 #'  An object of class `dist`, created by [stats::dist()], with
@@ -55,15 +58,16 @@
 #'
 #' @return
 #'  Returns a "`heumilkr_solution`" object, a [data.frame()] with one row per
-#'  site-run combination bestowed with additional attributes. Its columns
-#'  consist of:
-#'  * `site` - The site index (i.e. the index of the `demand` vector) associated
+#'  site-run combination bestowed with additional attributes. Each records reflects
+#'  a run visit of a particular site. It is implied that each run starts and ends at the origin.
+#'  Its columns consist of:
+#'  * `site` - The site index (i.e. the index of the (1-indexed) `demand` vector) associated
 #'             to the run.
-#'  * `run` - Identifies the run the site is assigned to.
+#'  * `run` - Identifies the run/tour the site is assigned to.
 #'  * `order`  - Integer values providing the visiting order within each run.
 #'  * `vehicle` - The vehicle type index (as provided in `vehicles`) associated
 #'                to the run.
-#'  * `load` - The actual load in units of `demand` on the particular run.
+#'  * `load` - The initial load in units of `demand` per particular run.
 #'  * `distance` - The travel distance of the particular run.
 #'
 #'  Unless a site demand exceeds the vehicle capacities it is always assigned
@@ -113,7 +117,7 @@ clarke_wright <- function(
 
   heumilkr_solution(
     .Call(
-      `_heumilkr_cpp_clarke_wright`,
+      `_heumilkr_r_cpp_clarke_wright`,
       as.numeric(demand),
       distances,
       vehicles$n,

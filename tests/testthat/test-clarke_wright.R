@@ -31,10 +31,10 @@ test_that("every site is represented in output", {
       dist(pos),
       data.frame(n = NA_integer_, caps = 99999)
     )
-  
+
   expect_equal(
     sort(unique(res$site)),
-    1:length(demand)
+    seq_along(demand) - 1
   )
 })
 
@@ -42,7 +42,7 @@ test_that("Sum of loads over all runs equals sum of demands", {
   skip_if_not_installed("hedgehog")
 
   hedgehog::forall(
-    gen.demand_net(max_sites = 10L),
+    gen.demand_net(max_sites = 10L, min_demand = 1),
     function(demand_net) {
       res <-
         clarke_wright(
@@ -95,6 +95,8 @@ test_that("Limited vehicles with more priority should always be exhausted
         )
       # note: we deliberately put the higher capacity vehicle first,
       # so this one always gets chosen.
+
+      # print(constructive::construct(demand_net))
 
       expect_equal(
         nrow(unique(res[res$vehicle == 0, ][, c("run", "vehicle")])),
@@ -322,4 +324,98 @@ test_that("README example result is preserved.", {
     )
 
   expect_snapshot(res)
+})
+
+test_that("Truck loads are always within physical boundaries at any point on the run (even with negative demands)", {
+  skip_if_not_installed("hedgehog")
+
+  hedgehog::forall(
+    gen.demand_net(max_sites = 10L),
+    function(demand_net) {
+      res <-
+        clarke_wright(
+          demand_net$demand,
+          demand_net$distances,
+          data.frame(n = c(NA_integer_, 3L), caps = c(60, 120))
+        )
+
+      res2 <-
+        merge(
+          res,
+          data.frame(
+            site = seq_along(demand_net$demand) - 1,
+            demand = demand_net$demand
+          ),
+          by = "site"
+        )
+
+      load_by_run <- by(
+        res2,
+        res2$run,
+        FUN = function(x) {
+          init_load = sum(pmax(0, x$demand))
+          init_load - cumsum(x$demand[1 + x$order])
+        },
+        simplify = FALSE
+      )
+
+      print(constructive::construct(demand_net))
+
+      for (load in load_by_run) {
+        expect_all_true(load >= 0)
+        expect_all_true(load <= 120)
+      }
+      
+    }
+  )
+})
+
+
+test_that("Sum of absolute demands over run equals the load", {
+  skip_if_not_installed("hedgehog")
+
+  # requirement for that to be true:
+  # * only count positive demands
+  # * demand is always <= vehicle capacity
+  hedgehog::forall(
+    gen.demand_net(max_sites = 10L),
+    function(demand_net) {
+      res <-
+        clarke_wright(
+          demand_net$demand,
+          demand_net$distances,
+          data.frame(n = c(NA_integer_, 3L), caps = c(60, 120))
+        )
+
+      res1 <- merge(
+        res,
+        data.frame(
+          site = seq_along(demand_net$demand),
+          demand = demand_net$demand
+        ),
+        by = "site"
+      )
+
+      expect_equal(
+        unique(data.frame(res$run, res$load))$res.load,
+        as.numeric(by(res1, res1$run, function(x) sum(abs(x$demand))))
+      )
+    }
+  )
+})
+
+
+test_that("Example scenario with negative demand yields a single run", {
+  res <- clarke_wright(
+    demand = c(10, 10, 10, -5),
+    distances = stats::dist(
+      data.frame(
+        x = c(0, 1, 2, 3, 4),
+        y = c(0, 0, 1, 0, 1)
+      )
+    ),
+    vehicles = data.frame(n = NA_integer_, caps = 30)
+  )
+
+  expect_equal(length(unique(res$run)), 1)
 })

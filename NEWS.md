@@ -4,6 +4,11 @@
 
 -   `clarke_wright()`: The resulting site-index is now 1-indexed, to be consistent with R usage and reserve index 0 for the origin.
 
+## New features / improvements
+
+-   `clarke_wright()` now supports negative demands: sites with negative demand are treated as "backhaul" points, i.e. they deliver goods back to the depot. By design they can only be visited after all positive-demand sites have been served.
+-   `clarke_wright()` has gained runtime speedup compared to the previous version by roughly a factor of 3 (the actual speedup depends on input characteristics).
+
 ## Bugfixes
 
 -   `cvrplib_ls()`, `cvrplib_download()`: Upstream website has changed. Fix malfunctioning functions by adjusting webscraping accordingly.
