@@ -4,12 +4,14 @@
 \alias{cvrplib_download}
 \title{CVRPLIB problem instance downloader}
 \usage{
-cvrplib_download(qualifier)
+cvrplib_download(qualifier, cvrplib_url = "https://galgos.inf.puc-rio.br")
 }
 \arguments{
-\item{qualifier}{The qualifier of the problem instance. E.g. "tai/tai150d".
+\item{qualifier}{The qualifier of the problem instance. E.g. "tai150d".
 This can either be inferred directly from the website or by the output of
 \code{\link[=cvrplib_ls]{cvrplib_ls()}}.}
+
+\item{cvrplib_url}{The base URL of the CVRPLIB website. Defaults to https://galgos.inf.puc-rio.br.}
 }
 \value{
 Returns a "\code{cvrplib_instance}" object which contains CVRPLIB problem

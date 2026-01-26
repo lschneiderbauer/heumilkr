@@ -140,35 +140,55 @@ cvrplib_clarke_wright_perf2 <- function(cvrplib_instance) {
   )
 }
 
-cvrplib_url <- "https://galgos.inf.puc-rio.br/"
-
 #' List available CVRPLIB online data
 #'
 #' Scrapes the CVRPLIB website to look for available data sets.
 #' This function call can take some time.
 #'
+#' @param cvrplib_url
+#'  The base URL of the CVRPLIB website. Defaults to https://galgos.inf.puc-rio.br.
 #' @return
-#'  A vector of data set qualifiers which can be used with [cvrplib_download()].
+#'  A [data.frame()] where each row represents a CVRPLIB instance with the
+#'  following columns:
+#'  * `name` - Instance qualifiers which can be used with [cvrplib_download()].
+#'  * `instance_url` - The URL to the instance file.
+#'  * `solution_url` - The URL to the solution file.
 #'
 #' @family cvrplib
 #' @concept cvrplib
 #' @export
-cvrplib_ls <- function() {
-  # reading directories first
-  all_hrefs <-
-    xml2::xml_attr(
-      xml2::xml_find_all(
-        xml2::read_html(paste0(
-          readLines(url(paste0(cvrplib_url, "cvrplib/en/instances"))),
-          collapse = "\n"
-        )),
-        "//a[@href]"
-      ),
-      "href"
+cvrplib_ls <- function(cvrplib_url = "https://galgos.inf.puc-rio.br") {
+  html_content <-
+    xml2::read_html(
+      paste0(
+        readLines(url(paste0(cvrplib_url, "/cvrplib/en/instances"))),
+        collapse = "\n"
+      )
     )
 
-  is_vrp <- grepl("/cvrplib/uploads/instances/CVRP/(.*)\\.vrp$", all_hrefs)
-  sub("/cvrplib/uploads/instances/CVRP/(.*)\\.vrp$", "\\1", all_hrefs[is_vrp])
+  # reading directories first
+  instance_nodes <-
+    xml2::xml_find_all(
+      html_content,
+      "//a[contains(@title,'Instance File')]"
+    )
+
+  href <- paste0(cvrplib_url, xml2::xml_attr(instance_nodes, "href"))
+  names <- gsub("\\s*", "", xml2::xml_contents(instance_nodes))
+
+  solution_nodes <-
+    xml2::xml_find_all(
+      html_content,
+      "//a[contains(@title,'Solution File')]"
+    )
+
+  href_sol <- gsub("instance", "instanceSolution", href)
+
+  data.frame(
+    name = names,
+    instance_url = href,
+    solution_url = href_sol
+  )
 }
 
 extract_header <- function(content, header) {
@@ -179,7 +199,9 @@ extract_header <- function(content, header) {
 extract_cost <- function(content) {
   regexp <- paste0("^Cost\\s*(.*)$")
 
-  unlist(regmatches(content, regexec(regexp, content)))[[2]]
+  as.numeric(
+    unlist(regmatches(content, regexec(regexp, content)))[[2]]
+  )
 }
 
 #' CVRPLIB problem instance downloader
@@ -191,9 +213,10 @@ extract_cost <- function(content) {
 #' benchmarking / comparing speed as well as performance of solvers.
 #'
 #' @param qualifier
-#'  The qualifier of the problem instance. E.g. "tai/tai150d".
+#'  The qualifier of the problem instance. E.g. "tai150d".
 #'  This can either be inferred directly from the website or by the output of
 #'  [cvrplib_ls()].
+#' @inheritParams cvrplib_ls
 #'
 #' @return
 #'  Returns a "`cvrplib_instance`" object which contains CVRPLIB problem
@@ -204,12 +227,17 @@ extract_cost <- function(content) {
 #' @importFrom utils read.csv
 #' @importFrom stats dist
 #' @export
-cvrplib_download <- function(qualifier) {
+cvrplib_download <- function(
+  qualifier,
+  cvrplib_url = "https://galgos.inf.puc-rio.br"
+) {
   stopifnot(is.character(qualifier))
 
-  download_url <- paste0(cvrplib_url, "/cvrplib/uploads/instances/CVRP/")
+  ls <- cvrplib_ls(cvrplib_url)
 
-  content <- readLines(url(paste0(download_url, qualifier, ".vrp")))
+  instance_download_url <- ls[ls$name == qualifier, "instance_url"]
+
+  content <- readLines(url(instance_download_url))
 
   name <- extract_header(content, "NAME")
   comment <- extract_header(content, "COMMENT")
@@ -297,9 +325,15 @@ cvrplib_download <- function(qualifier) {
   demand <- demand[demand$demand > 0, ]
 
   ## solution file
+  solution_download_url <- ls[ls$name == qualifier, "solution_url"]
+
   optimum <-
-    as.numeric(
-      extract_cost(readLines(url(paste0(download_url, qualifier, ".sol"))))
+    tryCatch(
+      extract_cost(readLines(url(solution_download_url))),
+      error = function(e) {
+        # assume there is no solution file
+        NA_real_
+      }
     )
 
   cvrplib_instance(

@@ -362,7 +362,7 @@ test_that("Truck loads are always within physical boundaries at any point on the
       for (load in load_by_run) {
         expect_all_true(load >= 0)
         expect_all_true(load <= max_cap)
-      }      
+      }
     }
   )
 })
@@ -403,7 +403,7 @@ test_that("Max of positive demand sum and negative demand sum
         as.numeric(
           by(res1, res1$run, function(x) sum(pmin(x$demand, 0)))
         )
-        
+
       expect_equal(
         unique(data.frame(res$run, res$load))$res.load,
         pmax(pos_load, -neg_load)
