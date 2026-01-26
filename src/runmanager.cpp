@@ -305,6 +305,17 @@ bool RunManager::relink_best(binop_dbl combine_load)
 
     combine_runs(a, b, vehicle, combine_load);
 
+    // we use consider_optim1 only when we combine positive and negative demand runs
+    // so we can simply check the existance of this variable
+    if (consider_optim1.size() > 0) {
+      // we want to combine pos and negative tours only once, so we remove the relevant sites here.
+      for (const int site : runs[a]->sites()) {
+        // TODO: this is an abuse of sites_relinked, where we use the fact that elements with sites_relinked = 2
+        // are not considered.
+        sites_relinked[site] = 2;
+      }
+    }
+
     return true;
   }
   else
@@ -352,18 +363,6 @@ bool RunManager::opt_vehicles()
 
 bool RunManager::is_considered(const int site1, const int site2) const
 {
-  if (consider_optim1.size() > 0 &&
-          ((consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1]))) {
-    
-  printf("---\n");
-  printf("site %d-%d\n", site1, site2);
-  printf("c 11: %d\n", consider_optim1[site1]);
-  printf("c 22: %d\n", consider_optim2[site2]);
-  printf("c 21: %d\n", consider_optim2[site1]);
-  printf("c 12: %d\n", consider_optim1[site2]);
-  fflush(stdout);
-
-  }
   return(consider_optim1.size() == 0 ||
           (consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1])
         );
@@ -433,7 +432,7 @@ col_types RunManager::runs_as_cols() const
     {
       visited_elements.insert({cyc, run_id});
       // we reorder each run again (by solving the TSP)
-      order = cyc->ordered_sites(*(this->distances));
+      order = cyc->ordered_sites(*(this->distances), consider_optim1, consider_optim2);
       run_dist = run_distance(order, *(this->distances));
 
       orders.insert({run_id, order});

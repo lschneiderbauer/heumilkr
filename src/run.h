@@ -32,6 +32,12 @@ public:
   }
   std::vector<int> ordered_sites(const distmat<double> &distances) const;
 
+  // special version that has predefined order requirements:
+  // all "first" sites must come before "last" sites
+  std::vector<int> ordered_sites(const distmat<double> &distances,
+                                 const std::vector<int> &first,
+                                 const std::vector<int> &last) const;
+
 private:
   std::unordered_set<int> _sites;
 };
