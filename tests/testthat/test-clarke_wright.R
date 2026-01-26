@@ -96,8 +96,6 @@ test_that("Limited vehicles with more priority should always be exhausted
       # note: we deliberately put the higher capacity vehicle first,
       # so this one always gets chosen.
 
-      # print(constructive::construct(demand_net))
-
       expect_equal(
         nrow(unique(res[res$vehicle == 0, ][, c("run", "vehicle")])),
         pmin(length(unique(res$run)), 3)
@@ -332,11 +330,13 @@ test_that("Truck loads are always within physical boundaries at any point on the
   hedgehog::forall(
     gen.demand_net(max_sites = 10L),
     function(demand_net) {
+      max_cap <- 120
+
       res <-
         clarke_wright(
           demand_net$demand,
           demand_net$distances,
-          data.frame(n = c(NA_integer_, 3L), caps = c(60, 120))
+          data.frame(n = c(NA_integer_, 3L), caps = c(60, max_cap))
         )
 
       res2 <-
@@ -354,24 +354,22 @@ test_that("Truck loads are always within physical boundaries at any point on the
         res2$run,
         FUN = function(x) {
           init_load = sum(pmax(0, x$demand))
-          init_load - cumsum(x$demand[1 + x$order])
+          init_load - cumsum(x$demand[order(1 + x$order)])
         },
         simplify = FALSE
       )
 
-      print(constructive::construct(demand_net))
-
       for (load in load_by_run) {
         expect_all_true(load >= 0)
-        expect_all_true(load <= 120)
-      }
-      
+        expect_all_true(load <= max_cap)
+      }      
     }
   )
 })
 
 
-test_that("Sum of absolute demands over run equals the load", {
+test_that("Max of positive demand sum and negative demand sum
+          for each run equals the load", {
   skip_if_not_installed("hedgehog")
 
   # requirement for that to be true:
@@ -390,15 +388,25 @@ test_that("Sum of absolute demands over run equals the load", {
       res1 <- merge(
         res,
         data.frame(
-          site = seq_along(demand_net$demand),
+          site = seq_along(demand_net$demand) - 1,
           demand = demand_net$demand
         ),
         by = "site"
       )
 
+      pos_load <-
+        as.numeric(
+          by(res1, res1$run, function(x) sum(pmax(x$demand, 0)))
+        )
+
+      neg_load <-
+        as.numeric(
+          by(res1, res1$run, function(x) sum(pmin(x$demand, 0)))
+        )
+        
       expect_equal(
         unique(data.frame(res$run, res$load))$res.load,
-        as.numeric(by(res1, res1$run, function(x) sum(abs(x$demand))))
+        pmax(pos_load, -neg_load)
       )
     }
   )

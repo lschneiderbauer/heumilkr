@@ -154,13 +154,13 @@ col_types cpp_clarke_wright(const std::vector<double> &demand,
   // if we have both, combine then and optimize again
   RunManager runm_all(runm_pos, runm_neg, distm, ind_pos, ind_neg);
 
-  // runm_all.relink_best([](double l1, double l2){return(std::max(l1, l2));});
-  // while(runm_all.relink_best([](double l1, double l2){return(std::max(l1, l2));}))
-  // {
-  // };
-  // while (runm_all.opt_vehicles())
-  // {
-  // };
+  runm_all.relink_best([](double l1, double l2){return(std::max(l1, l2));});
+  while(runm_all.relink_best([](double l1, double l2){return(std::max(l1, l2));}))
+  {
+  };
+  while (runm_all.opt_vehicles())
+  {
+  };
 
   return(runm_all.runs_as_cols());
 }
