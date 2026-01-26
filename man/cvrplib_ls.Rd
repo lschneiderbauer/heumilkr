@@ -4,10 +4,19 @@
 \alias{cvrplib_ls}
 \title{List available CVRPLIB online data}
 \usage{
-cvrplib_ls()
+cvrplib_ls(cvrplib_url = "https://galgos.inf.puc-rio.br")
+}
+\arguments{
+\item{cvrplib_url}{The base URL of the CVRPLIB website. Defaults to https://galgos.inf.puc-rio.br.}
 }
 \value{
-A vector of data set qualifiers which can be used with \code{\link[=cvrplib_download]{cvrplib_download()}}.
+A \code{\link[=data.frame]{data.frame()}} where each row represents a CVRPLIB instance with the
+following columns:
+\itemize{
+\item \code{name} - Instance qualifiers which can be used with \code{\link[=cvrplib_download]{cvrplib_download()}}.
+\item \code{instance_url} - The URL to the instance file.
+\item \code{solution_url} - The URL to the solution file.
+}
 }
 \description{
 Scrapes the CVRPLIB website to look for available data sets.
