@@ -8,13 +8,13 @@ new_heumilkr_solution <- function(dfs, distances) {
   structure(
     dfs,
     distances = distances,
-    class = c("heumilkr_solution", class(df))
+    class = c("heumilkr_solution", class(dfs))
   )
 }
 
 #' @export
-print.heumilkr_solution <- function(hs) {
-  print(c(hs)) # misuse c() to strip attributes
+print.heumilkr_solution <- function(x, ...) {
+  print(c(x)) # misuse c() to strip attributes
 }
 
 #' Vehicle runs cost / distance
