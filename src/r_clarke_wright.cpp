@@ -44,7 +44,8 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
                             const std::vector<int> &n_res,
                             const std::vector<double> &capacities,
                             const std::vector<int> &restr_sites,
-                            const std::vector<int> &restr_vehicles);
+                            const std::vector<int> &restr_vehicles,
+                            std::function<void(RunManager&)> callback = [](RunManager&) {});
 
 [[cpp11::register]]
 cpp11::writable::list r_cpp_clarke_wright(
@@ -76,22 +77,17 @@ list cpp_clarke_wright_stepwise(
   const std::vector<int> &restr_sites,
   const std::vector<int> &restr_vehicles)
 {
-  std::vector<std::unordered_set<int>> restricted_vehicles(demand.size());
-  for (unsigned int i = 0; i < restr_sites.size(); i++)
-  {
-    restricted_vehicles[restr_sites[i]].insert(restr_vehicles[i]);
-  }
-  Fleet fleet(n_res, capacities, restricted_vehicles);
-  RunManager runm(demand, std::make_unique<distmat<double>>(distances),
-                  std::make_shared<Fleet>(fleet));
-
   cpp11::writable::list steps;
-  steps.push_back(tbls_to_dfs(runm.runs_as_tbls(demand)));
-
-  while (runm.relink_best())
-  {
-    steps.push_back(tbls_to_dfs(runm.runs_as_tbls(demand)));
-  };
+  
+  cpp_clarke_wright(
+    demand,
+    distances,
+    n_res,
+    capacities,
+    restr_sites,
+    restr_vehicles,
+    [&steps, &demand] (RunManager& runm) { steps.push_back(tbls_to_dfs(runm.runs_as_tbls(demand))); }
+  );
 
   return steps;
 }

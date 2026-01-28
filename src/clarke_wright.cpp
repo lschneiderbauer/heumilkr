@@ -45,7 +45,8 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
                        const std::vector<int> &n_res,
                        const std::vector<double> &capacities,
                        const std::vector<int> &restr_sites,
-                       const std::vector<int> &restr_vehicles)
+                       const std::vector<int> &restr_vehicles,
+                       std::function<void(RunManager&)> callback = [](RunManager&) {})
 {
   // check that all inputs have the correct size
   assert(distances.size() == (demand.size() + 1)*(demand.size())/2);
@@ -106,8 +107,10 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
 
   if (have_pos)
   {
+    callback(runm_pos);
     while (runm_pos.relink_best())
     {
+      callback(runm_pos);
     };
     while (runm_pos.opt_vehicles())
     {
@@ -137,8 +140,10 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
   
   if (have_neg)
   {
+    callback(runm_neg);
     while (runm_neg.relink_best())
     {
+      callback(runm_neg);
     };
     
     while (runm_neg.opt_vehicles())
@@ -157,9 +162,10 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
   // if we have both, combine then and optimize again
   RunManager runm_all(runm_pos, runm_neg, distm, ind_pos, ind_neg);
 
-  runm_all.relink_best([](double l1, double l2){return(std::max(l1, l2));});
+  callback(runm_all);
   while(runm_all.relink_best([](double l1, double l2){return(std::max(l1, l2));}))
   {
+    callback(runm_all);
   };
   while (runm_all.opt_vehicles())
   {
