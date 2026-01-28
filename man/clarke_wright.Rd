@@ -12,17 +12,19 @@ clarke_wright(
 )
 }
 \arguments{
-\item{demand}{A numeric vector consisting of "demands" indexed by sites.
-The \code{i}th entry refers to the demand of site \code{i} (and the length
-of the vector equals the number of sites \code{N} with demands). The
+\item{demand}{A \code{\link[=numeric]{numeric()}} vector consisting of "demands" indexed by sites.
+The \code{i}th entry refers to the demand of site \code{i} that is requested by the
+source depot (origin).
+The length of the vector equals the number of sites \code{N}. The
 units of demand values need to match the units of vehicle capacity values.
-\code{NA} values are not allowed. Negative values are also allowed and are
-interpreted as freight volume that needs to be delivered to the source
-(origin site).}
+\code{NA} values are not allowed. Negative demand values are also allowed and are
+interpreted as freight that needs to be delivered from a site
+to the source source depot (origin), i.e. "backhaul". Note that sites with
+negative demands can only be visited after after sites with positive demand.}
 
 \item{distances}{An object of class \code{dist}, created by \code{\link[stats:dist]{stats::dist()}}, with
 \code{(N + 1)} locations describing the distances between individual
-sites. The first index refers to the source site. The \code{(i+1)}th
+sites. The first index refers to the source location. The \code{(i+1)}th
 index refers to site \code{i} (as defined by \code{demand}).}
 
 \item{vehicles}{A \code{\link[=data.frame]{data.frame()}} describing available vehicle types and their respective
@@ -59,19 +61,33 @@ Each row defines a restriction: vehicle type \code{vehicle} can not approach sit
 \code{site}. Defaults to an empty \code{\link[=data.frame]{data.frame()}}, i.e. no restrictions are enforced.}
 }
 \value{
-Returns a "\code{heumilkr_solution}" object, a \code{\link[=data.frame]{data.frame()}} with one row per
-site-run combination bestowed with additional attributes. Each records reflects
-a run visit of a particular site. It is implied that each run starts and ends at the origin.
-Its columns consist of:
+Returns a "\code{heumilkr_solution}" object, a named \code{\link[=list]{list()}} of three \code{\link[=data.frame]{data.frame()}}s
+with names "runs", "sites" and "visits", bestowed with additional attributes.
 \itemize{
-\item \code{site} - The site index (i.e. the index of the (1-indexed) \code{demand} vector) associated
-to the run.
-\item \code{run} - Identifies the run/tour the site is assigned to.
-\item \code{order}  - Integer values providing the visiting order within each run.
+\item \code{runs}: Each record reflects a single run/tour.
+\itemize{
+\item \code{run} - A run identifier.
 \item \code{vehicle} - The vehicle type index (as provided in \code{vehicles}) associated
 to the run.
-\item \code{load} - The initial load in units of \code{demand} per particular run.
+\item \code{max_load} - The maximal load of the vehicle on this run. It is always
+smaller or equal the vehicle capacity.
 \item \code{distance} - The travel distance of the particular run.
+}
+\item \code{sites}: Each record reflect a site with demand. Its columns consist of:
+\itemize{
+\item \code{site} - A site identifier.
+\item \code{demand} - The site demand. This is supplied as an input.
+}
+\item \code{visits}: Each record reflects a run visit of a particular site.
+It is implied that each run starts and ends at the origin.
+Its columns consist of:
+\itemize{
+\item \code{run} - Identifies the run the site is assigned to.
+\item \code{site} - The site index (i.e. the index of the (1-indexed) \code{demand} vector)
+associated to the run.
+\item \code{order} - Integer values providing the visiting order within each run.
+\item \code{load} - The departing load on site \code{site} in units of \code{demand} per particular run.
+}
 }
 
 Unless a site demand exceeds the vehicle capacities it is always assigned

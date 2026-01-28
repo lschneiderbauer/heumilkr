@@ -90,19 +90,19 @@ plot_data <- function(x) {
   }
   pos$site <- seq.int(nrow(pos)) - 1
 
-  runs <-
+  visits <-
     rbind(
       data.frame(
-        run = unique(x$run),
+        run = x$runs$run,
         order = -1,
         site = 0
       ),
-      cbind(x[, c("run", "order")], site = seq.int(nrow(x))),
+      cbind(x$visits[, c("run", "order")], site = seq.int(nrow(x$site))),
       do.call(
         rbind,
         by(
-          x,
-          x$run,
+          x$visits,
+          x$visits$run,
           function(y) {
             data.frame(
               run = unique(y$run),
@@ -115,8 +115,8 @@ plot_data <- function(x) {
     )
 
   merge(
-    merge(runs, pos, by = "site"),
-    x[, c("run", "vehicle")],
+    merge(visits, pos, by = "site"),
+    x$runs[, c("run", "vehicle")],
     "run"
   )
 }

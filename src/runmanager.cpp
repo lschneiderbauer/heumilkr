@@ -79,8 +79,9 @@ int unique_count(union_view<int, std::vector> uv)
 RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
                        const distmat<double> &new_distances,
                        const std::vector<int> &site_ind_map1,
-                       const std::vector<int> &site_ind_map2) : fleet(runm1.fleet),
-                                                                distances(std::make_unique<distmat<double>>(new_distances))
+                       const std::vector<int> &site_ind_map2)
+        : fleet(runm1.fleet),
+          distances(std::make_unique<distmat<double>>(new_distances))
 {
   if (runm1.fleet != runm2.fleet)
   {
@@ -394,7 +395,7 @@ col_types RunManager::runs_as_cols() const
 
   size_t col_size = runs.size() + fixed_singleton_runs.size();
 
-  std::map<T, int> visited_elements;
+  std::map<T, int> visited_runs;
   std::map<int, std::vector<int>> orders;
   std::map<int, double> run_dists;
 
@@ -421,16 +422,16 @@ col_types RunManager::runs_as_cols() const
     std::get<4>(cols)[i] = runs[i]->max_load;
 
     // check if we have seen cyc before
-    if (visited_elements.count(cyc) > 0)
+    if (visited_runs.count(cyc) > 0)
     {
-      order = orders[visited_elements[cyc]];
-      run_dist = run_dists[visited_elements[cyc]];
+      order = orders[visited_runs[cyc]];
+      run_dist = run_dists[visited_runs[cyc]];
 
-      std::get<1>(cols)[i] = visited_elements[cyc];
+      std::get<1>(cols)[i] = visited_runs[cyc];
     }
     else // if we did not see it before
     {
-      visited_elements.insert({cyc, run_id});
+      visited_runs.insert({cyc, run_id});
       // we reorder each run again (by solving the TSP)
       order = cyc->ordered_sites(*(this->distances), consider_optim1, consider_optim2);
       run_dist = run_distance(order, *(this->distances));
@@ -462,4 +463,125 @@ col_types RunManager::runs_as_cols() const
   }
 
   return cols;
+}
+
+tbls RunManager::runs_as_tbls(const std::vector<double> &demand) const
+{
+  typedef std::shared_ptr<run> T;
+
+  size_t col_size = runs.size() + fixed_singleton_runs.size();
+ 
+  std::map<T, int> visited_runs;
+  std::map<int, std::vector<int>> orders;
+  std::map<int, double> run_dists;
+
+  tbl_run_site run_site_cols = {
+    std::vector<int>(col_size),
+    std::vector<int>(col_size),
+    std::vector<int>(col_size),
+    std::vector<double>(col_size)
+  };
+
+  int run_id = 0;
+
+  // Iterate over sites
+  size_t i = 0;
+  for (; i < runs.size(); i++)
+  {
+    std::vector<int> order;
+    double run_dist;
+    T cyc = runs[i];
+
+    std::get<1>(run_site_cols)[i] = i;
+
+    // check if we have seen cyc before
+    if (visited_runs.count(cyc) > 0)
+    {
+      order = orders[visited_runs[cyc]];
+      run_dist = run_dists[visited_runs[cyc]];
+
+      std::get<0>(run_site_cols)[i] = visited_runs[cyc];
+    }
+    else // if we did not see it before
+    {
+      visited_runs.insert({cyc, run_id});
+      // we reorder each run again (by solving the TSP)
+      order = cyc->ordered_sites(*(this->distances), consider_optim1, consider_optim2);
+      run_dist = run_distance(order, *(this->distances));
+
+      orders.insert({run_id, order});
+      run_dists.insert({run_id, run_dist});
+
+      std::get<0>(run_site_cols)[i] = run_id;
+      run_id++;
+    }
+
+    int norder =  std::distance(
+                    order.begin(),
+                    std::find(order.begin(), order.end(), i)
+                  );
+    std::get<2>(run_site_cols)[i] = norder;  
+  }
+
+  // now create the runs table from "visited_runs"
+  tbl_run run_cols = {
+    std::vector<int>(visited_runs.size() + fixed_singleton_runs.size()),
+    std::vector<int>(visited_runs.size()+ fixed_singleton_runs.size()),
+    std::vector<double>(visited_runs.size() + fixed_singleton_runs.size()),
+    std::vector<double>(visited_runs.size() + fixed_singleton_runs.size())
+  };
+
+  for (const auto& [run, run_id] : visited_runs) {
+    std::get<0>(run_cols)[run_id] = run_id;
+    std::get<1>(run_cols)[run_id] = run->vehicle;
+    std::get<2>(run_cols)[run_id] = run->max_load;
+    std::get<3>(run_cols)[run_id] = run_dists[run_id];
+
+    // we also perform the load calculation here per run
+    double sdemand = 0;
+    double min_sdemand = 0;
+    for (auto site : orders[run_id]) {
+      sdemand -= demand[site];
+      // first write in the demand wrong by an offset
+      std::get<3>(run_site_cols)[site] = sdemand;
+
+      if (sdemand < min_sdemand) {
+        min_sdemand = sdemand;
+      }
+    }
+
+    // now update everything by that offset
+    for (auto site : orders[run_id]) {
+      std::get<3>(run_site_cols)[site] -= min_sdemand;
+    }
+  }
+
+    // fill the rest up with singleton runs
+  for (const auto &run : fixed_singleton_runs)
+  {
+    int site = *(run.sites().begin());
+    std::get<0>(run_site_cols)[i] = run_id;
+    std::get<1>(run_site_cols)[i] = site;
+    std::get<2>(run_site_cols)[i] = 0;
+    std::get<3>(run_site_cols)[i] = run.max_load;
+
+    std::get<0>(run_cols)[i] = run_id;
+    std::get<1>(run_cols)[i] = run.vehicle;
+    std::get<2>(run_cols)[i] = run.max_load;
+    std::get<3>(run_cols)[i] = 2 * distances->get(0, 1 + site);
+
+    run_id++;
+    i++;
+  }
+
+  tbl_site site_cols = {
+    std::vector<int>(runs.size()),
+    std::vector<double>(runs.size()) = demand
+  };
+
+  for (i = 0; i < runs.size(); i++) {
+    std::get<0>(site_cols)[i] = i;
+  }
+
+  return { site_cols, run_cols, run_site_cols };
 }

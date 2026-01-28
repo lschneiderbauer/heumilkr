@@ -10,19 +10,20 @@
 #' for a detailed explanation of the Clarke-Wright algorithm.
 #'
 #' @param demand
-#'  A numeric vector consisting of "demands" indexed by sites.
-#'  The `i`th entry refers to the demand of site `i` (and the length
-#'  of the vector equals the number of sites `N` with demands). The
+#'  A [numeric()] vector consisting of "demands" indexed by sites.
+#'  The `i`th entry refers to the demand of site `i` that is requested by the
+#'  source depot (origin).
+#'  The length of the vector equals the number of sites `N`. The
 #'  units of demand values need to match the units of vehicle capacity values.
-#'  `NA` values are not allowed. Negative values are also allowed and are
-#'  interpreted as freight volume that needs to be delivered from site `i`
-#'  to the source (origin), i.e. "backhaul". Note that those sites can only
-#'  occur at the end of runs that visit sites with positive demand.
+#'  `NA` values are not allowed. Negative demand values are also allowed and are
+#'  interpreted as freight that needs to be delivered from a site
+#'  to the source source depot (origin), i.e. "backhaul". Note that sites with
+#'  negative demands can only be visited after after sites with positive demand.
 #'
 #' @param distances
 #'  An object of class `dist`, created by [stats::dist()], with
 #'  `(N + 1)` locations describing the distances between individual
-#'  sites. The first index refers to the source site. The `(i+1)`th
+#'  sites. The first index refers to the source location. The `(i+1)`th
 #'  index refers to site `i` (as defined by `demand`).
 #'
 #' @param vehicles
@@ -57,19 +58,28 @@
 #'  `site`. Defaults to an empty [data.frame()], i.e. no restrictions are enforced.
 #'
 #' @return
-#'  Returns a "`heumilkr_solution`" object, a [data.frame()] with one row per
-#'  site-run combination bestowed with additional attributes. Each records reflects
-#'  a run visit of a particular site. It is implied that each run starts and ends at the origin.
-#'  Its columns consist of:
-#'  * `site` - The site index (i.e. the index of the (1-indexed) `demand` vector) associated
-#'             to the run.
-#'  * `run` - Identifies the run/tour the site is assigned to.
-#'  * `order`  - Integer values providing the visiting order within each run.
-#'  * `vehicle` - The vehicle type index (as provided in `vehicles`) associated
+#'  Returns a "`heumilkr_solution`" object, a named [list()] of three [data.frame()]s
+#'  with names "runs", "sites" and "visits", bestowed with additional attributes.
+#'  * `runs`: Each record reflects a single run/tour.
+#'    * `run` - A run identifier.
+#'    * `vehicle` - The vehicle type index (as provided in `vehicles`) associated
 #'                to the run.
-#'  * `load` - The initial load in units of `demand` per particular run.
-#'  * `distance` - The travel distance of the particular run.
-#'
+#'    * `max_load` - The maximal load of the vehicle on this run. It is always
+#'                  smaller or equal the vehicle capacity.
+#'    * `distance` - The travel distance of the particular run.
+#'  * `sites`: Each record reflect a site with demand. Its columns consist of:
+#'    * `site` - A site identifier.
+#'    * `demand` - The site demand. This is supplied as an input.
+#'  * `visits`: Each record reflects a run visit of a particular site.
+#'  It is implied that each run starts and ends at the origin.
+#'  Its columns consist of:
+#'    * `run` - Identifies the run the site is assigned to.
+#'    * `site` - The site index (i.e. the index of the (1-indexed) `demand` vector)
+#'              associated to the run.
+#'    * `order` - Integer values providing the visiting order within each run.
+#'    * `load` - The departing load on site `site` in units of `demand` per particular run.
+#'  
+#' 
 #'  Unless a site demand exceeds the vehicle capacities it is always assigned
 #'  to only a single run.
 #'

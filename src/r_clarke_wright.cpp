@@ -5,25 +5,41 @@
 
 using namespace cpp11;
 
-cpp11::writable::data_frame rbind_df(const cpp11::writable::data_frame &a, const cpp11::writable::data_frame &b)
+cpp11::writable::list tbls_to_dfs(const tbls &tbls)
 {
-  cpp11::function rbind = cpp11::package("base")["rbind"];
-  return (cpp11::writable::data_frame)rbind(a, b);
+  tbl_run_site trs = std::get<2>(tbls);
+  tbl_site ts = std::get<0>(tbls);
+  tbl_run tr = std::get<1>(tbls);
+
+  cpp11::writable::data_frame df_run_site({
+    "run"_nm = as_sexp(std::get<0>(trs)),
+    "site"_nm = as_sexp(std::get<1>(trs)),
+    "order"_nm = as_sexp(std::get<2>(trs)),
+    "load"_nm = as_sexp(std::get<3>(trs))
+  });
+
+  cpp11::writable::data_frame df_run({
+    "run"_nm = as_sexp(std::get<0>(tr)),
+    "vehicle"_nm = as_sexp(std::get<1>(tr)),
+    "max_load"_nm = as_sexp(std::get<2>(tr)),
+    "distance"_nm = as_sexp(std::get<3>(tr))
+  });
+
+  cpp11::writable::data_frame df_site({
+    "site"_nm = as_sexp(std::get<0>(ts)),
+    "demand"_nm = as_sexp(std::get<1>(ts))
+  });
+
+  cpp11::writable::list dfs({
+    "runs"_nm = df_run,
+    "sites"_nm = df_site,
+    "visits"_nm = df_run_site
+  });
+
+  return dfs;
 }
 
-cpp11::writable::data_frame arrvec_to_dataframe(const col_types &cols)
-{
-  cpp11::writable::data_frame df({"site"_nm = as_sexp(std::get<0>(cols)),
-                                  "run"_nm = as_sexp(std::get<1>(cols)),
-                                  "order"_nm = as_sexp(std::get<2>(cols)),
-                                  "vehicle"_nm = as_sexp(std::get<3>(cols)),
-                                  "load"_nm = as_sexp(std::get<4>(cols)),
-                                  "distance"_nm = as_sexp(std::get<5>(cols))});
-
-  return df;
-}
-
-col_types cpp_clarke_wright(const std::vector<double> &demand,
+tbls cpp_clarke_wright(const std::vector<double> &demand,
                             const std::vector<double> &distances,
                             const std::vector<int> &n_res,
                             const std::vector<double> &capacities,
@@ -31,43 +47,34 @@ col_types cpp_clarke_wright(const std::vector<double> &demand,
                             const std::vector<int> &restr_vehicles);
 
 [[cpp11::register]]
-cpp11::writable::data_frame r_cpp_clarke_wright(const std::vector<double> &demand,
-                                                const std::vector<double> &distances,
-                                                const std::vector<int> &n_res,
-                                                const std::vector<double> &capacities,
-                                                const std::vector<int> &restr_sites,
-                                                const std::vector<int> &restr_vehicles)
+cpp11::writable::list r_cpp_clarke_wright(
+  const std::vector<double> &demand,
+  const std::vector<double> &distances,
+  const std::vector<int> &n_res,
+  const std::vector<double> &capacities,
+  const std::vector<int> &restr_sites,
+  const std::vector<int> &restr_vehicles)
 {
-  return arrvec_to_dataframe(
-      cpp_clarke_wright(
-          demand,
-          distances,
-          n_res,
-          capacities,
-          restr_sites,
-          restr_vehicles));
-
-  // RunManager runm_comb(
-  //   runm_pos,
-  //   runm_neg,
-  //   ind_pos,
-  //   ind_neg
-  // );
-
-  // TODO combine those two solutions
-  //  return rbind_df(
-  //    arrvec_to_dataframe(pos_state.runs_as_cols()),
-  //    arrvec_to_dataframe(neg_state.runs_as_cols())
-  //  );
+  return tbls_to_dfs(
+    cpp_clarke_wright(
+      demand,
+      distances,
+      n_res,
+      capacities,
+      restr_sites,
+      restr_vehicles
+    )
+  );
 }
 
 [[cpp11::register]]
-list cpp_clarke_wright_stepwise(const std::vector<double> &demand,
-                                const std::vector<double> &distances,
-                                const std::vector<int> &n_res,
-                                const std::vector<double> &capacities,
-                                const std::vector<int> &restr_sites,
-                                const std::vector<int> &restr_vehicles)
+list cpp_clarke_wright_stepwise(
+  const std::vector<double> &demand,
+  const std::vector<double> &distances,
+  const std::vector<int> &n_res,
+  const std::vector<double> &capacities,
+  const std::vector<int> &restr_sites,
+  const std::vector<int> &restr_vehicles)
 {
   std::vector<std::unordered_set<int>> restricted_vehicles(demand.size());
   for (unsigned int i = 0; i < restr_sites.size(); i++)
@@ -79,11 +86,11 @@ list cpp_clarke_wright_stepwise(const std::vector<double> &demand,
                   std::make_shared<Fleet>(fleet));
 
   cpp11::writable::list steps;
-  steps.push_back(arrvec_to_dataframe(runm.runs_as_cols()));
+  steps.push_back(tbls_to_dfs(runm.runs_as_tbls(demand)));
 
   while (runm.relink_best())
   {
-    steps.push_back(arrvec_to_dataframe(runm.runs_as_cols()));
+    steps.push_back(tbls_to_dfs(runm.runs_as_tbls(demand)));
   };
 
   return steps;

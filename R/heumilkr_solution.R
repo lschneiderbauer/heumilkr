@@ -1,22 +1,20 @@
-heumilkr_solution <- function(df, distances) {
-  stopifnot(inherits(df, "data.frame"))
-  stopifnot(
-    c("site", "run", "order", "vehicle", "order", "distance") %in% colnames(df)
-  )
+heumilkr_solution <- function(dfs, distances) {
   stopifnot(inherits(distances, "dist"))
 
-  new_heumilkr_solution(df, distances)
+  new_heumilkr_solution(dfs, distances)
 }
 
-new_heumilkr_solution <- function(df, distances) {
-  obj <-
-    structure(
-      df,
-      class = c("heumilkr_solution", class(df))
-    )
+new_heumilkr_solution <- function(dfs, distances) {  
+  structure(
+    dfs,
+    distances = distances,
+    class = c("heumilkr_solution", class(df))
+  )
+}
 
-  attr(obj, "distances") <- distances
-  obj
+#' @export
+print.heumilkr_solution <- function(hs) {
+  print(c(hs)) # misuse c() to strip attributes
 }
 
 #' Vehicle runs cost / distance
@@ -50,7 +48,7 @@ new_heumilkr_solution <- function(df, distances) {
 milkr_cost <- function(solution) {
   stopifnot(inherits(solution, "heumilkr_solution"))
 
-  sum(unique(solution[, c("run", "distance")])$distance)
+  sum(solution$runs[, "distance"])
 }
 
 #' Vehicle run saving

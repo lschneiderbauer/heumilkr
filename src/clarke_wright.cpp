@@ -40,12 +40,12 @@ select_demand(const std::vector<double> &demand, const distmat<double> &distm, i
   return std::tuple<std::vector<int>, std::vector<double>, distmat<double>>(new_ind, new_demand, new_distm);
 }
 
-col_types cpp_clarke_wright(const std::vector<double> &demand,
-                            const std::vector<double> &distances,
-                            const std::vector<int> &n_res,
-                            const std::vector<double> &capacities,
-                            const std::vector<int> &restr_sites,
-                            const std::vector<int> &restr_vehicles)
+tbls cpp_clarke_wright(const std::vector<double> &demand,
+                       const std::vector<double> &distances,
+                       const std::vector<int> &n_res,
+                       const std::vector<double> &capacities,
+                       const std::vector<int> &restr_sites,
+                       const std::vector<int> &restr_vehicles)
 {
   // check that all inputs have the correct size
   assert(distances.size() == (demand.size() + 1)*(demand.size())/2);
@@ -115,7 +115,7 @@ col_types cpp_clarke_wright(const std::vector<double> &demand,
     
     if (!have_neg)
     {
-      return (runm_pos.runs_as_cols());
+      return (runm_pos.runs_as_tbls(demand_pos));
     }
   }
 
@@ -147,7 +147,10 @@ col_types cpp_clarke_wright(const std::vector<double> &demand,
 
     if (!have_pos)
     {
-      return (runm_neg.runs_as_cols());
+      for (auto &dmnd : demand_neg) {
+        dmnd = -dmnd;
+      }
+      return (runm_neg.runs_as_tbls(demand_neg));
     }
   }
 
@@ -162,31 +165,31 @@ col_types cpp_clarke_wright(const std::vector<double> &demand,
   {
   };
 
-  return(runm_all.runs_as_cols());
+  return(runm_all.runs_as_tbls(demand));
 }
 
 #ifndef NDEBUG
 // only for debug purposes
 int main()
 {
-  col_types cols =
-      cpp_clarke_wright(
-          std::vector<double>{-3, -2, 1, 2},
-          std::vector<double>{5, 10, 5, 4, 5, 2, 12, 13, 10, 3},
-          std::vector<int>{100},
-          std::vector<double>{5},
-          std::vector<int>{},
-          std::vector<int>{});
+  tbls cols =
+    cpp_clarke_wright(
+        std::vector<double>{-3, -2, 1, 2},
+        std::vector<double>{5, 10, 5, 4, 5, 2, 12, 13, 10, 3},
+        std::vector<int>{100},
+        std::vector<double>{5},
+        std::vector<int>{},
+        std::vector<int>{});
 
-  for (size_t i = 0; i < std::get<0>(cols).size(); i++)
+  tbl_run_site tr = std::get<2>(cols);
+
+  for (size_t i = 0; i < std::get<0>(tr).size(); i++)
   {
-    printf("Site: %d, Run: %d, Order: %d, Vehicle: %d, Load: %.1f, Distance: %.1f\n",
-           std::get<0>(cols)[i],
-           std::get<1>(cols)[i],
-           std::get<2>(cols)[i],
-           std::get<3>(cols)[i],
-           std::get<4>(cols)[i],
-           std::get<5>(cols)[i]);
+    printf("Run: %d, Site: %d, Order: %d, Departing Load: %f\n",
+           std::get<0>(tr)[i],
+           std::get<1>(tr)[i],
+           std::get<2>(tr)[i],
+           std::get<3>(tr)[i]);
   }
 
   return 0;
