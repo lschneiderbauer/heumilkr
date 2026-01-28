@@ -84,6 +84,24 @@ A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for the res
 plot(solution)
 ```
 
+The following animation shows how the Clarke-Wright algorithm iterates to arrive at its final solution:
+
+```{r, animation.hook="gifski", interval = 0.5, echo = FALSE, results = FALSE}
+res <-
+  heumilkr:::clarke_wright_stepwise(
+    demand,
+    dist(positions),
+    data.frame(n = c(NA_integer_, 2L), caps = c(33, 44))
+  )
+
+lapply(
+  res,
+  function(sres) {
+    plot(sres)
+  }
+)
+```
+
 ## Runtime Benchmarks
 
 ```{r benchmark_calc, echo=FALSE, message=FALSE, warning=FALSE}

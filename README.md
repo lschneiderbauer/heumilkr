@@ -146,6 +146,11 @@ plot(solution)
 
 <img src="man/figures/README-example_plot-1.png" alt="" width="100%" />
 
+The following animation shows how the Clarke-Wright algorithm iterates
+to arrive at its final solution:
+
+<img src="man/figures/README-unnamed-chunk-2-.gif" alt="" width="100%" />
+
 ## Runtime Benchmarks
 
 The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz
