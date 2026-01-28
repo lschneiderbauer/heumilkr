@@ -404,3 +404,33 @@ test_that("Example scenario with negative demand yields a single run", {
 
   expect_equal(length(res$runs$run), 1)
 })
+
+
+test_that("Last result of clarke_wright stepwise should be the original result", {
+skip_if_not_installed("hedgehog")
+
+  # requirement for that to be true:
+  # * only count positive demands
+  # * demand is always <= vehicle capacity
+  hedgehog::forall(
+    gen.demand_net(max_sites = 10L),
+    function(demand_net) {
+      res <-
+        clarke_wright(
+          demand_net$demand,
+          demand_net$distances,
+          data.frame(n = c(NA_integer_, 3L), caps = c(60, 120))
+        )
+
+      res_sw <-
+        clarke_wright_stepwise(
+          demand_net$demand,
+          demand_net$distances,
+          data.frame(n = c(NA_integer_, 3L), caps = c(60, 120))
+        )
+
+      expect_true(is.list(res_sw))
+      expect_equal(res_sw[[length(res_sw)]], res)
+    }
+  )
+})
