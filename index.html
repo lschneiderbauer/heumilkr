@@ -98,27 +98,62 @@
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">solution</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    site run order vehicle     load  distance</span></span>
-<span><span class="co">#&gt; 1     0   0     0       0 31.75943 29.029139</span></span>
-<span><span class="co">#&gt; 2     1   1     0       0 25.78821 16.929475</span></span>
-<span><span class="co">#&gt; 3     2   0     2       0 31.75943 29.029139</span></span>
-<span><span class="co">#&gt; 4     3   2     3       1 41.60558 32.192404</span></span>
-<span><span class="co">#&gt; 5     4   1     1       0 25.78821 16.929475</span></span>
-<span><span class="co">#&gt; 6     5   3     2       1 34.12677 20.601801</span></span>
-<span><span class="co">#&gt; 7     6   3     0       1 34.12677 20.601801</span></span>
-<span><span class="co">#&gt; 8     7   2     2       1 41.60558 32.192404</span></span>
-<span><span class="co">#&gt; 9     8   3     1       1 34.12677 20.601801</span></span>
-<span><span class="co">#&gt; 10    9   4     1       0 22.65398 14.329082</span></span>
-<span><span class="co">#&gt; 11   10   5     0       0 21.76854 14.231704</span></span>
-<span><span class="co">#&gt; 12   11   5     1       0 21.76854 14.231704</span></span>
-<span><span class="co">#&gt; 13   12   6     0       0 14.34672  6.043174</span></span>
-<span><span class="co">#&gt; 14   13   2     0       1 41.60558 32.192404</span></span>
-<span><span class="co">#&gt; 15   14   7     1       0 30.58007 36.895550</span></span>
-<span><span class="co">#&gt; 16   15   2     1       1 41.60558 32.192404</span></span>
-<span><span class="co">#&gt; 17   16   7     2       0 30.58007 36.895550</span></span>
-<span><span class="co">#&gt; 18   17   7     0       0 30.58007 36.895550</span></span>
-<span><span class="co">#&gt; 19   18   0     1       0 31.75943 29.029139</span></span>
-<span><span class="co">#&gt; 20   19   4     0       0 22.65398 14.329082</span></span>
+<span><span class="co">#&gt; $runs</span></span>
+<span><span class="co">#&gt;   run vehicle max_load  distance</span></span>
+<span><span class="co">#&gt; 1   0       0 31.75943 29.029139</span></span>
+<span><span class="co">#&gt; 2   1       0 25.78821 16.929475</span></span>
+<span><span class="co">#&gt; 3   2       1 41.60558 32.192404</span></span>
+<span><span class="co">#&gt; 4   3       1 34.12677 20.601801</span></span>
+<span><span class="co">#&gt; 5   4       0 22.65398 14.329082</span></span>
+<span><span class="co">#&gt; 6   5       0 21.76854 14.231704</span></span>
+<span><span class="co">#&gt; 7   6       0 14.34672  6.043174</span></span>
+<span><span class="co">#&gt; 8   7       0 30.58007 36.895550</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $sites</span></span>
+<span><span class="co">#&gt;    site    demand</span></span>
+<span><span class="co">#&gt; 1     0 14.148060</span></span>
+<span><span class="co">#&gt; 2     1 14.370754</span></span>
+<span><span class="co">#&gt; 3     2  7.861395</span></span>
+<span><span class="co">#&gt; 4     3 13.304476</span></span>
+<span><span class="co">#&gt; 5     4 11.417455</span></span>
+<span><span class="co">#&gt; 6     5 10.190959</span></span>
+<span><span class="co">#&gt; 7     6 12.365883</span></span>
+<span><span class="co">#&gt; 8     7  6.346666</span></span>
+<span><span class="co">#&gt; 9     8 11.569923</span></span>
+<span><span class="co">#&gt; 10    9 12.050648</span></span>
+<span><span class="co">#&gt; 11   10  9.577418</span></span>
+<span><span class="co">#&gt; 12   11 12.191123</span></span>
+<span><span class="co">#&gt; 13   12 14.346722</span></span>
+<span><span class="co">#&gt; 14   13  7.554288</span></span>
+<span><span class="co">#&gt; 15   14  9.622928</span></span>
+<span><span class="co">#&gt; 16   15 14.400145</span></span>
+<span><span class="co">#&gt; 17   16 14.782264</span></span>
+<span><span class="co">#&gt; 18   17  6.174874</span></span>
+<span><span class="co">#&gt; 19   18  9.749971</span></span>
+<span><span class="co">#&gt; 20   19 10.603327</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $visits</span></span>
+<span><span class="co">#&gt;    run site order      load</span></span>
+<span><span class="co">#&gt; 1    0    0     0 17.611366</span></span>
+<span><span class="co">#&gt; 2    1    1     0 11.417455</span></span>
+<span><span class="co">#&gt; 3    0    2     2  0.000000</span></span>
+<span><span class="co">#&gt; 4    2    3     3  0.000000</span></span>
+<span><span class="co">#&gt; 5    1    4     1  0.000000</span></span>
+<span><span class="co">#&gt; 6    3    5     2  0.000000</span></span>
+<span><span class="co">#&gt; 7    3    6     0 21.760882</span></span>
+<span><span class="co">#&gt; 8    2    7     2 13.304476</span></span>
+<span><span class="co">#&gt; 9    3    8     1 10.190959</span></span>
+<span><span class="co">#&gt; 10   4    9     1  0.000000</span></span>
+<span><span class="co">#&gt; 11   5   10     0 12.191123</span></span>
+<span><span class="co">#&gt; 12   5   11     1  0.000000</span></span>
+<span><span class="co">#&gt; 13   6   12     0  0.000000</span></span>
+<span><span class="co">#&gt; 14   2   13     0 34.051287</span></span>
+<span><span class="co">#&gt; 15   7   14     1 14.782264</span></span>
+<span><span class="co">#&gt; 16   2   15     1 19.651142</span></span>
+<span><span class="co">#&gt; 17   7   16     2  0.000000</span></span>
+<span><span class="co">#&gt; 18   7   17     0 24.405193</span></span>
+<span><span class="co">#&gt; 19   0   18     1  7.861395</span></span>
+<span><span class="co">#&gt; 20   4   19     0 12.050648</span></span>
 <span></span>
 <span><span class="co"># returns the total cost / distance</span></span>
 <span><span class="co"># (the quantity that is minimized by CVRP)</span></span>
@@ -131,14 +166,16 @@
 <p>A plotting function (using <a href="https://ggplot2.tidyverse.org/" class="external-link">ggplot</a>) for the result is built in. The individual runs are distinguished by color. The demanding site locations are marked with round circles while the (single) supplying site is depicted as a square. The line types (solid/dashed/…) are associated to different vehicle types.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">solution</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-example_plot-1.png" width="100%"></p>
+<p><img src="reference/figures/README-example_plot-1.png" alt="" width="100%"></p>
+<p>The following animation shows how the Clarke-Wright algorithm iterates to arrive at its final solution:</p>
+<p><img src="reference/figures/README-unnamed-chunk-2-.gif" alt="" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="runtime-benchmarks">Runtime Benchmarks<a class="anchor" aria-label="anchor" href="#runtime-benchmarks"></a>
 </h2>
 <p>The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz CPU, using the R package <a href="https://bench.r-lib.org/" class="external-link">bench</a>.</p>
-<p>The following graph shows the run time behavior as the number of sites <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math> increase. The curve exhibits near-cubic behavior in <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>. For <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>110</mn></mrow><annotation encoding="application/x-tex">n = 110</annotation></semantics></math> the performance is still relatively reasonable with a run time of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>12.9</mn><mi>m</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">\sim 12.9ms</annotation></semantics></math>.</p>
-<p><img src="reference/figures/README-benchmark_runtime-1.png" width="100%"></p>
+<p>The following graph shows the run time behavior as the number of sites <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math> increase. The curve exhibits near-cubic behavior in <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>. For <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>110</mn></mrow><annotation encoding="application/x-tex">n = 110</annotation></semantics></math> the performance is still relatively reasonable with a run time of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>3.87</mn><mi>m</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">\sim 3.87ms</annotation></semantics></math>.</p>
+<p><img src="reference/figures/README-benchmark_runtime-1.png" alt="" width="100%"></p>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-clarke1964" class="csl-entry">
 Clarke, G., and J. W. Wright. 1964. “Scheduling of Vehicles from a Central Depot to a Number of Delivery Points.” <em>Operations Research</em> 12 (4): 568–81. <a href="https://doi.org/10.1287/opre.12.4.568" class="external-link uri">https://doi.org/10.1287/opre.12.4.568</a>.
@@ -174,7 +211,7 @@ Clarke, G., and J. W. Wright. 1964. “Scheduling of Vehicles from a Central Dep
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Lukas Schneiderbauer <br><small class="roles"> Author, maintainer, copyright holder </small>  </li>
+<li>Lukas Schneiderbauer <br><small class="roles"> Author, maintainer, copyright holder </small>   </li>
 </ul>
 </div>
 
@@ -197,7 +234,7 @@ Clarke, G., and J. W. Wright. 1964. “Scheduling of Vehicles from a Central Dep
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

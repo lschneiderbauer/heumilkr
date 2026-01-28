@@ -38,9 +38,24 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="heumilkr-development-version">heumilkr (development version)<a class="anchor" aria-label="anchor" href="#heumilkr-development-version"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<ul><li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code>: Return value changed: instead of returning a single <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> a list of three <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code>s is returned now that makes it easier to interpret the result.</p></li>
+<li><p><code><a href="../reference/cvrplib_ls.html">cvrplib_ls()</a></code> now returns a <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> instead of a simple vector.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features--improvements-development-version">New features / improvements<a class="anchor" aria-label="anchor" href="#new-features--improvements-development-version"></a></h3>
+<ul><li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code> now supports negative demands: sites with negative demand are treated as “backhaul” points, i.e. they deliver goods back to the depot. By design they can only be visited after all positive-demand sites have been served.</p></li>
+<li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code> has gained runtime speedup compared to the previous version by roughly a factor of 3 (the actual speedup depends on input characteristics).</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="bugfixes-development-version">Bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/cvrplib_ls.html">cvrplib_ls()</a></code>, <code><a href="../reference/cvrplib_download.html">cvrplib_download()</a></code>: Upstream website has changed. Fix malfunctioning functions by adjusting webscraping accordingly.</li>
+</ul></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.3.0" id="heumilkr-030">heumilkr 0.3.0<a class="anchor" aria-label="anchor" href="#heumilkr-030"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.3.0" id="heumilkr-030">heumilkr 0.3.0<a class="anchor" aria-label="anchor" href="#heumilkr-030"></a></h2><p class="text-muted">CRAN release: 2025-04-24</p>
 <div class="section level3">
 <h3 id="breaking-changes-0-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-3-0"></a></h3>
 <ul><li>
@@ -86,7 +101,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
