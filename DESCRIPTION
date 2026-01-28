@@ -23,6 +23,7 @@ Suggests:
     hedgehog (>= 0.1),
     ggExtra (>= 0.10.0),
     scales (>= 1.3.0),
+    curl,
     knitr,
     rmarkdown
 Config/testthat/edition: 3
