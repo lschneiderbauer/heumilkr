@@ -33,7 +33,7 @@ test_that("every site is represented in output", {
     )
 
   expect_equal(
-    sort(unique(res$site)),
+    sort(unique(res$sites$site)),
     seq_along(demand) - 1
   )
 })
@@ -52,7 +52,7 @@ test_that("Sum of loads over all runs equals sum of demands", {
         )
 
       expect_equal(
-        sum(unique(data.frame(res$run, res$load))$res.load),
+        sum(res$runs$max_load),
         sum(demand_net$demand)
       )
     }
@@ -74,7 +74,7 @@ test_that("Distances add up correctly.", {
     data.frame(n = NA_integer_, caps = 1)
   )
 
-  expect_equal(res$distance, 1:10 * 2)
+  expect_equal(res$runs$distance, 1:10 * 2)
 })
 
 test_that("Limited vehicles with more priority should always be exhausted
@@ -97,8 +97,8 @@ test_that("Limited vehicles with more priority should always be exhausted
       # so this one always gets chosen.
 
       expect_equal(
-        nrow(unique(res[res$vehicle == 0, ][, c("run", "vehicle")])),
-        pmin(length(unique(res$run)), 3)
+        nrow(res$runs[res$runs$vehicle == 0, ]),
+        pmin(length(res$runs$run), 3)
       )
     }
   )
@@ -117,8 +117,8 @@ test_that("A vehicle with infinite capacity covers everything in a single run", 
           data.frame(n = NA_integer_, caps = 99999)
         )
 
-      expect_equal(unique(res$run), 0)
-      expect_equal(unique(res$vehicle), 0)
+      expect_equal(res$runs$run, 0)
+      expect_equal(res$runs$vehicle, 0)
     }
   )
 })
@@ -139,10 +139,10 @@ test_that("A demand that exceeds vehicle capacities generates more than a single
       data.frame(n = NA_integer_, caps = 6)
     )
 
-  expect_equal(length(unique(res$run)), 3)
-  expect_equal(unique(res$site), 0)
-  expect_equal(sort(res$load), c(3, 6, 6))
-  expect_equal(res$distance, c(2, 2, 2))
+  expect_equal(length(res$runs$run), 3)
+  expect_equal(res$sites$site, 0)
+  expect_equal(sort(res$runs$max_load), c(3, 6, 6))
+  expect_equal(res$runs$distance, c(2, 2, 2))
 })
 
 
@@ -163,8 +163,10 @@ test_that("Vehicles are not assigned to restricted sites", {
           restrictions = data.frame(site = 0L, vehicle = 0L)
         )
 
+      runs <- res$visits[res$visits$site == 0, "run"]
+      
       expect_false(
-        0 %in% res[res$site == 0, ]$vehicle
+        0 %in% res$runs[res$runs$run %in% runs, "vehicle"]
       )
     }
   )
@@ -228,7 +230,8 @@ test_that("Vehicles are not assigned to restricted sites: edge case", {
       )
     )
 
-  expect_false(0 %in% res[res$site == 3, ]$vehicle)
+  runs <- res$visits[res$visits$site == 0, "run"]
+  expect_false(0 %in% res$runs[res$run %in% runs, "vehicle"])
 })
 
 test_that("Not having enough vehicles is handled gracefully", {
@@ -338,38 +341,15 @@ test_that("Truck loads are always within physical boundaries at any point on the
           demand_net$distances,
           data.frame(n = c(NA_integer_, 3L), caps = c(60, max_cap))
         )
-
-      res2 <-
-        merge(
-          res,
-          data.frame(
-            site = seq_along(demand_net$demand) - 1,
-            demand = demand_net$demand
-          ),
-          by = "site"
-        )
-
-      load_by_run <- by(
-        res2,
-        res2$run,
-        FUN = function(x) {
-          init_load = sum(pmax(0, x$demand))
-          init_load - cumsum(x$demand[order(1 + x$order)])
-        },
-        simplify = FALSE
-      )
-
-      for (load in load_by_run) {
-        expect_all_true(load >= 0)
-        expect_all_true(load <= max_cap)
-      }
+      
+      expect_all_true(res$visits$load >= 0)
+      expect_all_true(res$visits$load <= max_cap)
     }
   )
 })
 
-
 test_that("Max of positive demand sum and negative demand sum
-          for each run equals the load", {
+          for each run equals the max_load", {
   skip_if_not_installed("hedgehog")
 
   # requirement for that to be true:
@@ -386,11 +366,8 @@ test_that("Max of positive demand sum and negative demand sum
         )
 
       res1 <- merge(
-        res,
-        data.frame(
-          site = seq_along(demand_net$demand) - 1,
-          demand = demand_net$demand
-        ),
+        res$visits,
+        res$sites,
         by = "site"
       )
 
@@ -405,7 +382,7 @@ test_that("Max of positive demand sum and negative demand sum
         )
 
       expect_equal(
-        unique(data.frame(res$run, res$load))$res.load,
+        res$runs$max_load,
         pmax(pos_load, -neg_load)
       )
     }
@@ -425,5 +402,5 @@ test_that("Example scenario with negative demand yields a single run", {
     vehicles = data.frame(n = NA_integer_, caps = 30)
   )
 
-  expect_equal(length(unique(res$run)), 1)
+  expect_equal(length(res$runs$run), 1)
 })

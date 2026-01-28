@@ -11,7 +11,7 @@ test_that("CVRP downloader yields correct result", {
   skip_if_offline()
   skip_on_cran()
 
-  inst <- cvrplib_download("A/A-n80-k10")
+  inst <- cvrplib_download("A-n80-k10")
 
   expect_s3_class(
     inst,

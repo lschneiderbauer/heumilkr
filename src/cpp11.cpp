@@ -6,7 +6,7 @@
 #include <R_ext/Visibility.h>
 
 // r_clarke_wright.cpp
-cpp11::writable::data_frame r_cpp_clarke_wright(const std::vector<double> & demand, const std::vector<double> & distances, const std::vector<int> & n_res, const std::vector<double> & capacities, const std::vector<int> & restr_sites, const std::vector<int> & restr_vehicles);
+cpp11::writable::list r_cpp_clarke_wright(const std::vector<double> & demand, const std::vector<double> & distances, const std::vector<int> & n_res, const std::vector<double> & capacities, const std::vector<int> & restr_sites, const std::vector<int> & restr_vehicles);
 extern "C" SEXP _heumilkr_r_cpp_clarke_wright(SEXP demand, SEXP distances, SEXP n_res, SEXP capacities, SEXP restr_sites, SEXP restr_vehicles) {
   BEGIN_CPP11
     return cpp11::as_sexp(r_cpp_clarke_wright(cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(demand), cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(distances), cpp11::as_cpp<cpp11::decay_t<const std::vector<int> &>>(n_res), cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(capacities), cpp11::as_cpp<cpp11::decay_t<const std::vector<int> &>>(restr_sites), cpp11::as_cpp<cpp11::decay_t<const std::vector<int> &>>(restr_vehicles)));
