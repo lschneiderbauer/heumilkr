@@ -40,16 +40,17 @@ select_demand(const std::vector<double> &demand, const distmat<double> &distm, i
   return std::tuple<std::vector<int>, std::vector<double>, distmat<double>>(new_ind, new_demand, new_distm);
 }
 
-tbls cpp_clarke_wright(const std::vector<double> &demand,
-                       const std::vector<double> &distances,
-                       const std::vector<int> &n_res,
-                       const std::vector<double> &capacities,
-                       const std::vector<int> &restr_sites,
-                       const std::vector<int> &restr_vehicles,
-                       std::function<void(RunManager&)> callback = [](RunManager&) {})
+tbls cpp_clarke_wright(
+    const std::vector<double> &demand,
+    const std::vector<double> &distances,
+    const std::vector<int> &n_res,
+    const std::vector<double> &capacities,
+    const std::vector<int> &restr_sites,
+    const std::vector<int> &restr_vehicles,
+    std::function<void(RunManager &)> callback = [](RunManager &) {})
 {
   // check that all inputs have the correct size
-  assert(distances.size() == (demand.size() + 1)*(demand.size())/2);
+  assert(distances.size() == (demand.size() + 1) * (demand.size()) / 2);
   assert(capacities.size() == n_res.size());
 
   std::vector<std::unordered_set<int>> restricted_vehicles(demand.size());
@@ -115,7 +116,7 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
     while (runm_pos.opt_vehicles())
     {
     };
-    
+
     if (!have_neg)
     {
       return (runm_pos.runs_as_tbls(demand_pos));
@@ -137,7 +138,7 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
   RunManager runm_neg(demand_neg,
                       std::make_unique<distmat<double>>(distances_neg),
                       fleet);
-  
+
   if (have_neg)
   {
     callback(runm_neg);
@@ -145,14 +146,15 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
     {
       callback(runm_neg);
     };
-    
+
     while (runm_neg.opt_vehicles())
     {
     };
 
     if (!have_pos)
     {
-      for (auto &dmnd : demand_neg) {
+      for (auto &dmnd : demand_neg)
+      {
         dmnd = -dmnd;
       }
       return (runm_neg.runs_as_tbls(demand_neg));
@@ -163,7 +165,8 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
   RunManager runm_all(runm_pos, runm_neg, distm, ind_pos, ind_neg);
 
   callback(runm_all);
-  while(runm_all.relink_best([](double l1, double l2){return(std::max(l1, l2));}))
+  while (runm_all.relink_best([](double l1, double l2)
+                              { return (std::max(l1, l2)); }))
   {
     callback(runm_all);
   };
@@ -171,7 +174,7 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
   {
   };
 
-  return(runm_all.runs_as_tbls(demand));
+  return (runm_all.runs_as_tbls(demand));
 }
 
 #ifndef NDEBUG
@@ -179,13 +182,13 @@ tbls cpp_clarke_wright(const std::vector<double> &demand,
 int main()
 {
   tbls cols =
-    cpp_clarke_wright(
-        std::vector<double>{-3, -2, 1, 2},
-        std::vector<double>{5, 10, 5, 4, 5, 2, 12, 13, 10, 3},
-        std::vector<int>{100},
-        std::vector<double>{5},
-        std::vector<int>{},
-        std::vector<int>{});
+      cpp_clarke_wright(
+          std::vector<double>{-3, -2, 1, 2},
+          std::vector<double>{5, 10, 5, 4, 5, 2, 12, 13, 10, 3},
+          std::vector<int>{100},
+          std::vector<double>{5},
+          std::vector<int>{},
+          std::vector<int>{});
 
   tbl_run_site tr = std::get<2>(cols);
 

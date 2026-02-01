@@ -1,5 +1,5 @@
 debug: clarke_wright.cpp fleet.cpp cpp11.cpp distmat.cpp run.cpp runmanager.cpp tsp_greedy.cpp
-	g++ -std=gnu++17 -I. -I"/usr/share/R/include" \
+	g++ -std=gnu++17 -I. \
 		-fstack-protector-strong -fstack-clash-protection -Wformat -fcf-protection \
 		-Wdate-time -Wall -pedantic -Wformat-security -g -O0 -fdiagnostics-color=always \
 		-fsanitize=address,undefined \
