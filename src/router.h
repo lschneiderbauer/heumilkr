@@ -1,5 +1,5 @@
-#ifndef RUN_MANAGER_H
-#define RUN_MANAGER_H
+#ifndef ROUTER_H
+#define ROUTER_H
 
 #include <vector>
 #include <memory>
@@ -46,18 +46,18 @@ using tbls =
   >;
 
 
-class RunManager
+class Router
 {
 public:
   // creates one singleton runs for each site with the given demand and already assigns
   // vehicles from a fleet
-  RunManager(const std::vector<double> &demand,
+  Router(const std::vector<double> &demand,
              std::unique_ptr<distmat<double>> distances,
              std::shared_ptr<Fleet> fleet);
 
-  // creates a new RunManager by combining two existing ones
+  // creates a new Router by combining two existing ones
   // note that their fleets have to be identical for that to make sense
-  RunManager(const RunManager &runm1, const RunManager &runm2,
+  Router(const Router &runm1, const Router &runm2,
              const distmat<double> &new_distances,
              const std::vector<int> &site_ind_map1,
              const std::vector<int> &site_ind_map2);

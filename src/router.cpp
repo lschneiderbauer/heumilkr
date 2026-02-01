@@ -1,4 +1,4 @@
-#include "runmanager.h"
+#include "router.h"
 #include "union_view.h"
 
 #include <unordered_set>
@@ -9,7 +9,7 @@
 #include <memory>
 #include <cassert>
 
-RunManager::RunManager(const std::vector<double> &demand,
+Router::Router(const std::vector<double> &demand,
                        std::unique_ptr<distmat<double>> distances,
                        std::shared_ptr<Fleet> fleet)
     : fleet(fleet),
@@ -24,7 +24,7 @@ RunManager::RunManager(const std::vector<double> &demand,
   {
     if (demand[i] <= 0)
     {
-      throw std::runtime_error("RunManager: demand has to be strictly positive");
+      throw std::runtime_error("Router: demand has to be strictly positive");
     }
 
     runs[i] = std::make_shared<run>(i, demand[i]);
@@ -52,10 +52,11 @@ RunManager::RunManager(const std::vector<double> &demand,
                                             run->max_load,
                                             true);
 
-      if (vehicle == -1) {
+      if (vehicle == -1)
+      {
         throw std::runtime_error(
-          "Not enough vehicles available to fulfill all demands trivially."
-          " Solver cannot proceed in that case.");
+            "Not enough vehicles available to fulfill all demands trivially."
+            " Solver cannot proceed in that case.");
       }
 
       fleet->reserve_vehicle(vehicle);
@@ -76,16 +77,16 @@ int unique_count(union_view<int, std::vector> uv)
   return s.size();
 }
 
-RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
+Router::Router(const Router &runm1, const Router &runm2,
                        const distmat<double> &new_distances,
                        const std::vector<int> &site_ind_map1,
                        const std::vector<int> &site_ind_map2)
-        : fleet(runm1.fleet),
-          distances(std::make_unique<distmat<double>>(new_distances))
+    : fleet(runm1.fleet),
+      distances(std::make_unique<distmat<double>>(new_distances))
 {
   if (runm1.fleet != runm2.fleet)
   {
-    throw std::runtime_error("RunManager: cannot combine two RunManagers with different fleets");
+    throw std::runtime_error("Router: cannot combine two Routers with different fleets");
   }
 
   // create inverse maps
@@ -163,10 +164,12 @@ RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
   // we only want to consider connecting runs from one set to the other
   this->consider_optim1 = std::vector<int>(site_size, false);
   this->consider_optim2 = std::vector<int>(site_size, false);
-  for (const auto site : site_ind_map1) {
+  for (const auto site : site_ind_map1)
+  {
     this->consider_optim1[site] = true;
   }
-  for (const auto site : site_ind_map2) {
+  for (const auto site : site_ind_map2)
+  {
     this->consider_optim2[site] = true;
   }
 
@@ -174,7 +177,7 @@ RunManager::RunManager(const RunManager &runm1, const RunManager &runm2,
   this->savings = calc_savings(*(this->distances));
 }
 
-void RunManager::combine_runs(const int a, const int b, const int new_vehicle, binop_dbl combine_load)
+void Router::combine_runs(const int a, const int b, const int new_vehicle, binop_dbl combine_load)
 {
   assert(a != b);
   assert(runs[a] != runs[b]);
@@ -205,19 +208,19 @@ void RunManager::combine_runs(const int a, const int b, const int new_vehicle, b
   }
 }
 
-bool RunManager::links_to_origin(const int a) const
+bool Router::links_to_origin(const int a) const
 {
   return (sites_relinked[a] < 2);
 }
 
-bool RunManager::edges_share_run(const int a, const int b) const
+bool Router::edges_share_run(const int a, const int b) const
 {
   return (runs[a] == runs[b]);
 }
 
 // we create a symmat that is one size smaller than the distances
 // (only calculate for sites)
-distmat<double> RunManager::calc_savings(const distmat<double> &d) const
+distmat<double> Router::calc_savings(const distmat<double> &d) const
 {
   distmat<double> savings(d.size() - 1, 0);
 
@@ -233,7 +236,7 @@ distmat<double> RunManager::calc_savings(const distmat<double> &d) const
 }
 
 // returns Site 1, Site 2, Used vehicle
-std::tuple<int, int, int> RunManager::best_link(binop_dbl combine_load) const
+std::tuple<int, int, int> Router::best_link(binop_dbl combine_load) const
 {
   std::tuple<int, int, int> best_link = {-1, -1, -1};
   double max_val = 0;
@@ -283,7 +286,7 @@ std::tuple<int, int, int> RunManager::best_link(binop_dbl combine_load) const
 
 // TRUE if something got relinked,
 // FALSE if nothing got relinked (i.e. the procedure stabilized)
-bool RunManager::relink_best(binop_dbl combine_load)
+bool Router::relink_best(binop_dbl combine_load)
 {
   int a;
   int b;
@@ -308,9 +311,11 @@ bool RunManager::relink_best(binop_dbl combine_load)
 
     // we use consider_optim1 only when we combine positive and negative demand runs
     // so we can simply check the existance of this variable
-    if (consider_optim1.size() > 0) {
+    if (consider_optim1.size() > 0)
+    {
       // we want to combine pos and negative tours only once, so we remove the relevant sites here.
-      for (const int site : runs[a]->sites()) {
+      for (const int site : runs[a]->sites())
+      {
         // TODO: this is an abuse of sites_relinked, where we use the fact that elements with sites_relinked = 2
         // are not considered.
         sites_relinked[site] = 2;
@@ -325,9 +330,9 @@ bool RunManager::relink_best(binop_dbl combine_load)
   }
 }
 
-bool RunManager::opt_vehicles()
+bool Router::opt_vehicles()
 {
-  /* 
+  /*
   It might seem more efficient to release all vehicles first and then determine them from
   the ground up.
   However, we run the risk that we cannot reconstruct a vehicle configuration that
@@ -353,7 +358,8 @@ bool RunManager::opt_vehicles()
 
     fleet->reserve_vehicle(vehicle);
 
-    if (old_vehicle != vehicle) {
+    if (old_vehicle != vehicle)
+    {
       run->vehicle = vehicle;
       changed = true;
     }
@@ -362,11 +368,10 @@ bool RunManager::opt_vehicles()
   return changed;
 }
 
-bool RunManager::is_considered(const int site1, const int site2) const
+bool Router::is_considered(const int site1, const int site2) const
 {
-  return(consider_optim1.size() == 0 ||
-          (consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1])
-        );
+  return (consider_optim1.size() == 0 ||
+          (consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1]));
 }
 
 double run_distance(const std::vector<int> ordered_sites,
@@ -389,7 +394,7 @@ double run_distance(const std::vector<int> ordered_sites,
 // 4 - vehicle per run
 // 5 - load per run
 // 6 - distance per run
-col_types RunManager::runs_as_cols() const
+col_types Router::runs_as_cols() const
 {
   typedef std::shared_ptr<run> T;
 
@@ -465,22 +470,21 @@ col_types RunManager::runs_as_cols() const
   return cols;
 }
 
-tbls RunManager::runs_as_tbls(const std::vector<double> &demand) const
+tbls Router::runs_as_tbls(const std::vector<double> &demand) const
 {
   typedef std::shared_ptr<run> T;
 
   size_t col_size = runs.size() + fixed_singleton_runs.size();
- 
+
   std::map<T, int> visited_runs;
   std::map<int, std::vector<int>> orders;
   std::map<int, double> run_dists;
 
   tbl_run_site run_site_cols = {
-    std::vector<int>(col_size),
-    std::vector<int>(col_size),
-    std::vector<int>(col_size),
-    std::vector<double>(col_size)
-  };
+      std::vector<int>(col_size),
+      std::vector<int>(col_size),
+      std::vector<int>(col_size),
+      std::vector<double>(col_size)};
 
   int run_id = 0;
 
@@ -516,22 +520,21 @@ tbls RunManager::runs_as_tbls(const std::vector<double> &demand) const
       run_id++;
     }
 
-    int norder =  std::distance(
-                    order.begin(),
-                    std::find(order.begin(), order.end(), i)
-                  );
-    std::get<2>(run_site_cols)[i] = norder;  
+    int norder = std::distance(
+        order.begin(),
+        std::find(order.begin(), order.end(), i));
+    std::get<2>(run_site_cols)[i] = norder;
   }
 
   // now create the runs table from "visited_runs"
   tbl_run run_cols = {
-    std::vector<int>(visited_runs.size() + fixed_singleton_runs.size()),
-    std::vector<int>(visited_runs.size()+ fixed_singleton_runs.size()),
-    std::vector<double>(visited_runs.size() + fixed_singleton_runs.size()),
-    std::vector<double>(visited_runs.size() + fixed_singleton_runs.size())
-  };
+      std::vector<int>(visited_runs.size() + fixed_singleton_runs.size()),
+      std::vector<int>(visited_runs.size() + fixed_singleton_runs.size()),
+      std::vector<double>(visited_runs.size() + fixed_singleton_runs.size()),
+      std::vector<double>(visited_runs.size() + fixed_singleton_runs.size())};
 
-  for (const auto& [run, run_id] : visited_runs) {
+  for (const auto &[run, run_id] : visited_runs)
+  {
     std::get<0>(run_cols)[run_id] = run_id;
     std::get<1>(run_cols)[run_id] = run->vehicle;
     std::get<2>(run_cols)[run_id] = run->max_load;
@@ -540,23 +543,26 @@ tbls RunManager::runs_as_tbls(const std::vector<double> &demand) const
     // we also perform the load calculation here per run
     double sdemand = 0;
     double min_sdemand = 0;
-    for (auto site : orders[run_id]) {
+    for (auto site : orders[run_id])
+    {
       sdemand -= demand[site];
       // first write in the demand wrong by an offset
       std::get<3>(run_site_cols)[site] = sdemand;
 
-      if (sdemand < min_sdemand) {
+      if (sdemand < min_sdemand)
+      {
         min_sdemand = sdemand;
       }
     }
 
     // now update everything by that offset
-    for (auto site : orders[run_id]) {
+    for (auto site : orders[run_id])
+    {
       std::get<3>(run_site_cols)[site] -= min_sdemand;
     }
   }
 
-    // fill the rest up with singleton runs
+  // fill the rest up with singleton runs
   for (const auto &run : fixed_singleton_runs)
   {
     int site = *(run.sites().begin());
@@ -575,13 +581,13 @@ tbls RunManager::runs_as_tbls(const std::vector<double> &demand) const
   }
 
   tbl_site site_cols = {
-    std::vector<int>(runs.size()),
-    std::vector<double>(runs.size()) = demand
-  };
+      std::vector<int>(runs.size()),
+      std::vector<double>(runs.size()) = demand};
 
-  for (i = 0; i < runs.size(); i++) {
+  for (i = 0; i < runs.size(); i++)
+  {
     std::get<0>(site_cols)[i] = i;
   }
 
-  return { site_cols, run_cols, run_site_cols };
+  return {site_cols, run_cols, run_site_cols};
 }
