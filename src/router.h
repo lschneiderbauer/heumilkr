@@ -8,43 +8,33 @@
 #include "run.h"
 #include "fleet.h"
 
-using col_types = std::tuple<
-  std::vector<int>, // Site ID
-  std::vector<int>, // Run ID
-  std::vector<int>, // Order
-  std::vector<int>, // Vehicle ID
-  std::vector<double>, // Max Load
-  std::vector<double>>; // Traveled Distance
-
 using tbl_run =
-  std::tuple< // Run
-    std::vector<int>, // Run ID
-    std::vector<int>, // Vehicle ID
-    std::vector<double>, // Max Load
-    std::vector<double> // Run distance
-  >;
+    std::tuple<              // Run
+        std::vector<int>,    // Run ID
+        std::vector<int>,    // Vehicle ID
+        std::vector<double>, // Max Load
+        std::vector<double>  // Run distance
+        >;
 
 using tbl_run_site =
-  std::tuple< // Site-Visit
-    std::vector<int>, // Run ID
-    std::vector<int>, // Visited Site
-    std::vector<int>, // Order
-    std::vector<double> // Departing Load
-  >;
+    std::tuple<             // Site-Visit
+        std::vector<int>,   // Run ID
+        std::vector<int>,   // Visited Site
+        std::vector<int>,   // Order
+        std::vector<double> // Departing Load
+        >;
 
 using tbl_site =
-  std::tuple< // Site
-    std::vector<int>, // Site ID
-    std::vector<double> // Demand
-  >;
+    std::tuple<             // Site
+        std::vector<int>,   // Site ID
+        std::vector<double> // Demand
+        >;
 
 using tbls =
-  std::tuple<
-    tbl_site,
-    tbl_run,
-    tbl_run_site
-  >;
-
+    std::tuple<
+        tbl_site,
+        tbl_run,
+        tbl_run_site>;
 
 class Router
 {
@@ -52,17 +42,18 @@ public:
   // creates one singleton runs for each site with the given demand and already assigns
   // vehicles from a fleet
   Router(const std::vector<double> &demand,
-             std::unique_ptr<distmat<double>> distances,
-             std::shared_ptr<Fleet> fleet);
+         std::unique_ptr<distmat<double>> distances,
+         std::shared_ptr<Fleet> fleet);
 
   // creates a new Router by combining two existing ones
   // note that their fleets have to be identical for that to make sense
   Router(const Router &runm1, const Router &runm2,
-             const distmat<double> &new_distances,
-             const std::vector<int> &site_ind_map1,
-             const std::vector<int> &site_ind_map2);
+         const distmat<double> &new_distances,
+         const std::vector<int> &site_ind_map1,
+         const std::vector<int> &site_ind_map2);
 
-  bool relink_best(binop_dbl combine_load = [](double l1, double l2) {return(l1 + l2);});
+  bool relink_best(binop_dbl combine_load = [](double l1, double l2)
+                   { return (l1 + l2); });
 
   // After we have the final routes, we might still be able to assign
   // better vehicles for each route
@@ -72,7 +63,6 @@ public:
 
   // returns the current runs as column vectors for
   // data frame creation
-  col_types runs_as_cols() const;
   tbls runs_as_tbls(const std::vector<double> &demand) const;
 
   std::shared_ptr<Fleet> fleet;
