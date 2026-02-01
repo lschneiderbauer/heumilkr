@@ -1,7 +1,7 @@
-debug: clarke_wright.cpp fleet.cpp cpp11.cpp distmat.cpp run.cpp runmanager.cpp tsp_greedy.cpp
+debug: clarke_wright.cpp fleet.cpp cpp11.cpp distmat.cpp run.cpp router.cpp tsp_greedy.cpp
 	g++ -std=gnu++17 -I. \
 		-fstack-protector-strong -fstack-clash-protection -Wformat -fcf-protection \
 		-Wdate-time -Wall -pedantic -Wformat-security -g -O0 -fdiagnostics-color=always \
 		-fsanitize=address,undefined \
-		clarke_wright.cpp fleet.cpp distmat.cpp run.cpp runmanager.cpp tsp_greedy.cpp \
+		clarke_wright.cpp fleet.cpp distmat.cpp run.cpp router.cpp tsp_greedy.cpp \
 		-o debug

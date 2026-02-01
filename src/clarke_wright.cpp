@@ -1,6 +1,6 @@
 #include <iterator>
 #include <vector>
-#include "runmanager.h"
+#include "router.h"
 #include <cassert>
 
 // selects demand with a given sign, and always returns positive values
@@ -47,7 +47,7 @@ tbls cpp_clarke_wright(
     const std::vector<double> &capacities,
     const std::vector<int> &restr_sites,
     const std::vector<int> &restr_vehicles,
-    std::function<void(RunManager &)> callback = [](RunManager &) {})
+    std::function<void(Router &)> callback = [](Router &) {})
 {
   // check that all inputs have the correct size
   assert(distances.size() == (demand.size() + 1) * (demand.size()) / 2);
@@ -101,7 +101,7 @@ tbls cpp_clarke_wright(
         select_demand(demand, distm, 1);
   }
 
-  RunManager runm_pos(
+  Router runm_pos(
       demand_pos,
       std::make_unique<distmat<double>>(distances_pos),
       fleet);
@@ -135,7 +135,7 @@ tbls cpp_clarke_wright(
         select_demand(demand, distm, -1);
   }
 
-  RunManager runm_neg(demand_neg,
+  Router runm_neg(demand_neg,
                       std::make_unique<distmat<double>>(distances_neg),
                       fleet);
 
@@ -162,7 +162,7 @@ tbls cpp_clarke_wright(
   }
 
   // if we have both, combine then and optimize again
-  RunManager runm_all(runm_pos, runm_neg, distm, ind_pos, ind_neg);
+  Router runm_all(runm_pos, runm_neg, distm, ind_pos, ind_neg);
 
   callback(runm_all);
   while (runm_all.relink_best([](double l1, double l2)
