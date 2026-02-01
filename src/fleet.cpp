@@ -19,7 +19,8 @@ void Fleet::release_vehicle(const int vehicle)
 
 void Fleet::reserve_vehicle(const int vehicle)
 {
-    if (vehicle == -1) {
+    if (vehicle == -1)
+    {
         throw std::runtime_error("blah.");
     }
 

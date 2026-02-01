@@ -24,18 +24,22 @@ std::vector<int> run::ordered_sites(
     const std::vector<int> &first,
     const std::vector<int> &last) const
 {
-    if (first.size() == 0 || last.size() == 0) {
+    if (first.size() == 0 || last.size() == 0)
+    {
         return ordered_sites(distances);
     }
 
     // solve two tsp problems
     std::unordered_set<int> sites_first;
     std::unordered_set<int> sites_last;
-    for (const auto site : _sites) {
-        if (first[site]) {
+    for (const auto site : _sites)
+    {
+        if (first[site])
+        {
             sites_first.insert(site);
         }
-        if (last[site]) {
+        if (last[site])
+        {
             sites_last.insert(site);
         }
     }
@@ -45,8 +49,7 @@ std::vector<int> run::ordered_sites(
 
     ordered_sites_first.insert(
         ordered_sites_first.end(),
-        ordered_sites_last.rbegin(), ordered_sites_last.rend()
-    );
+        ordered_sites_last.rbegin(), ordered_sites_last.rend());
 
     return ordered_sites_first;
 }
