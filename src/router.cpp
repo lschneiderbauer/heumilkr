@@ -8,222 +8,112 @@
 #include <vector>
 #include <memory>
 #include <cassert>
+#include <optional>
 
-Router::Router(const std::vector<double> &demand,
-               std::unique_ptr<distmat<double>> distances,
+// creates potentially multiple singleton runs but returns only a single "run".
+run Router::create_initial_runs(Site s, double demand, std::shared_ptr<Fleet> fleet,
+                                std::shared_ptr<Distmat> distances)
+{
+  VehicleTypeID vehicle;
+  try
+  {
+    vehicle = fleet->find_fitting_vehicle(std::list<Site>{s}, demand, true).value();
+  }
+  catch (const std::bad_optional_access &e)
+  {
+    throw std::runtime_error(
+        "Not enough vehicles available to fulfill all demands trivially."
+        " Solver cannot proceed in that case.");
+  }
+  fleet->reserve_vehicle(vehicle);
+  int capacity = fleet->capacity(vehicle);
+
+  if (demand > capacity)
+  {
+    this->fixed_singleton_runs.emplace_back(s, capacity, vehicle, distances);
+    return (create_initial_runs(s, demand - capacity, fleet, distances));
+  }
+  else
+  {
+    return run(s, demand, vehicle, distances);
+  }
+}
+
+Router::Router(const std::shared_ptr<std::vector<double>> demand,
+               const std::unique_ptr<Distmat> distances,
                std::shared_ptr<Fleet> fleet)
     : fleet(fleet),
-      distances(std::move(distances)),
-      sites_relinked(demand.size(), 0),
-      runs(demand.size())
+      distances(std::make_shared<Distmat>(std::move(*distances))),
+      demand(demand),
+      sites_start(demand->size(), true),
+      sites_end(demand->size(), true),
+      runs(demand->size())
 {
   this->savings = calc_savings(*(this->distances));
-
-  runs.reserve(demand.size()); // just in case
-  for (size_t i = 0; i < demand.size(); i++)
-  {
-    if (demand[i] <= 0)
-    {
-      throw std::runtime_error("Router: demand has to be strictly positive");
-    }
-
-    runs[i] = std::make_shared<run>(i, demand[i]);
-  }
 
   fixed_singleton_runs = std::vector<run>();
 
-  // first vehicle assignments (iterate over runs)
-  // initial runs have only a single site
-  for (auto &run : runs)
+  runs.reserve(demand->size()); // just in case
+  for (size_t i = 0; i < demand->size(); i++)
   {
-    int vehicle = fleet->find_fitting_vehicle(run->sites(),
-                                              run->max_load,
-                                              true);
-    fleet->reserve_vehicle(vehicle);
-
-    // special treatment for the case when demand is higher than capacity
-    while (run->max_load > fleet->capacity(vehicle))
-    {
-      run->max_load -= fleet->capacity(vehicle);
-      this->fixed_singleton_runs.emplace_back(
-          *(run->sites().begin()), fleet->capacity(vehicle), vehicle);
-
-      vehicle = fleet->find_fitting_vehicle(run->sites(),
-                                            run->max_load,
-                                            true);
-
-      if (vehicle == -1)
-      {
-        throw std::runtime_error(
-            "Not enough vehicles available to fulfill all demands trivially."
-            " Solver cannot proceed in that case.");
-      }
-
-      fleet->reserve_vehicle(vehicle);
-    }
-
-    // only add the last one to the state
-    run->vehicle = vehicle;
+    runs[i] = std::make_shared<run>(
+        create_initial_runs(i, (*demand)[i], fleet, this->distances));
   }
 }
 
-int unique_count(union_view<int, std::vector> uv)
-{
-  std::unordered_set<int> s;
-  for (auto it = uv.begin(); it != uv.end(); ++it)
-  {
-    s.insert(*it);
-  }
-  return s.size();
-}
-
-Router::Router(const Router &runm1, const Router &runm2,
-               const distmat<double> &new_distances,
-               const std::vector<int> &site_ind_map1,
-               const std::vector<int> &site_ind_map2)
-    : fleet(runm1.fleet),
-      distances(std::make_unique<distmat<double>>(new_distances))
-{
-  if (runm1.fleet != runm2.fleet)
-  {
-    throw std::runtime_error("Router: cannot combine two Routers with different fleets");
-  }
-
-  // create inverse maps
-  // std::map<int, int> inv_site_ind_map1;
-  // for (size_t i = 0; i < site_ind_map1.size(); i++) {
-  //   inv_site_ind_map1[site_ind_map1[i]] = i;
-  // }
-  // std::map<int, int> inv_site_ind_map2;
-  // for (size_t i = 0; i < site_ind_map2.size(); i++) {
-  //   inv_site_ind_map2[site_ind_map2[i]] = i;
-  // }
-
-  // we have to mainly take care of identifying sites of run1 and run2 correctly
-  size_t site_size = unique_count(union_view(site_ind_map1, site_ind_map2));
-
-  this->sites_relinked = std::vector<int>(site_size);
-  for (size_t i = 0; i < runm1.sites_relinked.size(); i++)
-  {
-    this->sites_relinked[site_ind_map1[i]] = runm1.sites_relinked[i];
-  }
-  for (size_t i = 0; i < runm2.sites_relinked.size(); i++)
-  {
-    this->sites_relinked[site_ind_map2[i]] = runm2.sites_relinked[i];
-  }
-
-  this->runs = std::vector<std::shared_ptr<run>>(site_size);
-  for (const auto &rptr : runm1.runs)
-  {
-    std::unordered_set<int> new_sites;
-    for (auto old_site : rptr->sites())
-    {
-      new_sites.insert(site_ind_map1[old_site]);
-    }
-    auto new_run = std::make_shared<run>(new_sites, rptr->max_load, rptr->vehicle);
-    for (const auto site : new_run->sites())
-    {
-      this->runs[site] = new_run;
-    }
-  }
-  for (const auto &rptr : runm2.runs)
-  {
-    std::unordered_set<int> new_sites;
-    for (auto old_site : rptr->sites())
-    {
-      new_sites.insert(site_ind_map2[old_site]);
-    }
-    auto new_run = std::make_shared<run>(new_sites, rptr->max_load, rptr->vehicle);
-    for (const auto site : new_run->sites())
-    {
-      this->runs[site] = new_run;
-    }
-  }
-
-  this->fixed_singleton_runs = std::vector<run>();
-  this->fixed_singleton_runs.reserve(runm1.fixed_singleton_runs.size() + runm2.fixed_singleton_runs.size());
-  for (const auto &srun : runm1.fixed_singleton_runs)
-  {
-    std::unordered_set<int> new_sites;
-    for (auto site : srun.sites())
-    {
-      new_sites.insert(site_ind_map1[site]);
-    }
-    this->fixed_singleton_runs.emplace_back(new_sites, srun.max_load, srun.vehicle);
-  }
-  for (const auto &srun : runm2.fixed_singleton_runs)
-  {
-    std::unordered_set<int> new_sites;
-    for (auto site : srun.sites())
-    {
-      new_sites.insert(site_ind_map2[site]);
-    }
-    this->fixed_singleton_runs.emplace_back(new_sites, srun.max_load, srun.vehicle);
-  }
-
-  // we only want to consider connecting runs from one set to the other
-  this->consider_optim1 = std::vector<int>(site_size, false);
-  this->consider_optim2 = std::vector<int>(site_size, false);
-  for (const auto site : site_ind_map1)
-  {
-    this->consider_optim1[site] = true;
-  }
-  for (const auto site : site_ind_map2)
-  {
-    this->consider_optim2[site] = true;
-  }
-
-  // recalculate savings (there are more efficient ways)
-  this->savings = calc_savings(*(this->distances));
-}
-
-void Router::combine_runs(const int a, const int b, const int new_vehicle, binop_dbl combine_load)
+void Router::combine_runs(const Site a, const Site b, const VehicleTypeID new_vehicle)
 {
   assert(a != b);
   assert(runs[a] != runs[b]);
-  assert(links_to_origin(a) && links_to_origin(b));
+  assert(end_of_run(a));
+  assert(start_of_run(b));
 
   /*
   In the original algorithm we are only supposed to attempt to combine vertices that
   are connected to the origin.
   We used to keep track of the whole graph to determine that, but that was
   not necessary if the initial state consists of singleton runs all connected
-  to the origin, i.e. the form a cycle (ORIGIN - v - ORIGIN).
+  to the origin, i.e. the form a run_ptrle (ORIGIN - v - ORIGIN).
   When combining two vertices v and b for the first time, v is adjacent to ORIGIN
   and b. When combined a second time (to another vertex c), v is adjacent to b and c.
   -> A vertex can be combined at most two times, then it will not be connected to
      the origin anymore.
   */
 
-  sites_relinked[a] += 1;
-  sites_relinked[b] += 1;
-  runs[a]->combine(*runs[b], new_vehicle, combine_load);
+  runs[a]->combine(*runs[b], new_vehicle);
+
+  sites_end[a] = false;
+  sites_start[b] = false;
 
   // all vertices in the runs are affected,
   // we need to reset the pointer of the ones that b pointed
-  // to to point to the same cycle
+  // to to point to the same run_ptrle
   for (const auto site : runs[a]->sites())
   {
     runs[site] = runs[a];
   }
 }
 
-bool Router::links_to_origin(const int a) const
+bool Router::end_of_run(const Site a) const
 {
-  return (sites_relinked[a] < 2);
+  return sites_end[a];
 }
 
-bool Router::edges_share_run(const int a, const int b) const
+bool Router::start_of_run(const Site a) const
+{
+  return sites_start[a];
+}
+
+bool Router::sites_share_run(const Site a, const Site b) const
 {
   return (runs[a] == runs[b]);
 }
 
-// we create a symmat that is one size smaller than the distances
+// we create a Distmat that is one size smaller than the distances
 // (only calculate for sites)
-distmat<double> Router::calc_savings(const distmat<double> &d) const
+Distmat Router::calc_savings(const Distmat &d) const
 {
-  distmat<double> savings(d.size() - 1, 0);
-
+  Distmat savings(d.size() - 1, 0);
   for (int i = 1; i < savings.size(); i++)
   {
     for (int j = 0; j < i; j++)
@@ -235,47 +125,79 @@ distmat<double> Router::calc_savings(const distmat<double> &d) const
   return savings;
 }
 
-// returns Site 1, Site 2, Used vehicle
-std::tuple<int, int, int> Router::best_link(binop_dbl combine_load) const
+std::optional<std::tuple<Site, Site>> Router::run_merge_order(const Site i, const Site j) const
 {
-  std::tuple<int, int, int> best_link = {-1, -1, -1};
+  // if we have only attach a singleton run, we attach the new one at the end
+  // if its associated to negative demand, and in the beginning, if it's positive
+  bool i_is_singleton = end_of_run(i) && start_of_run(i);
+  bool j_is_singleton = end_of_run(j) && start_of_run(j);
+  if (
+      (i_is_singleton && ((*demand)[i] > 0) && start_of_run(j)) ||
+      (j_is_singleton && ((*demand)[j] > 0) && end_of_run(i)) ||
+      (end_of_run(i) && start_of_run(j)))
+  {
+    return std::make_tuple(i, j);
+  }
+
+  if (
+      (i_is_singleton && ((*demand)[i] < 0) && end_of_run(j)) ||
+      (j_is_singleton && ((*demand)[j] < 0) && start_of_run(i)) ||
+      (end_of_run(j) && start_of_run(i)))
+  {
+    return std::make_tuple(j, i);
+  }
+
+  return std::nullopt;
+}
+
+// returns Site 1, Site 2, Used vehicle
+std::optional<std::tuple<Site, Site, VehicleTypeID>> Router::best_link() const
+{
+  std::optional<std::tuple<Site, Site, VehicleTypeID>> best_link(std::nullopt);
   double max_val = 0;
 
-  for (int i = 1; i < savings.size(); i++)
+  for (Site i = 1; i < savings.size(); i++)
   {
-    for (int j = 0; j < i; j++)
+    for (Site j = 0; j < i; j++)
     {
       // printf("---\n");
       // printf("Link (%d,%d)\n", i, j);
       // printf("orig1 %d\n", runm.links_to_origin(i));
       // printf("orig2 %d\n", runm.links_to_origin(j));
       // printf("selected vehicle %d\n", select_vehicle(vehicle_avail, vehicle_caps, site_vehicle, load, restricted_vehicles, runm, i, j));
-      // printf("share cycle %d\n", runm.edges_share_cycle(i, j));
+      // printf("share run_ptrle %d\n", runm.sites_share_run_ptrle(i, j));
 
-      int selected_vehicle;
+      std::optional<VehicleTypeID> selected_vehicle;
       double saving;
 
-      if (is_considered(i, j) &&
-          !edges_share_run(i, j) &&
+      if (!sites_share_run(i, j) &&
           ((saving = savings.get(i, j)) > max_val) &&
-          links_to_origin(i) && links_to_origin(j))
+          ((end_of_run(i) && start_of_run(j)) || (end_of_run(j) && start_of_run(i))))
       {
-        fleet->release_vehicle(runs[i]->vehicle);
-        fleet->release_vehicle(runs[j]->vehicle);
+        // we need to decide how to merge runs together
+        std::optional<std::tuple<Site, Site>> mo = run_merge_order(i, j);
 
-        selected_vehicle =
-            fleet->find_fitting_vehicle(
-                union_view(runs[i]->sites(), runs[j]->sites()),
-                combine_load(runs[i]->max_load, runs[j]->max_load),
-                false);
-
-        fleet->reserve_vehicle(runs[i]->vehicle);
-        fleet->reserve_vehicle(runs[j]->vehicle);
-
-        if (selected_vehicle != -1)
+        if (mo)
         {
-          max_val = saving;
-          best_link = {i, j, selected_vehicle};
+          auto [end, start] = mo.value();
+
+          fleet->release_vehicle(runs[end]->vehicle());
+          fleet->release_vehicle(runs[start]->vehicle());
+
+          selected_vehicle =
+              fleet->find_fitting_vehicle(
+                  union_view(runs[end]->sites(), runs[start]->sites()),
+                  runs[end]->combined_max_load(*runs[start]),
+                  false);
+
+          fleet->reserve_vehicle(runs[end]->vehicle());
+          fleet->reserve_vehicle(runs[start]->vehicle());
+
+          if (selected_vehicle)
+          {
+            max_val = saving;
+            best_link = {end, start, selected_vehicle.value()};
+          }
         }
       }
     }
@@ -286,51 +208,30 @@ std::tuple<int, int, int> Router::best_link(binop_dbl combine_load) const
 
 // TRUE if something got relinked,
 // FALSE if nothing got relinked (i.e. the procedure stabilized)
-bool Router::relink_best(binop_dbl combine_load)
+bool Router::relink_best()
 {
-  int a;
-  int b;
-  int vehicle;
-  std::tie(a, b, vehicle) = best_link(combine_load);
-
-  // printf("---\n");
-  // printf("Best Link (%d,%d)\n", a, b);
-  // printf("orig1 %d\n", runm.links_to_origin(a));
-  // printf("orig2 %d\n", runm.links_to_origin(b));
-  // printf("selected vehicle %d\n", vehicle);
-  // printf("share cycle %d\n", runm.edges_share_cycle(a, b));
-
-  if (!((a == b) && (a == -1)))
-  {
-    // return two vehicles
-    fleet->release_vehicle(this->runs[a]->vehicle);
-    fleet->release_vehicle(this->runs[b]->vehicle);
-    fleet->reserve_vehicle(vehicle);
-
-    combine_runs(a, b, vehicle, combine_load);
-
-    // we use consider_optim1 only when we combine positive and negative demand runs
-    // so we can simply check the existance of this variable
-    if (consider_optim1.size() > 0)
-    {
-      // we want to combine pos and negative tours only once, so we remove the relevant sites here.
-      for (const int site : runs[a]->sites())
-      {
-        // TODO: this is an abuse of sites_relinked, where we use the fact that elements with sites_relinked = 2
-        // are not considered.
-        sites_relinked[site] = 2;
-      }
-    }
-
-    return true;
-  }
-  else
+  std::optional<std::tuple<Site, Site, VehicleTypeID>> best_link = this->best_link();
+  if (!best_link)
   {
     return false;
   }
+
+  Site a;
+  Site b;
+  VehicleTypeID vehicle;
+  std::tie(a, b, vehicle) = best_link.value();
+
+  // return two vehicles
+  fleet->release_vehicle(this->runs[a]->vehicle());
+  fleet->release_vehicle(this->runs[b]->vehicle());
+  fleet->reserve_vehicle(vehicle);
+
+  combine_runs(a, b, vehicle);
+
+  return true;
 }
 
-bool Router::opt_vehicles()
+bool Router::optimize_vehicles()
 {
   /*
   It might seem more efficient to release all vehicles first and then determine them from
@@ -343,24 +244,10 @@ bool Router::opt_vehicles()
   bool changed = false;
 
   // then reassign fitting vehicles
-  for (auto &run : runs)
+  for (auto run : runs)
   {
-    int old_vehicle = run->vehicle;
-
-    // we are guaranteed to find at least that vehicle one again
-    fleet->release_vehicle(old_vehicle);
-
-    int vehicle =
-        fleet->find_fitting_vehicle(
-            run->sites(),
-            run->max_load,
-            false);
-
-    fleet->reserve_vehicle(vehicle);
-
-    if (old_vehicle != vehicle)
+    if (run->reassign_vehicle(*fleet))
     {
-      run->vehicle = vehicle;
       changed = true;
     }
   }
@@ -368,34 +255,22 @@ bool Router::opt_vehicles()
   return changed;
 }
 
-bool Router::is_considered(const int site1, const int site2) const
+void Router::optimize_runs_order()
 {
-  return (consider_optim1.size() == 0 ||
-          (consider_optim1[site1] && consider_optim2[site2]) || (consider_optim1[site2] && consider_optim2[site1]));
-}
-
-double run_distance(const std::vector<int> ordered_sites,
-                    const distmat<double> &d)
-{
-  auto it = ordered_sites.begin();
-  double distance = d.get(0, 1 + *it);
-  for (; it < (ordered_sites.end() - 1); it++)
+  for (auto run : runs)
   {
-    distance += d.get(1 + *it, 1 + *(it + 1));
+    run->optimize_route_order();
   }
-  distance += d.get(0, 1 + *it);
-
-  return distance;
 }
 
-tbls Router::runs_as_tbls(const std::vector<double> &demand) const
+tbls Router::runs_as_tbls() const
 {
   typedef std::shared_ptr<run> T;
 
   size_t col_size = runs.size() + fixed_singleton_runs.size();
 
   std::map<T, int> visited_runs;
-  std::map<int, std::vector<int>> orders;
+  std::map<int, std::list<Site>> orders;
   std::map<int, double> run_dists;
 
   tbl_run_site run_site_cols = {
@@ -410,26 +285,26 @@ tbls Router::runs_as_tbls(const std::vector<double> &demand) const
   size_t i = 0;
   for (; i < runs.size(); i++)
   {
-    std::vector<int> order;
+    std::list<Site> order;
     double run_dist;
-    T cyc = runs[i];
+    std::shared_ptr<run> run_ptr = runs[i];
 
     std::get<1>(run_site_cols)[i] = i;
 
-    // check if we have seen cyc before
-    if (visited_runs.count(cyc) > 0)
+    // check if we have seen run_ptr before
+    if (visited_runs.count(run_ptr) > 0)
     {
-      order = orders[visited_runs[cyc]];
-      run_dist = run_dists[visited_runs[cyc]];
+      order = orders[visited_runs[run_ptr]];
+      run_dist = run_dists[visited_runs[run_ptr]];
 
-      std::get<0>(run_site_cols)[i] = visited_runs[cyc];
+      std::get<0>(run_site_cols)[i] = visited_runs[run_ptr];
     }
     else // if we did not see it before
     {
-      visited_runs.insert({cyc, run_id});
+      visited_runs.insert({run_ptr, run_id});
       // we reorder each run again (by solving the TSP)
-      order = cyc->ordered_sites(*(this->distances), consider_optim1, consider_optim2);
-      run_dist = run_distance(order, *(this->distances));
+      order = run_ptr->sites();
+      run_dist = run_ptr->distance();
 
       orders.insert({run_id, order});
       run_dists.insert({run_id, run_dist});
@@ -454,29 +329,13 @@ tbls Router::runs_as_tbls(const std::vector<double> &demand) const
   for (const auto &[run, run_id] : visited_runs)
   {
     std::get<0>(run_cols)[run_id] = run_id;
-    std::get<1>(run_cols)[run_id] = run->vehicle;
-    std::get<2>(run_cols)[run_id] = run->max_load;
+    std::get<1>(run_cols)[run_id] = run->vehicle();
+    std::get<2>(run_cols)[run_id] = run->max_load();
     std::get<3>(run_cols)[run_id] = run_dists[run_id];
 
-    // we also perform the load calculation here per run
-    double sdemand = 0;
-    double min_sdemand = 0;
-    for (auto site : orders[run_id])
+    for (const auto [site, load] : run->load_after_visit(*demand))
     {
-      sdemand -= demand[site];
-      // first write in the demand wrong by an offset
-      std::get<3>(run_site_cols)[site] = sdemand;
-
-      if (sdemand < min_sdemand)
-      {
-        min_sdemand = sdemand;
-      }
-    }
-
-    // now update everything by that offset
-    for (auto site : orders[run_id])
-    {
-      std::get<3>(run_site_cols)[site] -= min_sdemand;
+      std::get<3>(run_site_cols)[site] = load;
     }
   }
 
@@ -487,11 +346,11 @@ tbls Router::runs_as_tbls(const std::vector<double> &demand) const
     std::get<0>(run_site_cols)[i] = run_id;
     std::get<1>(run_site_cols)[i] = site;
     std::get<2>(run_site_cols)[i] = 0;
-    std::get<3>(run_site_cols)[i] = run.max_load;
+    std::get<3>(run_site_cols)[i] = run.max_load();
 
     std::get<0>(run_cols)[i] = run_id;
-    std::get<1>(run_cols)[i] = run.vehicle;
-    std::get<2>(run_cols)[i] = run.max_load;
+    std::get<1>(run_cols)[i] = run.vehicle();
+    std::get<2>(run_cols)[i] = run.max_load();
     std::get<3>(run_cols)[i] = 2 * distances->get(0, 1 + site);
 
     run_id++;
@@ -500,7 +359,7 @@ tbls Router::runs_as_tbls(const std::vector<double> &demand) const
 
   tbl_site site_cols = {
       std::vector<int>(runs.size()),
-      std::vector<double>(runs.size()) = demand};
+      std::vector<double>(runs.size()) = *demand};
 
   for (i = 0; i < runs.size(); i++)
   {

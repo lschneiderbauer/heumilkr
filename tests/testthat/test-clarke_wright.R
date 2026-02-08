@@ -164,7 +164,7 @@ test_that("Vehicles are not assigned to restricted sites", {
         )
 
       runs <- res$visits[res$visits$site == 0, "run"]
-      
+
       expect_false(
         0 %in% res$runs[res$runs$run %in% runs, "vehicle"]
       )
@@ -341,22 +341,18 @@ test_that("Truck loads are always within physical boundaries at any point on the
           demand_net$distances,
           data.frame(n = c(NA_integer_, 3L), caps = c(60, max_cap))
         )
-      
+
       expect_all_true(res$visits$load >= 0)
       expect_all_true(res$visits$load <= max_cap)
     }
   )
 })
 
-test_that("Max of positive demand sum and negative demand sum
-          for each run equals the max_load", {
+test_that("Single-signed demand: Max of demand sum for each run equals max_load", {
   skip_if_not_installed("hedgehog")
 
-  # requirement for that to be true:
-  # * only count positive demands
-  # * demand is always <= vehicle capacity
   hedgehog::forall(
-    gen.demand_net(max_sites = 10L),
+    gen.demand_net(max_sites = 10L, min_demand = 1L),
     function(demand_net) {
       res <-
         clarke_wright(
@@ -371,19 +367,42 @@ test_that("Max of positive demand sum and negative demand sum
         by = "site"
       )
 
-      pos_load <-
+      load <-
         as.numeric(
-          by(res1, res1$run, function(x) sum(pmax(x$demand, 0)))
-        )
-
-      neg_load <-
-        as.numeric(
-          by(res1, res1$run, function(x) sum(pmin(x$demand, 0)))
+          by(res1, res1$run, function(x) sum(x$demand))
         )
 
       expect_equal(
         res$runs$max_load,
-        pmax(pos_load, -neg_load)
+        abs(load)
+      )
+    }
+  )
+
+  hedgehog::forall(
+    gen.demand_net(max_sites = 10L, max_demand = -1L),
+    function(demand_net) {
+      res <-
+        clarke_wright(
+          demand_net$demand,
+          demand_net$distances,
+          data.frame(n = c(NA_integer_, 3L), caps = c(60, 120))
+        )
+
+      res1 <- merge(
+        res$visits,
+        res$sites,
+        by = "site"
+      )
+
+      load <-
+        as.numeric(
+          by(res1, res1$run, function(x) sum(x$demand))
+        )
+
+      expect_equal(
+        res$runs$max_load,
+        abs(load)
       )
     }
   )
@@ -407,7 +426,7 @@ test_that("Example scenario with negative demand yields a single run", {
 
 
 test_that("Last result of clarke_wright stepwise should be the original result", {
-skip_if_not_installed("hedgehog")
+  skip_if_not_installed("hedgehog")
 
   # requirement for that to be true:
   # * only count positive demands

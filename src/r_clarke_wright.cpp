@@ -1,7 +1,8 @@
 #include <cpp11.hpp>
 #include <iterator>
 #include <vector>
-#include "runmanager.h"
+#include "router.h"
+#include <functional>
 
 using namespace cpp11;
 
@@ -38,7 +39,7 @@ tbls cpp_clarke_wright(
     const std::vector<double> &capacities,
     const std::vector<int> &restr_sites,
     const std::vector<int> &restr_vehicles,
-    std::function<void(RunManager &)> callback = [](RunManager &) {});
+    std::function<void(Router &)> callback = [](Router &) {});
 
 [[cpp11::register]]
 cpp11::writable::list r_cpp_clarke_wright(
@@ -77,8 +78,8 @@ list cpp_clarke_wright_stepwise(
       capacities,
       restr_sites,
       restr_vehicles,
-      [&steps, &demand](RunManager &runm)
-      { steps.push_back(tbls_to_dfs(runm.runs_as_tbls(demand))); });
+      [&steps, &demand](Router &router)
+      { steps.push_back(tbls_to_dfs(router.runs_as_tbls())); });
 
   return steps;
 }

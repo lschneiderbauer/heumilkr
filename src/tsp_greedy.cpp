@@ -1,45 +1,50 @@
-#ifndef TSP_GREEDY
-#define TSP_GREEDY
-
 #include <vector>
 #include <unordered_set>
 #include <limits>
 #include <algorithm>
-#include "distmat.h"
+#include <list>
+#include "tsp_greedy.h"
+#include "site.h"
 
-std::vector<int> tsp_greedy(const std::unordered_set<int> sites,
-                            const distmat<double> &distances)
+template <typename Container>
+std::tuple<Container, double> tsp_greedy(const Container &sites, const Distmat &distances)
 {
-  std::vector<int> run;
-  run.reserve(sites.size());
+  Container run;
+  // run.reserve(sites.size());
+
+  double total_dist = 0;
 
   int ref_site = -1;
   int next_site = ref_site;
+
+  std::unordered_set<Site> not_visited;
+  for (const auto site : sites)
+  {
+    not_visited.insert(site);
+  }
 
   int cont = true;
   do
   {
     double min_dist = std::numeric_limits<double>::max();
     // get the nearest site from origin
-    for (const auto site : sites)
+    for (const auto site : not_visited)
     {
-      // if it's not already in the list check the distance
-      if (std::find(run.begin(), run.end(), site) == run.end())
-      {
-        double dist = distances.get(ref_site + 1, site + 1);
+      double dist = distances.get(ref_site + 1, site + 1);
 
-        if (dist < min_dist)
-        {
-          min_dist = dist;
-          next_site = site;
-        }
+      if (dist < min_dist)
+      {
+        min_dist = dist;
+        next_site = site;
       }
     }
 
     if (next_site != ref_site)
     {
       run.push_back(next_site);
+      not_visited.erase(next_site);
       ref_site = next_site;
+      total_dist += min_dist;
     }
     else
     {
@@ -48,7 +53,9 @@ std::vector<int> tsp_greedy(const std::unordered_set<int> sites,
 
   } while (cont);
 
-  return run;
+  total_dist += distances.get(0, next_site + 1);
+
+  return std::make_tuple(run, total_dist);
 }
 
-#endif
+template std::tuple<std::list<Site>, double> tsp_greedy(const std::list<Site> &sites, const Distmat &distances);
