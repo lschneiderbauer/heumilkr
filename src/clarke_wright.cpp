@@ -1,15 +1,17 @@
 #include <iterator>
 #include <vector>
+#include <functional>
 #include "router.h"
+#include "symmat.h"
 #include <cassert>
 
 // selects demand with a given sign, and always returns positive values
-std::tuple<std::vector<int>, std::vector<double>, distmat<double>>
-select_demand(const std::vector<double> &demand, const distmat<double> &distm, int sign)
+std::tuple<std::vector<int>, std::vector<double>, Distmat>
+select_demand(const std::vector<double> &demand, const Distmat &distm, int sign)
 {
   std::vector<int> new_ind;
   std::vector<double> new_demand;
-  distmat<double> new_distm;
+  Distmat new_distm;
 
   new_ind.reserve(demand.size());
   new_demand.reserve(demand.size());
@@ -37,7 +39,7 @@ select_demand(const std::vector<double> &demand, const distmat<double> &distm, i
     new_distm = distm.sub(new_ind_dist);
   }
 
-  return std::tuple<std::vector<int>, std::vector<double>, distmat<double>>(new_ind, new_demand, new_distm);
+  return std::tuple<std::vector<int>, std::vector<double>, Distmat>(new_ind, new_demand, new_distm);
 }
 
 tbls cpp_clarke_wright(
@@ -60,7 +62,7 @@ tbls cpp_clarke_wright(
   }
 
   auto fleet = std::make_shared<Fleet>(n_res, capacities, restricted_vehicles);
-  distmat<double> distm(distances);
+  Distmat distm(distances);
 
   // we can have positive and negative demands
   // positive = sites are sinks and origin is source
@@ -69,112 +71,55 @@ tbls cpp_clarke_wright(
   // Strategy:
   // Consider and solve positive and negative demands separately (we can use the same solver)
   // Combine those solutions afterwards
+  /*
+    bool have_pos = false;
+    bool have_neg = false;
 
-  bool have_pos = false;
-  bool have_neg = false;
-
-  for (size_t i = 0; i < demand.size(); i++)
-  {
-    if (demand[i] > 0)
+    for (size_t i = 0; i < demand.size(); i++)
     {
-      have_pos = true;
-    }
-    if (demand[i] < 0)
-    {
-      have_neg = true;
-    }
-    if (have_pos && have_neg)
-    {
-      break;
-    }
-  }
-
-  /* Positive */
-
-  std::vector<int> ind_pos;
-  std::vector<double> demand_pos;
-  distmat<double> distances_pos;
-
-  if (have_pos)
-  {
-    std::tie(ind_pos, demand_pos, distances_pos) =
-        select_demand(demand, distm, 1);
-  }
-
-  Router runm_pos(
-      demand_pos,
-      std::make_unique<distmat<double>>(distances_pos),
-      fleet);
-
-  if (have_pos)
-  {
-    callback(runm_pos);
-    while (runm_pos.relink_best())
-    {
-      callback(runm_pos);
-    };
-    while (runm_pos.opt_vehicles())
-    {
-    };
-
-    if (!have_neg)
-    {
-      return (runm_pos.runs_as_tbls(demand_pos));
-    }
-  }
-
-  /* Negative */
-
-  std::vector<int> ind_neg;
-  std::vector<double> demand_neg;
-  distmat<double> distances_neg;
-
-  if (have_neg)
-  {
-    std::tie(ind_neg, demand_neg, distances_neg) =
-        select_demand(demand, distm, -1);
-  }
-
-  Router runm_neg(demand_neg,
-                      std::make_unique<distmat<double>>(distances_neg),
-                      fleet);
-
-  if (have_neg)
-  {
-    callback(runm_neg);
-    while (runm_neg.relink_best())
-    {
-      callback(runm_neg);
-    };
-
-    while (runm_neg.opt_vehicles())
-    {
-    };
-
-    if (!have_pos)
-    {
-      for (auto &dmnd : demand_neg)
+      if (demand[i] > 0)
       {
-        dmnd = -dmnd;
+        have_pos = true;
       }
-      return (runm_neg.runs_as_tbls(demand_neg));
+      if (demand[i] < 0)
+      {
+        have_neg = true;
+      }
+      if (have_pos && have_neg)
+      {
+        break;
+      }
     }
-  }
+  */
+  /* Positive */
+  /*
+    std::vector<int> ind_pos;
+    std::vector<double> demand_pos;
+    distmat<double> distances_pos;
+
+    if (have_pos)
+    {
+      std::tie(ind_pos, demand_pos, distances_pos) =
+          select_demand(demand, distm, 1);
+    }
+  */
 
   // if we have both, combine then and optimize again
-  Router runm_all(runm_pos, runm_neg, distm, ind_pos, ind_neg);
+  Router router(
+    std::make_shared<std::vector<double>>(demand),
+    std::make_unique<Distmat>(distm), fleet);
 
-  callback(runm_all);
-  while (runm_all.relink_best([](double l1, double l2)
-                              { return (std::max(l1, l2)); }))
+  callback(router);
+  while (router.relink_best())
   {
-    callback(runm_all);
+    callback(router);
   };
-  while (runm_all.opt_vehicles())
+  while (router.optimize_vehicles())
   {
   };
+  // router.optimize_runs_order();
 
-  return (runm_all.runs_as_tbls(demand));
+  return (router.runs_as_tbls());
 }
 
 #ifndef NDEBUG
@@ -183,10 +128,10 @@ int main()
 {
   tbls cols =
       cpp_clarke_wright(
-          std::vector<double>{-3, -2, 1, 2},
-          std::vector<double>{5, 10, 5, 4, 5, 2, 12, 13, 10, 3},
-          std::vector<int>{100},
-          std::vector<double>{5},
+          std::vector<double>{14.14, 14.37, 7.86},
+          std::vector<double>{8.128214, 7.837354, 3.162988, 12.616152, 6.427298, 10.7306495},
+          std::vector<int>{2, 100},
+          std::vector<double>{33, 44},
           std::vector<int>{},
           std::vector<int>{});
 
@@ -204,3 +149,15 @@ int main()
   return 0;
 }
 #endif
+
+
+/*
+> demand
+[1] 14.148060 14.370754  7.861395
+> pos
+     pos_x     pos_y
+1 0.000000  0.000000
+2 6.608953  4.731766
+3 2.834910 -7.306668
+4 0.381919  3.139846
+*/

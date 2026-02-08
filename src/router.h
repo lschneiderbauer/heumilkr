@@ -7,6 +7,8 @@
 
 #include "run.h"
 #include "fleet.h"
+#include "site.h"
+#include "symmat.h"
 
 using tbl_run =
     std::tuple<              // Run
@@ -39,63 +41,59 @@ using tbls =
 class Router
 {
 public:
-  // creates one singleton runs for each site with the given demand and already assigns
-  // vehicles from a fleet
-  Router(const std::vector<double> &demand,
-         std::unique_ptr<distmat<double>> distances,
-         std::shared_ptr<Fleet> fleet);
+    // creates one singleton runs for each site with the given demand and already assigns
+    // vehicles from a fleet
+    Router(const std::shared_ptr<std::vector<double>> demand,
+           const std::unique_ptr<Distmat> distances,
+           std::shared_ptr<Fleet> fleet);
 
-  // creates a new Router by combining two existing ones
-  // note that their fleets have to be identical for that to make sense
-  Router(const Router &runm1, const Router &runm2,
-         const distmat<double> &new_distances,
-         const std::vector<int> &site_ind_map1,
-         const std::vector<int> &site_ind_map2);
+    run create_initial_runs(Site s, double demand, std::shared_ptr<Fleet> fleet,
+                            const std::shared_ptr<Distmat> distances);
+    // creates a new Router by combining two existing ones
+    // note that their fleets have to be identical for that to make sense
 
-  bool relink_best(binop_dbl combine_load = [](double l1, double l2)
-                   { return (l1 + l2); });
+    bool relink_best();
 
-  // After we have the final routes, we might still be able to assign
-  // better vehicles for each route
-  // (we might have released some high-priority vehicles on the way which
-  // are now unused)
-  bool opt_vehicles();
+    // After we have the final routes, we might still be able to assign
+    // better vehicles for each route
+    // (we might have released some high-priority vehicles on the way which
+    // are now unused)
+    bool optimize_vehicles();
+    void optimize_runs_order();
 
-  // returns the current runs as column vectors for
-  // data frame creation
-  tbls runs_as_tbls(const std::vector<double> &demand) const;
-
-  std::shared_ptr<Fleet> fleet;
-  const std::unique_ptr<distmat<double>> distances;
+    // returns the current runs as column vectors for
+    // data frame creation
+    tbls runs_as_tbls() const;
 
 private:
-  // combines the two runs traversing site a and site b with the new vehicle new_vehicle.
-  void combine_runs(const int a, const int b, const int new_vehicle, binop_dbl combine_load);
+    // combines the two runs traversing site a and site b with the new vehicle new_vehicle.
+    void combine_runs(const Site a, const Site b, const VehicleTypeID new_vehicle);
 
-  // is site a directly linked to the origin via its traversing run?
-  bool links_to_origin(const int a) const;
+    // is site a directly linked to the origin via its traversing run?
+    bool end_of_run(const Site a) const;
+    bool start_of_run(const Site a) const;
+    std::optional<std::tuple<Site, Site>> run_merge_order(const Site a, const Site b) const;
 
-  // are the sites a and site b traversed by the same run?
-  bool edges_share_run(const int a, const int b) const;
+    // are the sites a and site b traversed by the same run?
+    bool sites_share_run(const Site a, const Site b) const;
 
-  distmat<double> calc_savings(const distmat<double> &d) const;
+    Distmat calc_savings(const Distmat &d) const;
 
-  std::tuple<int, int, int> best_link(binop_dbl combine_load) const;
+    std::optional<std::tuple<Site, Site, VehicleTypeID>> best_link() const;
 
-  distmat<double> savings;
-  std::vector<int> sites_relinked;
-  std::vector<run> fixed_singleton_runs; // those runs are not dynamic, i.e. they won't be changed
+    std::shared_ptr<Fleet> fleet;
+    const std::shared_ptr<Distmat> distances;
+    const std::shared_ptr<std::vector<double>> demand;
 
-  // a vector of runs (of length of the sites): each site has a reference to
-  // the runs it belongs to (which in turn has all the other references)
-  std::vector<std::shared_ptr<run>> runs;
+    Distmat savings;
+    // std::vector<int> sites_relinked;
+    std::vector<bool> sites_start;
+    std::vector<bool> sites_end;
+    std::vector<run> fixed_singleton_runs; // those runs are not dynamic, i.e. they won't be changed
 
-  bool is_considered(const int site1, const int site2) const;
-
-  // site-indexed: consider only site1-site2 combination for optimization
-  // if vectors are not empty
-  std::vector<int> consider_optim1;
-  std::vector<int> consider_optim2;
+    // a vector of runs (of length of the sites): each site has a reference to
+    // the runs it belongs to (which in turn has all the other references)
+    std::vector<std::shared_ptr<run>> runs;
 };
 
 #endif
