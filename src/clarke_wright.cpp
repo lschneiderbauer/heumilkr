@@ -135,11 +135,21 @@ int main()
           std::vector<int>{},
           std::vector<int>{});
 
-  tbl_run_site tr = std::get<2>(cols);
+  tbl_run_site trs = std::get<2>(cols);
+  tbl_run tr = std::get<1>(cols);
+
+  for (size_t i = 0; i < std::get<0>(trs).size(); i++)
+  {
+    printf("Run: %d, Site: %d, Order: %d, Departing Load: %f\n",
+           std::get<0>(trs)[i],
+           std::get<1>(trs)[i],
+           std::get<2>(trs)[i],
+           std::get<3>(trs)[i]);
+  }
 
   for (size_t i = 0; i < std::get<0>(tr).size(); i++)
   {
-    printf("Run: %d, Site: %d, Order: %d, Departing Load: %f\n",
+    printf("Run: %d, Vehicle: %d, Max Load: %f, Distance: %f\n",
            std::get<0>(tr)[i],
            std::get<1>(tr)[i],
            std::get<2>(tr)[i],

@@ -38,6 +38,8 @@ using tbls =
         tbl_run,
         tbl_run_site>;
 
+typedef std::shared_ptr<run> RunPtr;
+
 class Router
 {
 public:
@@ -67,33 +69,24 @@ public:
 
 private:
     // combines the two runs traversing site a and site b with the new vehicle new_vehicle.
-    void combine_runs(const Site a, const Site b, const VehicleTypeID new_vehicle);
+    void combine_runs(RunPtr a, RunPtr b, const VehicleTypeID new_vehicle);
 
     // is site a directly linked to the origin via its traversing run?
-    bool end_of_run(const Site a) const;
-    bool start_of_run(const Site a) const;
     std::optional<std::tuple<Site, Site>> run_merge_order(const Site a, const Site b) const;
-
-    // are the sites a and site b traversed by the same run?
-    bool sites_share_run(const Site a, const Site b) const;
 
     Distmat calc_savings(const Distmat &d) const;
 
-    std::optional<std::tuple<Site, Site, VehicleTypeID>> best_link() const;
+    std::optional<std::tuple<RunPtr, RunPtr, VehicleTypeID>> best_link() const;
 
     std::shared_ptr<Fleet> fleet;
     const std::shared_ptr<Distmat> distances;
     const std::shared_ptr<std::vector<double>> demand;
 
     Distmat savings;
-    // std::vector<int> sites_relinked;
-    std::vector<bool> sites_start;
-    std::vector<bool> sites_end;
     std::vector<run> fixed_singleton_runs; // those runs are not dynamic, i.e. they won't be changed
 
-    // a vector of runs (of length of the sites): each site has a reference to
-    // the runs it belongs to (which in turn has all the other references)
-    std::vector<std::shared_ptr<run>> runs;
+    std::unordered_set<RunPtr> runs;
+    // std::vector<RunPtr> runs;
 };
 
 #endif
