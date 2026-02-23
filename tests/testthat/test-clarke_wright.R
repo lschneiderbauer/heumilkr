@@ -74,7 +74,7 @@ test_that("Distances add up correctly.", {
     data.frame(n = NA_integer_, caps = 1)
   )
 
-  expect_equal(res$runs$distance, 1:10 * 2)
+  expect_equal(sort(res$runs$distance), 1:10 * 2)
 })
 
 test_that("Limited vehicles with more priority should always be exhausted
@@ -324,7 +324,13 @@ test_that("README example result is preserved.", {
       data.frame(n = c(NA_integer_, 2L), caps = c(33, 44))
     )
 
+  
   expect_snapshot(res)
+
+  expect_lte(
+    milkr_cost(res),
+    170.2523
+  )
 })
 
 test_that("Truck loads are always within physical boundaries at any point on the run (even with negative demands)", {

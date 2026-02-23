@@ -44,21 +44,21 @@ T &Symmat<T>::acc(const int i, const int j)
 template <class T>
 T Symmat<T>::get(const int i, const int j) const
 {
-  if (i >= m_size)
-  {
-    throw std::out_of_range("Index i out of range in distmat::get");
-  }
-  if (j >= m_size)
-  {
-    throw std::out_of_range("Index j out of range in distmat::get");
-  }
-
   if (i < j)
   {
+    if (j >= m_size)
+    {
+      throw std::out_of_range("Index j out of range in distmat::get");
+    }
+
     return data[m_size * i - i * (i + 1) / 2 + (j - i) - 1];
   }
   else
   {
+    if (i >= m_size)
+    {
+      throw std::out_of_range("Index i out of range in distmat::get");
+    }
     return data[m_size * j - j * (j + 1) / 2 + (i - j) - 1];
   }
 }

@@ -6,6 +6,12 @@ void run::combine(run &other_run, VehicleTypeID new_vehicle)
 {
     assert(this->_distances == other_run._distances);
 
+    // Store references before splice, as splice modifies _sites
+    Site this_first = *this->_sites.begin();
+    Site this_last = *this->_sites.rbegin();
+    Site other_first = *other_run._sites.begin();
+    Site other_last = *other_run._sites.rbegin();
+
     _sites.splice(_sites.end(), other_run._sites);
 
     this->_vehicle = new_vehicle;
@@ -16,10 +22,10 @@ void run::combine(run &other_run, VehicleTypeID new_vehicle)
 
     this->_distance =
         this->_distance + other_run._distance -
-        this->_distances->get(0, 1 + *this->_sites.begin()) -
-        this->_distances->get(0, 1 + *other_run._sites.rbegin()) +
-        this->_distances->get(1 + *this->_sites.rbegin(),
-                              1 + *other_run._sites.begin());
+        this->_distances->get(0, 1 + this_first) -
+        this->_distances->get(0, 1 + other_last) +
+        this->_distances->get(1 + this_last,
+                              1 + other_first);
 }
 
 double run::combined_max_load(const run &other_run) const
