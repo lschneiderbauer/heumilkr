@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <memory>
-#include <unordered_set>
+#include <set>
 
 #include "run.h"
 #include "fleet.h"
@@ -85,8 +85,7 @@ private:
     Distmat savings;
     std::vector<run> fixed_singleton_runs; // those runs are not dynamic, i.e. they won't be changed
 
-    std::unordered_set<RunPtr> runs;
-    // std::vector<RunPtr> runs;
+    std::set<RunPtr> runs;
 };
 
 #endif

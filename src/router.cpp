@@ -1,9 +1,7 @@
 #include "router.h"
 #include "union_view.h"
+#include "distinct_pairs.h"
 
-#include <unordered_set>
-#include <map>
-#include <algorithm>
 #include <iterator>
 #include <vector>
 #include <memory>
@@ -44,17 +42,16 @@ Router::Router(const std::shared_ptr<std::vector<double>> demand,
                std::shared_ptr<Fleet> fleet)
     : fleet(fleet),
       distances(std::make_shared<Distmat>(std::move(*distances))),
-      demand(demand),
-      runs(demand->size())
+      demand(demand)
 {
   this->savings = calc_savings(*(this->distances));
 
   fixed_singleton_runs = std::vector<run>();
 
-  runs.reserve(demand->size()); // just in case
+  runs = std::set<RunPtr>();
   for (size_t i = 0; i < demand->size(); i++)
   {
-    runs.emplace(std::make_shared<run>(
+    runs.insert(std::make_shared<run>(
         create_initial_runs(i, (*demand)[i], fleet, this->distances)));
   }
 }
@@ -104,41 +101,37 @@ std::optional<std::tuple<RunPtr, RunPtr, VehicleTypeID>> Router::best_link() con
   // combined load of best configuration
   double combined_load = std::numeric_limits<double>::max();
 
-  for (auto r1 : runs)
+  for (auto [r1, r2] : distinct_pairs(runs))
   {
-    for (auto r2 : runs)
+    double saving = savings.get(*(r1->sites().rbegin()), *(r2->sites().begin()));
+
+    // TODO: we need to check which direction is better r1->r2, or r2->r1
+
+    if (saving >= max_saving)
     {
-      if (r1 != r2)
+      double new_combined_load = r1->combined_max_load(*r2);
+
+      // if the savings are equal, but the new combined load is better, use that one
+      // (this can occur when positive and negative demands get combined)
+      if (saving > max_saving || new_combined_load < combined_load)
       {
-        double saving = savings.get(*(r1->sites().rbegin()), *(r2->sites().begin()));
+        fleet->release_vehicle(r1->vehicle());
+        fleet->release_vehicle(r2->vehicle());
 
-        if (saving >= max_saving)
+        std::optional<VehicleTypeID> selected_vehicle =
+            fleet->find_fitting_vehicle(
+                union_view(r1->sites(), r2->sites()),
+                new_combined_load,
+                false);
+
+        fleet->reserve_vehicle(r1->vehicle());
+        fleet->reserve_vehicle(r2->vehicle());
+
+        if (selected_vehicle)
         {
-          double new_combined_load = r1->combined_max_load(*r2);
-
-          // if the savings are equal, but the new combined load is better, use that one
-          // (this can occur when positive and negative demands get combined)
-          if (saving > max_saving || new_combined_load < combined_load)
-          {
-            fleet->release_vehicle(r1->vehicle());
-            fleet->release_vehicle(r2->vehicle());
-
-            std::optional<VehicleTypeID> selected_vehicle =
-                fleet->find_fitting_vehicle(
-                    union_view(r1->sites(), r2->sites()),
-                    new_combined_load,
-                    false);
-
-            fleet->reserve_vehicle(r1->vehicle());
-            fleet->reserve_vehicle(r2->vehicle());
-
-            if (selected_vehicle)
-            {
-              max_saving = saving;
-              combined_load = new_combined_load;
-              best_link = {r1, r2, selected_vehicle.value()};
-            }
-          }
+          max_saving = saving;
+          combined_load = new_combined_load;
+          best_link = {r1, r2, selected_vehicle.value()};
         }
       }
     }
@@ -232,7 +225,7 @@ tbls Router::runs_as_tbls() const
   int run_id = 0;
 
   for (auto run : runs)
-  { 
+  {
     std::get<0>(run_cols)[run_id] = run_id;
     std::get<1>(run_cols)[run_id] = run->vehicle();
     std::get<2>(run_cols)[run_id] = run->max_load();
