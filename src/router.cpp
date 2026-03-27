@@ -1,7 +1,5 @@
 #include "router.h"
 #include "union_view.h"
-#include "distinct_pairs.h"
-
 #include <iterator>
 #include <vector>
 #include <memory>
@@ -48,7 +46,7 @@ Router::Router(const std::shared_ptr<std::vector<double>> demand,
 
   fixed_singleton_runs = std::vector<run>();
 
-  runs = std::set<RunPtr>();
+  runs = std::unordered_set<RunPtr>();
   for (size_t i = 0; i < demand->size(); i++)
   {
     runs.insert(std::make_shared<run>(
@@ -101,41 +99,44 @@ std::optional<std::tuple<RunPtr, RunPtr, VehicleTypeID>> Router::best_link() con
   // combined load of best configuration
   double combined_load = std::numeric_limits<double>::max();
 
-  for (auto [r1, r2] : distinct_pairs(runs))
-  {
-    double saving = savings.get(*(r1->sites().rbegin()), *(r2->sites().begin()));
+  // NOTE: we could do better here if we iterated only over pairwise distinct elements and have
+  // some logic to choose the side (r1->r2, or r2->r1), but this way it's much simpler (at the moment the
+  // performance benefit does not outweigh the additional complexity
 
-    // TODO: we need to check which direction is better r1->r2, or r2->r1
+  for (auto r1 : runs) {
+    for (auto r2: runs) {
+      if (r1 != r2) {
+        double saving = savings.get(*(r1->sites().rbegin()), *(r2->sites().begin()));
 
-    if (saving >= max_saving)
-    {
-      double new_combined_load = r1->combined_max_load(*r2);
+        if (saving >= max_saving)
+        {
+          double new_combined_load = r1->combined_max_load(*r2);
 
-      // if the savings are equal, but the new combined load is better, use that one
-      // (this can occur when positive and negative demands get combined)
-      if (saving > max_saving || new_combined_load < combined_load)
-      {
-        fleet->release_vehicle(r1->vehicle());
-        fleet->release_vehicle(r2->vehicle());
+          // if the savings are equal, but the new combined load is better, use that one
+          // (this can occur when positive and negative demands get combined)
+          if (saving > max_saving || new_combined_load < combined_load)
+          {
+            fleet->release_vehicle(r1->vehicle());
+            fleet->release_vehicle(r2->vehicle());
 
-        std::optional<VehicleTypeID> selected_vehicle =
-            fleet->find_fitting_vehicle(
+            std::optional<VehicleTypeID> selected_vehicle =
+              fleet->find_fitting_vehicle(
                 union_view(r1->sites(), r2->sites()),
                 new_combined_load,
                 false);
 
-        fleet->reserve_vehicle(r1->vehicle());
-        fleet->reserve_vehicle(r2->vehicle());
+            fleet->reserve_vehicle(r1->vehicle());
+            fleet->reserve_vehicle(r2->vehicle());
 
-        if (selected_vehicle)
-        {
-          max_saving = saving;
-          combined_load = new_combined_load;
-          best_link = {r1, r2, selected_vehicle.value()};
+            if (selected_vehicle)
+            {
+              max_saving = saving;
+              combined_load = new_combined_load;
+              best_link = {r1, r2, selected_vehicle.value()};
+            }
+          }
         }
-      }
-    }
-  }
+      }}}
 
   return best_link;
 }
