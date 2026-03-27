@@ -1,5 +1,4 @@
 #include "run.h"
-#include <stdexcept>
 #include <cassert>
 
 void run::combine(run &other_run, VehicleTypeID new_vehicle)
@@ -77,6 +76,10 @@ bool run::reassign_vehicle(Fleet &fleet)
 
 void run::optimize_route_order()
 {
+  // NOTE: only perform greedy tsp if we have only positive or only negative demands
+  // otherwise we might not get a run that is always within physical vehicle capacity
+
+  if (!(_final_load != 0 && _initial_load != 0)) {
     std::list<Site> tsp_order;
     double dist;
     std::tie(tsp_order, dist) = tsp_greedy(_sites, *_distances);
@@ -86,4 +89,5 @@ void run::optimize_route_order()
         this->_sites = tsp_order;
         this->_distance = dist;
     }
+  }
 }

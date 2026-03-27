@@ -1,8 +1,6 @@
-#include <vector>
-#include <unordered_set>
 #include <limits>
-#include <algorithm>
 #include <list>
+#include <unordered_set>
 #include "tsp_greedy.h"
 #include "site.h"
 
@@ -10,7 +8,6 @@ template <typename Container>
 std::tuple<Container, double> tsp_greedy(const Container &sites, const Distmat &distances)
 {
   Container run;
-  // run.reserve(sites.size());
 
   double total_dist = 0;
 
@@ -59,3 +56,4 @@ std::tuple<Container, double> tsp_greedy(const Container &sites, const Distmat &
 }
 
 template std::tuple<std::list<Site>, double> tsp_greedy(const std::list<Site> &sites, const Distmat &distances);
+

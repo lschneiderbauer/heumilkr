@@ -1,4 +1,3 @@
-#include <iterator>
 #include <vector>
 #include <functional>
 #include "router.h"
@@ -117,13 +116,16 @@ tbls cpp_clarke_wright(
   while (router.optimize_vehicles())
   {
   };
-  // router.optimize_runs_order();
+  router.optimize_runs_order();
 
   return (router.runs_as_tbls());
 }
 
 #ifndef NDEBUG
 // only for debug purposes
+
+#include <stdio.h>
+
 int main()
 {
   tbls cols =
