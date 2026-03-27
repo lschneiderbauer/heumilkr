@@ -2,7 +2,11 @@
 #define FLEET_H
 
 #include <vector>
+#include <list>
 #include <unordered_set>
+#include <optional>
+
+typedef int VehicleTypeID;
 
 class Fleet
 {
@@ -12,14 +16,16 @@ public:
       : vehicle_avail(vehicle_avail),
         vehicle_caps(vehicle_caps),
         restricted_vehicles(restricted_vehicles) {};
-  void reserve_vehicle(const int vehicle);
-  void release_vehicle(const int vehicle);
+  void reserve_vehicle(const VehicleTypeID vehicle);
+  void release_vehicle(const VehicleTypeID vehicle);
 
   template <typename ForwardIt>
-  int find_fitting_vehicle(ForwardIt sites, const double max_load,
-                           bool max_load_soft) const;
+  std::optional<VehicleTypeID> find_fitting_vehicle(
+      ForwardIt sites,
+      const double max_load,
+      bool max_load_soft) const;
 
-  int capacity(const int vehicle) const;
+  int capacity(const VehicleTypeID vehicle) const;
 
 private:
   // Number and capacity of particular vehicle types
@@ -30,7 +36,7 @@ private:
   std::vector<std::unordered_set<int>> restricted_vehicles;
 
   template <typename ForwardIt>
-  bool is_vehicle_restricted(int vehicle, ForwardIt sites) const;
+  bool is_vehicle_restricted(const VehicleTypeID vehicle, ForwardIt sites) const;
 };
 
 #endif

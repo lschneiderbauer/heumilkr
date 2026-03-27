@@ -1,6 +1,9 @@
-#include <vector>
-#include <unordered_set>
-#include "distmat.h"
+#ifndef TSP_GREEDY
+#define TSP_GREEDY
 
-std::vector<int> tsp_greedy(const std::unordered_set<int> sites,
-                            const distmat<double> &distances);
+#include "symmat.h"
+
+template <typename Container>
+std::tuple<Container, double> tsp_greedy(const Container &sites, const Distmat &distances);
+
+#endif

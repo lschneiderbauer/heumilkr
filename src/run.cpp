@@ -1,55 +1,93 @@
 #include "run.h"
-#include "tsp_greedy.h"
+#include <cassert>
 
-void run::combine(run &other_run, int new_vehicle, binop_dbl combine_load)
+void run::combine(run &other_run, VehicleTypeID new_vehicle)
 {
-    auto other_sites = other_run.sites();
-    _sites.insert(other_sites.begin(), other_sites.end());
+    assert(this->_distances == other_run._distances);
 
-    // new max load
-    double new_max_load = combine_load(this->max_load, other_run.max_load);
-    this->max_load = new_max_load;
-    other_run.max_load = new_max_load;
+    // Store references before splice, as splice modifies _sites
+    Site this_first = *this->_sites.begin();
+    Site this_last = *this->_sites.rbegin();
+    Site other_first = *other_run._sites.begin();
+    Site other_last = *other_run._sites.rbegin();
 
-    this->vehicle = new_vehicle;
+    _sites.splice(_sites.end(), other_run._sites);
+
+    this->_vehicle = new_vehicle;
+    this->_max_load = this->combined_max_load(other_run);
+    // needs to be after combined_max_load(), as it uses initial_load()
+    this->_initial_load += other_run._initial_load;
+    this->_final_load += other_run._final_load;
+
+    this->_distance =
+        this->_distance + other_run._distance -
+        this->_distances->get(0, 1 + this_first) -
+        this->_distances->get(0, 1 + other_last) +
+        this->_distances->get(1 + this_last,
+                              1 + other_first);
 }
 
-std::vector<int> run::ordered_sites(const distmat<double> &distances) const
+double run::combined_max_load(const run &other_run) const
 {
-    return tsp_greedy(_sites, distances);
+    // note that this is not symmetric in the order of runs
+    return std::max(
+        this->_max_load + other_run._initial_load,
+        other_run._max_load + this->_final_load);
 }
 
-std::vector<int> run::ordered_sites(
-    const distmat<double> &distances,
-    const std::vector<int> &first,
-    const std::vector<int> &last) const
+std::map<Site, double> run::load_after_visit(const std::vector<double> &demand) const
 {
-    if (first.size() == 0 || last.size() == 0)
+    std::map<Site, double> loads;
+
+    double cur_load = _initial_load;
+    for (Site site : _sites)
     {
-        return ordered_sites(distances);
+        cur_load -= demand[site];
+        loads[site] = cur_load;
     }
 
-    // solve two tsp problems
-    std::unordered_set<int> sites_first;
-    std::unordered_set<int> sites_last;
-    for (const auto site : _sites)
+    return loads;
+}
+
+bool run::reassign_vehicle(Fleet &fleet)
+{
+    VehicleTypeID old_vehicle = this->_vehicle;
+
+    // we are guaranteed to find at least that vehicle once again
+    // so the usage of find_fitting_vehicle(...).value() is safe here
+    fleet.release_vehicle(old_vehicle);
+
+    VehicleTypeID vehicle =
+        fleet.find_fitting_vehicle(
+                 this->_sites,
+                 this->_max_load,
+                 false)
+            .value();
+
+    fleet.reserve_vehicle(vehicle);
+
+    if (old_vehicle != vehicle)
     {
-        if (first[site])
-        {
-            sites_first.insert(site);
-        }
-        if (last[site])
-        {
-            sites_last.insert(site);
-        }
+        this->_vehicle = vehicle;
+        return true;
     }
+    return false;
+}
 
-    std::vector<int> ordered_sites_first = tsp_greedy(sites_first, distances);
-    std::vector<int> ordered_sites_last = tsp_greedy(sites_last, distances);
+void run::optimize_route_order()
+{
+  // NOTE: only perform greedy tsp if we have only positive or only negative demands
+  // otherwise we might not get a run that is always within physical vehicle capacity
 
-    ordered_sites_first.insert(
-        ordered_sites_first.end(),
-        ordered_sites_last.rbegin(), ordered_sites_last.rend());
+  if (!(_final_load != 0 && _initial_load != 0)) {
+    std::list<Site> tsp_order;
+    double dist;
+    std::tie(tsp_order, dist) = tsp_greedy(_sites, *_distances);
 
-    return ordered_sites_first;
+    if (dist < this->_distance)
+    {
+        this->_sites = tsp_order;
+        this->_distance = dist;
+    }
+  }
 }

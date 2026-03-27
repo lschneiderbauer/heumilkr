@@ -77,7 +77,7 @@
 #'    * `site` - The site index (i.e. the index of the (1-indexed) `demand` vector)
 #'              associated to the run.
 #'    * `order` - Integer values providing the visiting order within each run.
-#'    * `load` - The departing load on site `site` in units of `demand` per particular run.
+#'    * `load` - The load after visiting site `site` in units of `demand` per particular run.
 #'  
 #' 
 #'  Unless a site demand exceeds the vehicle capacities it is always assigned

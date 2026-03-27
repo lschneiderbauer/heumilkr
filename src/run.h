@@ -1,45 +1,50 @@
 #ifndef RUN_H
 #define RUN_H
 
-#include <unordered_set>
-#include <functional>
-#include "distmat.h"
+#include "fleet.h"
+#include "site.h"
+#include "symmat.h"
+#include "tsp_greedy.h"
+#include <cmath>
+#include <list>
+#include <map>
+#include <memory>
+#include <optional>
 
-using binop_dbl = std::function<double(const double, const double)>;
-
-class run
-{
+class run {
 public:
-  double max_load;
-  int vehicle;
+  run(Site site, double site_demand, VehicleTypeID vehicle,
+      std::shared_ptr<Distmat> distances)
+      : _initial_load(site_demand > 0 ? site_demand : 0),
+        _final_load(site_demand > 0 ? 0 : -site_demand),
+        _max_load(std::abs(site_demand)), _sites(std::list<Site>{site}),
+        _vehicle(vehicle), _distances(distances),
+        _distance(2 * distances->get(0, 1 + site)) {};
 
-  run(int site, double max_load) // initialize a run with a single site
-      : max_load(max_load),
-        vehicle(-1),
-        _sites(std::unordered_set<int>{site}) {};
-  run(int site, double max_load, int vehicle)
-      : max_load(max_load),
-        vehicle(vehicle),
-        _sites(std::unordered_set<int>{site}) {};
-  run(std::unordered_set<int> &sites, double max_load, int vehicle)
-      : max_load(max_load),
-        vehicle(vehicle),
-        _sites(sites) {};
-  void combine(run &other_run, int new_vehicle, binop_dbl combine_load);
-  const std::unordered_set<int> &sites() const
-  {
-    return _sites;
-  }
-  std::vector<int> ordered_sites(const distmat<double> &distances) const;
+  double combined_max_load(const run &other_run) const;
+  std::map<Site, double>
+  load_after_visit(const std::vector<double> &demand) const;
 
-  // special version that has predefined order requirements:
-  // all "first" sites must come before "last" sites
-  std::vector<int> ordered_sites(const distmat<double> &distances,
-                                 const std::vector<int> &first,
-                                 const std::vector<int> &last) const;
+  void combine(run &other_run, VehicleTypeID new_vehicle);
+  bool reassign_vehicle(Fleet &fleet);
+  void optimize_route_order();
+
+  double distance() const { return _distance; }
+  const std::list<Site> &sites() const { return _sites; }
+  double max_load() const { return _max_load; };
+  const VehicleTypeID vehicle() const { return _vehicle; }
 
 private:
-  std::unordered_set<int> _sites;
+  double _initial_load; // load when leaving the origin
+  double _final_load;   // load when arriving at the origin
+  double _max_load;     // maximal load over the whole run
+
+  std::list<Site> _sites;
+
+  VehicleTypeID _vehicle;
+
+  std::shared_ptr<Distmat> _distances;
+  double _distance;
 };
 
 #endif
