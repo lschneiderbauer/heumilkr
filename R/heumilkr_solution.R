@@ -55,7 +55,8 @@ milkr_cost <- function(solution) {
 #'
 #' Measures the saving that was achieved by the heuristic optimization
 #' algorithm [clarke_wright()] compared to the naive vehicle run assignment,
-#' i.e. one run per site.
+#' i.e. one run per site, or as many runs as the solution uses for a site whose
+#' demand exceeds the vehicle capacities.
 #'
 #' @param solution
 #'  A "`heumilkr_solution`" object, typically obtained by [clarke_wright()].
@@ -94,14 +95,8 @@ milkr_saving <- function(solution, relative = FALSE) {
 
   d <- as.matrix(attr(solution, "distances"))
 
-  naive_cost <-
-    sum(
-      vapply(
-        1:(dim(d)[[2]] - 1),
-        function(idx) 2 * d[1, idx + 1],
-        FUN.VALUE = 1.
-      )
-    )
+  # a round trip for each visit: a site with split demand has multiple visits
+  naive_cost <- sum(2 * d[1, solution$visits$site + 2])
 
   saving <- naive_cost - milkr_cost(solution)
 
