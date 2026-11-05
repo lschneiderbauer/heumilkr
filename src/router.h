@@ -22,7 +22,7 @@ using tbl_run_site =
         std::vector<int>,   // Run ID
         std::vector<int>,   // Visited Site
         std::vector<int>,   // Order
-        std::vector<double> // Departing Load
+        std::vector<double> // Load after visit
         >;
 
 using tbl_site =
