@@ -20,6 +20,10 @@ This R package provides an implementation of the Clarke-Wright algorithm
 solution to the [Capacitated Vehicle Routing
 Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem).
 
+Besides deliveries, it also supports “backhaul”: sites with negative
+demand have goods picked up and brought back to the depot, in any order
+within a run as long as the load stays within the vehicle capacity.
+
 ## Installation
 
 You can install the latest CRAN release of heumilkr with:
@@ -136,9 +140,9 @@ print(milkr_saving(solution))
 
 A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for
 the result is built in. The individual runs are distinguished by color.
-The demanding site locations are marked with round circles while the
-(single) supplying site is depicted as a square. The line types
-(solid/dashed/…) are associated to different vehicle types.
+The site locations are marked with round circles while the depot is
+depicted as a square. The line types (solid/dashed/…) are associated to
+different vehicle types.
 
 ``` r
 plot(solution)

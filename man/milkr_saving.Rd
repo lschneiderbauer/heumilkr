@@ -21,7 +21,8 @@ naive costs, depending on \code{relative}.
 \description{
 Measures the saving that was achieved by the heuristic optimization
 algorithm \code{\link[=clarke_wright]{clarke_wright()}} compared to the naive vehicle run assignment,
-i.e. one run per site.
+i.e. one run per site, or as many runs as the solution uses for a site whose
+demand exceeds the vehicle capacities.
 }
 \examples{
 demand <- c(3, 2, 4, 2)

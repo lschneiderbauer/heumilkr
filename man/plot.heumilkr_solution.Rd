@@ -17,8 +17,8 @@ sites on the drawn 2D plane correspond to \code{distances} provided to the
 solver \code{clarke_wright()}.
 
 The individual runs are distinguished by color.
-The demanding site locations are marked with round circles while the
-(single) supplying site is depicted as a square.
+The site locations are marked with round circles while the depot is depicted
+as a square. Delivery and pickup sites are not distinguished.
 The line types (solid/dashed/...) are associated to different vehicle types.
 }
 \details{
