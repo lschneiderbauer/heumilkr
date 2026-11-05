@@ -19,8 +19,9 @@ The length of the vector equals the number of sites \code{N}. The
 units of demand values need to match the units of vehicle capacity values.
 \code{NA} values are not allowed. Negative demand values are also allowed and are
 interpreted as freight that needs to be delivered from a site
-to the source source depot (origin), i.e. "backhaul". Note that sites with
-negative demands can only be visited after after sites with positive demand.}
+to the source depot (origin), i.e. "backhaul". Sites with positive and
+negative demands can be visited in any order within a run, as long as the
+load stays within the vehicle capacity at every point of the run.}
 
 \item{distances}{An object of class \code{dist}, created by \code{\link[stats:dist]{stats::dist()}}, with
 \code{(N + 1)} locations describing the distances between individual
@@ -86,7 +87,7 @@ Its columns consist of:
 \item \code{site} - The site index (i.e. the index of the (1-indexed) \code{demand} vector)
 associated to the run.
 \item \code{order} - Integer values providing the visiting order within each run.
-\item \code{load} - The departing load on site \code{site} in units of \code{demand} per particular run.
+\item \code{load} - The load after visiting site \code{site} in units of \code{demand} per particular run.
 }
 }
 
