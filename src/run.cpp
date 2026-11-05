@@ -6,10 +6,8 @@ void run::combine(run &other_run, VehicleTypeID new_vehicle)
     assert(this->_distances == other_run._distances);
 
     // Store references before splice, as splice modifies _sites
-    Site this_first = *this->_sites.begin();
     Site this_last = *this->_sites.rbegin();
     Site other_first = *other_run._sites.begin();
-    Site other_last = *other_run._sites.rbegin();
 
     _sites.splice(_sites.end(), other_run._sites);
 
@@ -19,10 +17,12 @@ void run::combine(run &other_run, VehicleTypeID new_vehicle)
     this->_initial_load += other_run._initial_load;
     this->_final_load += other_run._final_load;
 
+    // the merge replaces the edges (this_last, origin) and (origin, other_first)
+    // by the edge (this_last, other_first)
     this->_distance =
         this->_distance + other_run._distance -
-        this->_distances->get(0, 1 + this_first) -
-        this->_distances->get(0, 1 + other_last) +
+        this->_distances->get(0, 1 + this_last) -
+        this->_distances->get(0, 1 + other_first) +
         this->_distances->get(1 + this_last,
                               1 + other_first);
 }
