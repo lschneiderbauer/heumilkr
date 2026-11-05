@@ -55,7 +55,7 @@ The problem instances we are basing our measurements on are provided courtesy of
 
 -   Rochat and Taillard, 1995 (12 instances)
 
-The data provides the problem instance as well as the optimal solution.
+The data provides the problem instance as well as the best known solution, whose cost is available as the field `best_known_cost` of each instance. CVRPLIB lists the best known solutions of all those instances as proven optimal, so we simply refer to them as optimal solutions below.
 
 ## Relation to optimal and trivial solution
 
