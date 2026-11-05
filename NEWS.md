@@ -8,12 +8,18 @@
 
 ## New features / improvements
 
--   `clarke_wright()` now supports negative demands: sites with negative demand are treated as "backhaul" points, i.e. they deliver goods back to the depot. By design they can only be visited after all positive-demand sites have been served.
+-   `clarke_wright()` now supports negative demands: sites with negative demand are treated as "backhaul" points, i.e. they deliver goods back to the depot. Sites with positive and negative demands can be visited in any order within a run, as long as the load stays within the vehicle capacity at every point of the run. Negative demands that exceed vehicle capacities are split across multiple runs, like positive demands.
 
 -   `clarke_wright()` has gained runtime speedup compared to the previous version by roughly a factor of 3 (the actual speedup depends on input characteristics).
 
 
 ## Bugfixes
+
+-   `clarke_wright()`: Fractional vehicle capacities are not truncated to integers anymore. Previously this caused unnecessary splits of demand, and capacities below 1 never terminated.
+
+-   `clarke_wright()`: Fix a crash with sites of zero demand.
+
+-   `clarke_wright()`: The `load` of visits now always refers to the load after the visit, also for sites whose demand is split across multiple runs.
 
 -   `cvrplib_ls()`, `cvrplib_download()`: Upstream website has changed. Fix malfunctioning functions by adjusting webscraping accordingly.
 

@@ -17,8 +17,9 @@
 #'  units of demand values need to match the units of vehicle capacity values.
 #'  `NA` values are not allowed. Negative demand values are also allowed and are
 #'  interpreted as freight that needs to be delivered from a site
-#'  to the source source depot (origin), i.e. "backhaul". Note that sites with
-#'  negative demands can only be visited after after sites with positive demand.
+#'  to the source depot (origin), i.e. "backhaul". Sites with positive and
+#'  negative demands can be visited in any order within a run, as long as the
+#'  load stays within the vehicle capacity at every point of the run.
 #'
 #' @param distances
 #'  An object of class `dist`, created by [stats::dist()], with

@@ -4,43 +4,6 @@
 #include "symmat.h"
 #include <cassert>
 
-// selects demand with a given sign, and always returns positive values
-std::tuple<std::vector<int>, std::vector<double>, Distmat>
-select_demand(const std::vector<double> &demand, const Distmat &distm, int sign)
-{
-  std::vector<int> new_ind;
-  std::vector<double> new_demand;
-  Distmat new_distm;
-
-  new_ind.reserve(demand.size());
-  new_demand.reserve(demand.size());
-  for (size_t i = 0; i < demand.size(); i++)
-  {
-    if (demand[i] * sign > 0)
-    {
-      new_ind.push_back(i);
-      new_demand.push_back(sign * demand[i]);
-    }
-  }
-
-  if (new_ind.size() == demand.size())
-  {
-    new_distm = distm;
-  }
-  else
-  {
-    std::vector<int> new_ind_dist(new_ind.size() + 1);
-    new_ind_dist[0] = 0;
-    for (size_t i = 1; i < new_ind_dist.size(); i++)
-    {
-      new_ind_dist[i] = new_ind[i - 1] + 1;
-    }
-    new_distm = distm.sub(new_ind_dist);
-  }
-
-  return std::tuple<std::vector<int>, std::vector<double>, Distmat>(new_ind, new_demand, new_distm);
-}
-
 tbls cpp_clarke_wright(
     const std::vector<double> &demand,
     const std::vector<double> &distances,
@@ -63,47 +26,9 @@ tbls cpp_clarke_wright(
   auto fleet = std::make_shared<Fleet>(n_res, capacities, restricted_vehicles);
   Distmat distm(distances);
 
-  // we can have positive and negative demands
-  // positive = sites are sinks and origin is source
-  // negative = sites are sources and origin is sink
-  //
-  // Strategy:
-  // Consider and solve positive and negative demands separately (we can use the same solver)
-  // Combine those solutions afterwards
-  /*
-    bool have_pos = false;
-    bool have_neg = false;
-
-    for (size_t i = 0; i < demand.size(); i++)
-    {
-      if (demand[i] > 0)
-      {
-        have_pos = true;
-      }
-      if (demand[i] < 0)
-      {
-        have_neg = true;
-      }
-      if (have_pos && have_neg)
-      {
-        break;
-      }
-    }
-  */
-  /* Positive */
-  /*
-    std::vector<int> ind_pos;
-    std::vector<double> demand_pos;
-    distmat<double> distances_pos;
-
-    if (have_pos)
-    {
-      std::tie(ind_pos, demand_pos, distances_pos) =
-          select_demand(demand, distm, 1);
-    }
-  */
-
-  // if we have both, combine then and optimize again
+  // Demands can have any sign, and both signs are handled in a single pass:
+  // positive = site is a sink and the origin is the source
+  // negative = site is a source and the origin is the sink
   Router router(
     std::make_shared<std::vector<double>>(demand),
     std::make_unique<Distmat>(distm), fleet);
