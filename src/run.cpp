@@ -1,4 +1,5 @@
 #include "run.h"
+#include <algorithm>
 #include <cassert>
 
 void run::combine(run &other_run, VehicleTypeID new_vehicle)
@@ -43,8 +44,11 @@ std::map<Site, double> run::load_after_visit(const std::vector<double> &demand) 
     for (Site site : _sites)
     {
         cur_load -= demand[site];
-        loads[site] = cur_load;
+        // the running sum accumulates floating point errors, which must not
+        // leave the physical boundaries (e.g. a tiny negative load)
+        loads[site] = std::min(std::max(cur_load, 0.0), _max_load);
     }
+    loads[*_sites.rbegin()] = _final_load;
 
     return loads;
 }

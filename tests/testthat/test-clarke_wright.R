@@ -648,3 +648,36 @@ test_that("Sites with zero demand are part of the solution", {
     expect_true(all(res$visits$load >= 0))
   }
 })
+
+test_that("Rounding errors do not push loads out of physical boundaries", {
+  # Values from runif() have few enough significant bits to add up exactly, so
+  # the generators above can not trigger this. Decimal values can.
+  vehicles <- data.frame(n = NA_integer_, caps = 60)
+
+  for (seed in 1:50) {
+    set.seed(seed)
+    n <- 30
+    positions <- data.frame(x = c(0, runif(n, 1, 10)), y = c(0, runif(n, 1, 10)))
+    amounts <- round(runif(n, 1, 33), 2)
+    signs <- ifelse(runif(n) < 0.3, -1, 1)
+
+    for (demand in list(amounts, amounts * signs, -amounts)) {
+      res <- clarke_wright(demand, dist(positions), vehicles)
+
+      visits <- merge(res$visits, res$runs, by = "run")
+      expect_true(all(visits$load >= 0))
+      expect_true(all(visits$load <= visits$max_load))
+    }
+
+    # a run that only delivers ends up exactly empty
+    res <- clarke_wright(amounts, dist(positions), vehicles)
+    last_visits <- do.call(
+      rbind,
+      lapply(
+        split(res$visits, res$visits$run),
+        function(x) x[which.max(x$order), ]
+      )
+    )
+    expect_true(all(last_visits$load == 0))
+  }
+})
