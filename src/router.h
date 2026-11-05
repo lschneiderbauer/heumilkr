@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <memory>
-#include <unordered_set>
 
 #include "run.h"
 #include "fleet.h"
@@ -85,7 +84,10 @@ private:
     Distmat savings;
     std::vector<run> fixed_singleton_runs; // those runs are not dynamic, i.e. they won't be changed
 
-    std::unordered_set<RunPtr> runs;
+    // kept in creation order: run iteration order (and therefore tie-breaking and
+    // run IDs) must not depend on memory addresses. best_link() iterates over all
+    // pairs for each merge, while merges erase only one element each.
+    std::vector<RunPtr> runs;
 };
 
 #endif

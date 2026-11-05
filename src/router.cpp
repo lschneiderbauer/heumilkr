@@ -1,5 +1,6 @@
 #include "router.h"
 #include "union_view.h"
+#include <algorithm>
 #include <iterator>
 #include <vector>
 #include <memory>
@@ -46,10 +47,10 @@ Router::Router(const std::shared_ptr<std::vector<double>> demand,
 
   fixed_singleton_runs = std::vector<run>();
 
-  runs = std::unordered_set<RunPtr>();
+  runs.reserve(demand->size());
   for (size_t i = 0; i < demand->size(); i++)
   {
-    runs.insert(std::make_shared<run>(
+    runs.push_back(std::make_shared<run>(
         create_initial_runs(i, (*demand)[i], fleet, this->distances)));
   }
 }
@@ -70,7 +71,7 @@ void Router::combine_runs(RunPtr a, RunPtr b, const VehicleTypeID new_vehicle)
      the origin anymore.
   */
 
-  runs.erase(b);
+  runs.erase(std::find(runs.begin(), runs.end(), b));
 
   a->combine(*b, new_vehicle);
 }
@@ -103,8 +104,8 @@ std::optional<std::tuple<RunPtr, RunPtr, VehicleTypeID>> Router::best_link() con
   // some logic to choose the side (r1->r2, or r2->r1), but this way it's much simpler (at the moment the
   // performance benefit does not outweigh the additional complexity
 
-  for (auto r1 : runs) {
-    for (auto r2: runs) {
+  for (const auto &r1 : runs) {
+    for (const auto &r2 : runs) {
       if (r1 != r2) {
         double saving = savings.get(*(r1->sites().rbegin()), *(r2->sites().begin()));
 
@@ -179,7 +180,7 @@ bool Router::optimize_vehicles()
   bool changed = false;
 
   // then reassign fitting vehicles
-  for (auto run : runs)
+  for (const auto &run : runs)
   {
     if (run->reassign_vehicle(*fleet))
     {
@@ -192,7 +193,7 @@ bool Router::optimize_vehicles()
 
 void Router::optimize_runs_order()
 {
-  for (auto run : runs)
+  for (const auto &run : runs)
   {
     run->optimize_route_order();
   }
@@ -225,7 +226,7 @@ tbls Router::runs_as_tbls() const
 
   int run_id = 0;
 
-  for (auto run : runs)
+  for (const auto &run : runs)
   {
     std::get<0>(run_cols)[run_id] = run_id;
     std::get<1>(run_cols)[run_id] = run->vehicle();
