@@ -30,7 +30,14 @@ cvrplib_download(qualifier, cvrplib_url = "https://galgos.inf.puc-rio.br")
 ## Value
 
 Returns a "`cvrplib_instance`" object which contains CVRPLIB problem
-instance data.
+instance data. Its `best_known_cost` is the cost of the best known
+solution provided by CVRPLIB (not necessarily a proven optimum), or `NA`
+if CVRPLIB provides no solution file for the instance. A solution file
+that exists but can not be downloaded raises an error.
+
+Instances defined by an explicit distance matrix store it as
+`distances`, a `dist` object, and have `NA` coordinates in `pos`.
+Instances defined by coordinates have `distances` set to `NULL`.
 
 ## See also
 

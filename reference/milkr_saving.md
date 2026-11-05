@@ -3,7 +3,9 @@
 Measures the saving that was achieved by the heuristic optimization
 algorithm
 [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md)
-compared to the naive vehicle run assignment, i.e. one run per site.
+compared to the naive vehicle run assignment, i.e. one run per site, or
+as many runs as the solution uses for a site whose demand exceeds the
+vehicle capacities.
 
 ## Usage
 

@@ -14,19 +14,58 @@
   now returns a [`data.frame()`](https://rdrr.io/r/base/data.frame.html)
   instead of a simple vector.
 
+- “`cvrplib_instance`” objects, including the bundled data sets: the
+  field `optimum` is renamed to `best_known_cost`, since CVRPLIB
+  provides best known solutions that are not necessarily proven optima.
+
+- [`cvrplib_download()`](https://lschneiderbauer.github.io/heumilkr/reference/cvrplib_download.md)
+  now raises an error if a solution file exists but can not be
+  downloaded, instead of silently setting the value to `NA`.
+
 ### New features / improvements
 
 - [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md)
   now supports negative demands: sites with negative demand are treated
-  as “backhaul” points, i.e. they deliver goods back to the depot. By
-  design they can only be visited after all positive-demand sites have
-  been served.
+  as “backhaul” points, i.e. they deliver goods back to the depot. Sites
+  with positive and negative demands can be visited in any order within
+  a run, as long as the load stays within the vehicle capacity at every
+  point of the run. Negative demands that exceed vehicle capacities are
+  split across multiple runs, like positive demands.
 
-- [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md)
-  has gained runtime speedup compared to the previous version by roughly
-  a factor of 3 (the actual speedup depends on input characteristics).
+- [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md):
+  Results are now deterministic, also in case of tied savings. Run
+  identifiers follow the order of run creation.
 
 ### Bugfixes
+
+- [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md):
+  Fractional vehicle capacities are not truncated to integers anymore.
+  Previously this caused unnecessary splits of demand, and capacities
+  below 1 never terminated.
+
+- [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md):
+  Fix a crash with sites of zero demand.
+
+- [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md):
+  The `load` of visits now always refers to the load after the visit,
+  also for sites whose demand is split across multiple runs.
+
+- [`plot()`](https://rdrr.io/r/graphics/plot.default.html),
+  `autoplot()`: Fix errors and misplaced visits for solutions with sites
+  whose demand is split across multiple runs.
+
+- [`milkr_saving()`](https://lschneiderbauer.github.io/heumilkr/reference/milkr_saving.md):
+  The naive cost now includes the additional round trips of sites whose
+  demand is split across multiple runs. Previously the saving could
+  become negative.
+
+- [`cvrplib_download()`](https://lschneiderbauer.github.io/heumilkr/reference/cvrplib_download.md),
+  [`clarke_wright_cvrplib()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright_cvrplib.md):
+  Instances defined by an explicit distance matrix (including `E-n13-k4`
+  and `E-n31-k7` in `cvrplib_E`) got corrupted distances, since
+  coordinates were derived from them incorrectly. The matrix is now kept
+  in the new field `distances` and used by the solver, and the
+  coordinates in `pos` are `NA` for those instances.
 
 - [`cvrplib_ls()`](https://lschneiderbauer.github.io/heumilkr/reference/cvrplib_ls.md),
   [`cvrplib_download()`](https://lschneiderbauer.github.io/heumilkr/reference/cvrplib_download.md):

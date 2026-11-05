@@ -26,7 +26,7 @@ row represents a CVRPLIB instance with the following columns:
 
 - `instance_url` - The URL to the instance file.
 
-- `solution_url` - The URL to the solution file.
+- `solution_url` - The URL to the solution file, `NA` if there is none.
 
 ## See also
 

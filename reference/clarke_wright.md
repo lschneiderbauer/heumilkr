@@ -1,8 +1,10 @@
 # Clarke-Wright algorithm, a Capacitated Vehicle Routing Problem solver
 
 Finds a quasi-optimal solution to the Capacitated Vehicle Routing
-Problem (CVRP). It is assumed that all demands will be satisfied by a
-single source (i.e. "depot") which is the origin of all runs.
+Problem (CVRP). All runs start and end at a single depot (origin). Goods
+are delivered from the depot to sites with positive demand, and picked
+up from sites with negative demand and brought back to the depot
+("backhaul").
 
 ## Usage
 
@@ -21,22 +23,24 @@ clarke_wright(
 
   A [`numeric()`](https://rdrr.io/r/base/numeric.html) vector consisting
   of "demands" indexed by sites. The `i`th entry refers to the demand of
-  site `i` that is requested by the source depot (origin). The length of
-  the vector equals the number of sites `N`. The units of demand values
-  need to match the units of vehicle capacity values. `NA` values are
-  not allowed. Negative demand values are also allowed and are
-  interpreted as freight that needs to be delivered from a site to the
-  source source depot (origin), i.e. "backhaul". Note that sites with
-  negative demands can only be visited after after sites with positive
-  demand.
+  the `i`th site. The length of the vector equals the number of sites
+  `N`. The units of demand values need to match the units of vehicle
+  capacity values. `NA` values are not allowed. Positive values are
+  goods to be delivered from the depot to a site. Negative values are
+  goods to be picked up at a site and brought to the depot, i.e.
+  "backhaul". Sites with positive and negative demands can be visited in
+  any order within a run, as long as the load stays within the vehicle
+  capacity at every point of the run. Goods picked up at one site can
+  not be delivered to another site. Sites with a demand of zero are
+  still visited.
 
 - distances:
 
   An object of class `dist`, created by
   [`stats::dist()`](https://rdrr.io/r/stats/dist.html), with `(N + 1)`
   locations describing the distances between individual sites. The first
-  index refers to the source location. The `(i+1)`th index refers to
-  site `i` (as defined by `demand`).
+  index refers to the depot. The `(i+1)`th index refers to the `i`th
+  site (as defined by `demand`).
 
 - vehicles:
 
@@ -44,12 +48,14 @@ clarke_wright(
   available vehicle types and their respective capacities. One row per
   vehicle type. The data frame is expected to have two columns:
 
-  - `n` - Number of available vehicles. This can be set to `NA` if the
-    number is "infinite" (i.e. effectively the maximal integer value on
-    your machine.). It is recommended to keep at least one vehicle type
-    as "infinite", otherwise the solver might raise a run time error due
-    to initially not having enough vehicles available (even though the
-    final solution might satisfy the availability restrictions).
+  - `n` - Number of available vehicles as an
+    [`integer()`](https://rdrr.io/r/base/integer.html). This can be set
+    to `NA_integer_` if the number is "infinite" (i.e. effectively the
+    maximal integer value on your machine.). It is recommended to keep
+    at least one vehicle type as "infinite", otherwise the solver might
+    raise a run time error due to initially not having enough vehicles
+    available (even though the final solution might satisfy the
+    availability restrictions).
 
   - `caps` - The vehicle capacity in same units as `demand`.
 
@@ -70,9 +76,13 @@ clarke_wright(
   in the form of a blacklist. The data frame is expected to have two
   columns:
 
-  - `vehicle` - The vehicle type index.
+  - `vehicle` - The vehicle type index as an
+    [`integer()`](https://rdrr.io/r/base/integer.html), starting at 0
+    (i.e. 0 refers to the first row of `vehicles`).
 
-  - `site` - The site index (i.e. the index of the `demand` vector)
+  - `site` - The site index as an
+    [`integer()`](https://rdrr.io/r/base/integer.html), starting at 0
+    (i.e. 0 refers to the first entry of `demand`).
 
   Each row defines a restriction: vehicle type `vehicle` can not
   approach site `site`. Defaults to an empty
@@ -90,18 +100,18 @@ Returns a "`heumilkr_solution`" object, a named
 
   - `run` - A run identifier.
 
-  - `vehicle` - The vehicle type index (as provided in `vehicles`)
-    associated to the run.
+  - `vehicle` - The vehicle type index associated to the run, starting
+    at 0 (i.e. 0 refers to the first row of `vehicles`).
 
   - `max_load` - The maximal load of the vehicle on this run. It is
     always smaller or equal the vehicle capacity.
 
   - `distance` - The travel distance of the particular run.
 
-- `sites`: Each record reflect a site with demand. Its columns consist
-  of:
+- `sites`: Each record reflects a site. Its columns consist of:
 
-  - `site` - A site identifier.
+  - `site` - The site index, starting at 0 (i.e. 0 refers to the first
+    entry of `demand`).
 
   - `demand` - The site demand. This is supplied as an input.
 
@@ -111,23 +121,37 @@ Returns a "`heumilkr_solution`" object, a named
 
   - `run` - Identifies the run the site is assigned to.
 
-  - `site` - The site index (i.e. the index of the (1-indexed) `demand`
-    vector) associated to the run.
+  - `site` - The site index associated to the run, starting at 0 (i.e. 0
+    refers to the first entry of `demand`).
 
   - `order` - Integer values providing the visiting order within each
     run.
 
-  - `load` - The departing load on site `site` in units of `demand` per
-    particular run.
+  - `load` - The load after visiting site `site` in units of `demand`
+    per particular run.
 
 Unless a site demand exceeds the vehicle capacities it is always
-assigned to only a single run.
+assigned to only a single run. Otherwise it is split across multiple
+runs, and the site appears once per run in `visits`. `load` and
+`max_load` then refer to the share of the demand served by the
+particular run, while `demand` in `sites` still holds the full demand.
 
 ## Details
 
 See the original paper, Clarke, G. and Wright, J.R. (1964)
 [doi:10.1287/opre.12.4.568](https://doi.org/10.1287/opre.12.4.568) , for
 a detailed explanation of the Clarke-Wright algorithm.
+
+To support deliveries and pickups in any order within a run, two runs
+can only be merged by connecting the end of one run to the start of the
+other. The original algorithm can connect either end of a run, but
+reversing a run with both deliveries and pickups would change its load
+along the way.
+
+As an additional step after merging, the visiting order is re-optimized
+with a greedy heuristic for runs that either only deliver or only pick
+up. Runs with both keep their order, so that the load stays within the
+vehicle capacity.
 
 ## Examples
 
@@ -159,8 +183,8 @@ clarke_wright(
 #> 
 #> $visits
 #>   run site order load
-#> 1   0    0     0    2
-#> 2   0    1     1    0
+#> 1   0    0     1    0
+#> 2   0    1     0    3
 #> 3   1    2     0    2
 #> 4   1    3     1    0
 #> 
