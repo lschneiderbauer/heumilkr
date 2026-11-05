@@ -12,7 +12,6 @@ public:
   T &acc(const int i, const int j);
   T get(const int i, const int j) const;
   int size() const;
-  Symmat<T> sub(std::vector<int> &subvec) const;
 
 private:
   std::vector<T> data;

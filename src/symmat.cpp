@@ -69,20 +69,4 @@ int Symmat<T>::size() const
   return m_size;
 }
 
-template <class T>
-Symmat<T> Symmat<T>::sub(std::vector<int> &subvec) const
-{
-  Symmat<T> submat(subvec.size(), 0);
-
-  for (size_t i = 0; i < subvec.size(); i++)
-  {
-    for (size_t j = 0; j < i; j++)
-    {
-      submat.acc(i, j) = this->get(subvec[i], subvec[j]);
-    }
-  }
-
-  return submat;
-}
-
 template class Symmat<double>;
