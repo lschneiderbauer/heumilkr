@@ -70,9 +70,6 @@ private:
     // combines the two runs traversing site a and site b with the new vehicle new_vehicle.
     void combine_runs(RunPtr a, RunPtr b, const VehicleTypeID new_vehicle);
 
-    // is site a directly linked to the origin via its traversing run?
-    std::optional<std::tuple<Site, Site>> run_merge_order(const Site a, const Site b) const;
-
     Distmat calc_savings(const Distmat &d) const;
 
     std::optional<std::tuple<RunPtr, RunPtr, VehicleTypeID>> best_link() const;
@@ -83,6 +80,10 @@ private:
 
     Distmat savings;
     std::vector<run> fixed_singleton_runs; // those runs are not dynamic, i.e. they won't be changed
+
+    // site-indexed: the share of each site's demand that is served by `runs`.
+    // It differs from `demand` for sites whose demand got split up.
+    std::vector<double> run_demand;
 
     // kept in creation order: run iteration order (and therefore tie-breaking and
     // run IDs) must not depend on memory addresses. best_link() iterates over all
