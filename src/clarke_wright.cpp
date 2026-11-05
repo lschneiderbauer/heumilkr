@@ -68,7 +68,7 @@ int main()
 
   for (size_t i = 0; i < std::get<0>(trs).size(); i++)
   {
-    printf("Run: %d, Site: %d, Order: %d, Departing Load: %f\n",
+    printf("Run: %d, Site: %d, Order: %d, Load after visit: %f\n",
            std::get<0>(trs)[i],
            std::get<1>(trs)[i],
            std::get<2>(trs)[i],

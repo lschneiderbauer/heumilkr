@@ -14,8 +14,6 @@
 
 -   `clarke_wright()` now supports negative demands: sites with negative demand are treated as "backhaul" points, i.e. they deliver goods back to the depot. Sites with positive and negative demands can be visited in any order within a run, as long as the load stays within the vehicle capacity at every point of the run. Negative demands that exceed vehicle capacities are split across multiple runs, like positive demands.
 
--   `clarke_wright()` has gained runtime speedup compared to the previous version by roughly a factor of 3 (the actual speedup depends on input characteristics).
-
 -   `clarke_wright()`: Results are now deterministic, also in case of tied savings. Run identifiers follow the order of run creation.
 
 

@@ -216,7 +216,7 @@ tbls Router::runs_as_tbls() const
       std::vector<int>(run_site_col_size),   // Run ID
       std::vector<int>(run_site_col_size),   // Visited Site
       std::vector<int>(run_site_col_size),   // Order
-      std::vector<double>(run_site_col_size) // Departing Load
+      std::vector<double>(run_site_col_size) // Load after visit
   };
 
   tbl_run run_cols = {
