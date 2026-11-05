@@ -117,6 +117,7 @@ tbls cpp_clarke_wright(
   {
   };
   router.optimize_runs_order();
+  callback(router); // the last step must equal the final result
 
   return (router.runs_as_tbls());
 }
