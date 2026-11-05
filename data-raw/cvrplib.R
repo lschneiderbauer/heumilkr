@@ -1,24 +1,25 @@
 ## code to prepare `cvrplib` dataset goes here
 library(purrr)
+library(usethis)
 
-instances <- cvrplib_ls()
+instances <- cvrplib_ls()$name
 
 # TAI - solution files contain optimal solution according to website
 selected_instances <-
   list(
     # Rochat and Taillard, 1995
     Tai = setdiff(
-      instances[grepl("tai", instances, fixed = TRUE)],
-      "tai/tai385"
+      instances[grepl("^tai", instances)],
+      "tai385"
     ),
     # Augerat, 1995
-    A = instances[grepl("A/", instances, fixed = TRUE)],
+    A = instances[grepl("^A-", instances)],
     # Augerat, 1995
-    B = instances[grepl("B/", instances, fixed = TRUE)],
+    B = instances[grepl("^B-", instances)],
     # Christofides and Eilon, 1969
-    E = instances[grepl("E/", instances, fixed = TRUE)],
+    E = instances[grepl("^E-", instances)],
     # Fisher, 1994
-    F = instances[grepl("F/", instances, fixed = TRUE)]
+    F = instances[grepl("^F-", instances)]
   )
 
 data <-
