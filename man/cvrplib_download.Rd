@@ -15,7 +15,10 @@ This can either be inferred directly from the website or by the output of
 }
 \value{
 Returns a "\code{cvrplib_instance}" object which contains CVRPLIB problem
-instance data.
+instance data. Its \code{best_known_cost} is the cost of the best known solution
+provided by CVRPLIB (not necessarily a proven optimum), or \code{NA} if CVRPLIB
+provides no solution file for the instance. A solution file that exists but
+can not be downloaded raises an error.
 }
 \description{
 \href{https://galgos.inf.puc-rio.br/}{CVRLIB} offers a selection of

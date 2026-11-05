@@ -15,7 +15,7 @@ following columns:
 \itemize{
 \item \code{name} - Instance qualifiers which can be used with \code{\link[=cvrplib_download]{cvrplib_download()}}.
 \item \code{instance_url} - The URL to the instance file.
-\item \code{solution_url} - The URL to the solution file.
+\item \code{solution_url} - The URL to the solution file, \code{NA} if there is none.
 }
 }
 \description{
