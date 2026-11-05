@@ -6,7 +6,7 @@ cvrplib_instance <- function(
   capacity,
   pos,
   demand,
-  optimum
+  best_known_cost
 ) {
   new_cvrplib_instance(
     name,
@@ -16,7 +16,7 @@ cvrplib_instance <- function(
     capacity,
     pos,
     demand,
-    optimum
+    best_known_cost
   )
 }
 
@@ -28,7 +28,7 @@ new_cvrplib_instance <- function(
   capacity,
   pos,
   demand,
-  optimum
+  best_known_cost
 ) {
   stopifnot(is.character(name))
   stopifnot(is.character(type))
@@ -37,7 +37,7 @@ new_cvrplib_instance <- function(
   stopifnot(is.numeric(capacity))
   stopifnot(is.data.frame(pos))
   stopifnot(is.data.frame(demand))
-  stopifnot(is.numeric(optimum))
+  stopifnot(is.numeric(best_known_cost))
 
   structure(
     list(
@@ -48,7 +48,7 @@ new_cvrplib_instance <- function(
       capacity = capacity,
       pos = pos,
       demand = demand,
-      optimum = optimum
+      best_known_cost = best_known_cost
     ),
     class = "cvrplib_instance"
   )
@@ -64,7 +64,7 @@ format.cvrplib_instance <- function(x, ...) {
     cli_ul(c(
       "Number of sites: {.val {x$dimension}}",
       "Vehicle capacity: {.val {x$capacity}}",
-      "Optimal distance: {.val {x$optimum}}",
+      "Best known distance: {.val {x$best_known_cost}}",
       "Demand: ({.val {x$demand$demand}})",
       "Comment: '{x$comment}'"
     ))
@@ -127,7 +127,7 @@ cvrplib_clarke_wright_perf <- function(cvrplib_instance) {
 
   milkr_perf_scale(
     clarke_wright_cvrplib(cvrplib_instance),
-    cvrplib_instance$optimum
+    cvrplib_instance$best_known_cost
   )
 }
 
@@ -136,7 +136,7 @@ cvrplib_clarke_wright_perf2 <- function(cvrplib_instance) {
 
   milkr_perf_rel(
     clarke_wright_cvrplib(cvrplib_instance),
-    cvrplib_instance$optimum
+    cvrplib_instance$best_known_cost
   )
 }
 
@@ -152,7 +152,7 @@ cvrplib_clarke_wright_perf2 <- function(cvrplib_instance) {
 #'  following columns:
 #'  * `name` - Instance qualifiers which can be used with [cvrplib_download()].
 #'  * `instance_url` - The URL to the instance file.
-#'  * `solution_url` - The URL to the solution file.
+#'  * `solution_url` - The URL to the solution file, `NA` if there is none.
 #'
 #' @family cvrplib
 #' @concept cvrplib
@@ -176,13 +176,17 @@ cvrplib_ls <- function(cvrplib_url = "https://galgos.inf.puc-rio.br") {
   href <- paste0(cvrplib_url, xml2::xml_attr(instance_nodes, "href"))
   names <- gsub("\\s*", "", xml2::xml_contents(instance_nodes))
 
+  # look up the solution link in the table row of each instance, so that an
+  # instance without a solution file yields NA instead of shifting the links
   solution_nodes <-
-    xml2::xml_find_all(
-      html_content,
-      "//a[contains(@title,'Solution File')]"
+    xml2::xml_find_first(
+      instance_nodes,
+      "ancestor::tr//a[contains(@title,'Solution File')]"
     )
 
-  href_sol <- gsub("instance", "instanceSolution", href)
+  href_sol <- xml2::xml_attr(solution_nodes, "href")
+  has_sol <- !is.na(href_sol)
+  href_sol[has_sol] <- paste0(cvrplib_url, href_sol[has_sol])
 
   data.frame(
     name = names,
@@ -220,7 +224,10 @@ extract_cost <- function(content) {
 #'
 #' @return
 #'  Returns a "`cvrplib_instance`" object which contains CVRPLIB problem
-#'  instance data.
+#'  instance data. Its `best_known_cost` is the cost of the best known solution
+#'  provided by CVRPLIB (not necessarily a proven optimum), or `NA` if CVRPLIB
+#'  provides no solution file for the instance. A solution file that exists but
+#'  can not be downloaded raises an error.
 #'
 #' @family cvrplib
 #' @concept cvrplib
@@ -327,14 +334,12 @@ cvrplib_download <- function(
   ## solution file
   solution_download_url <- ls[ls$name == qualifier, "solution_url"]
 
-  optimum <-
-    tryCatch(
-      extract_cost(readLines(url(solution_download_url))),
-      error = function(e) {
-        # assume there is no solution file
-        NA_real_
-      }
-    )
+  best_known_cost <-
+    if (is.na(solution_download_url)) {
+      NA_real_
+    } else {
+      extract_cost(readLines(url(solution_download_url)))
+    }
 
   cvrplib_instance(
     name,
@@ -344,6 +349,6 @@ cvrplib_download <- function(
     capacity,
     pos,
     demand,
-    optimum
+    best_known_cost
   )
 }
