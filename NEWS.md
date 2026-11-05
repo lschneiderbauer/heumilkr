@@ -12,6 +12,8 @@
 
 -   `clarke_wright()` has gained runtime speedup compared to the previous version by roughly a factor of 3 (the actual speedup depends on input characteristics).
 
+-   `clarke_wright()`: Results are now deterministic, also in case of tied savings. Run identifiers follow the order of run creation.
+
 
 ## Bugfixes
 
@@ -20,6 +22,10 @@
 -   `clarke_wright()`: Fix a crash with sites of zero demand.
 
 -   `clarke_wright()`: The `load` of visits now always refers to the load after the visit, also for sites whose demand is split across multiple runs.
+
+-   `plot()`, `autoplot()`: Fix errors and misplaced visits for solutions with sites whose demand is split across multiple runs.
+
+-   `milkr_saving()`: The naive cost now includes the additional round trips of sites whose demand is split across multiple runs. Previously the saving could become negative.
 
 -   `cvrplib_ls()`, `cvrplib_download()`: Upstream website has changed. Fix malfunctioning functions by adjusting webscraping accordingly.
 
