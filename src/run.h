@@ -32,6 +32,7 @@ public:
   double distance() const { return _distance; }
   const std::list<Site> &sites() const { return _sites; }
   double max_load() const { return _max_load; };
+  double final_load() const { return _final_load; };
   const VehicleTypeID vehicle() const { return _vehicle; }
 
 private:

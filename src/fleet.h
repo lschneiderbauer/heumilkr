@@ -25,7 +25,7 @@ public:
       const double max_load,
       bool max_load_soft) const;
 
-  int capacity(const VehicleTypeID vehicle) const;
+  double capacity(const VehicleTypeID vehicle) const;
 
 private:
   // Number and capacity of particular vehicle types

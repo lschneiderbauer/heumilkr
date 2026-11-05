@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include "union_view.h"
 
-int Fleet::capacity(const int vehicle) const
+double Fleet::capacity(const VehicleTypeID vehicle) const
 {
     return vehicle_caps[vehicle];
 }

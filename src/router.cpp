@@ -1,6 +1,7 @@
 #include "router.h"
 #include "union_view.h"
 #include <algorithm>
+#include <cmath>
 #include <iterator>
 #include <vector>
 #include <memory>
@@ -11,28 +12,33 @@
 run Router::create_initial_runs(Site s, double demand, std::shared_ptr<Fleet> fleet,
                                 std::shared_ptr<Distmat> distances)
 {
-  VehicleTypeID vehicle;
-  try
-  {
-    vehicle = fleet->find_fitting_vehicle(std::list<Site>{s}, demand, true).value();
-  }
-  catch (const std::bad_optional_access &e)
-  {
-    throw std::runtime_error(
-        "Not enough vehicles available to fulfill all demands trivially."
-        " Solver cannot proceed in that case.");
-  }
-  fleet->reserve_vehicle(vehicle);
-  int capacity = fleet->capacity(vehicle);
+  // deliveries (positive demand) and pickups (negative demand) split up the same way
+  const double sign = demand < 0 ? -1 : 1;
+  double remaining = std::abs(demand);
 
-  if (demand > capacity)
+  while (true)
   {
-    this->fixed_singleton_runs.emplace_back(s, capacity, vehicle, distances);
-    return (create_initial_runs(s, demand - capacity, fleet, distances));
-  }
-  else
-  {
-    return run(s, demand, vehicle, distances);
+    const std::optional<VehicleTypeID> vehicle =
+        fleet->find_fitting_vehicle(std::list<Site>{s}, remaining, true);
+
+    if (!vehicle)
+    {
+      throw std::runtime_error(
+          "Not enough vehicles available to fulfill all demands trivially."
+          " Solver cannot proceed in that case.");
+    }
+
+    fleet->reserve_vehicle(*vehicle);
+    const double capacity = fleet->capacity(*vehicle);
+
+    if (remaining <= capacity)
+    {
+      this->run_demand[s] = sign * remaining;
+      return run(s, sign * remaining, *vehicle, distances);
+    }
+
+    this->fixed_singleton_runs.emplace_back(s, sign * capacity, *vehicle, distances);
+    remaining -= capacity;
   }
 }
 
@@ -46,6 +52,7 @@ Router::Router(const std::shared_ptr<std::vector<double>> demand,
   this->savings = calc_savings(*(this->distances));
 
   fixed_singleton_runs = std::vector<run>();
+  run_demand = *demand;
 
   runs.reserve(demand->size());
   for (size_t i = 0; i < demand->size(); i++)
@@ -243,7 +250,7 @@ tbls Router::runs_as_tbls() const
       order++;
     }
 
-    for (const auto [site, load] : run->load_after_visit(*demand))
+    for (const auto [site, load] : run->load_after_visit(run_demand))
     {
       std::get<3>(run_site_cols)[site] = load;
     }
@@ -259,7 +266,7 @@ tbls Router::runs_as_tbls() const
     std::get<0>(run_site_cols)[i] = run_id;
     std::get<1>(run_site_cols)[i] = site;
     std::get<2>(run_site_cols)[i] = 0;
-    std::get<3>(run_site_cols)[i] = run.max_load();
+    std::get<3>(run_site_cols)[i] = run.final_load(); // a single site: load after the visit
 
     std::get<0>(run_cols)[run_id] = run_id;
     std::get<1>(run_cols)[run_id] = run.vehicle();
