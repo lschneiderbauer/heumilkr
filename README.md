@@ -69,10 +69,10 @@ solution <-
 print(solution)
 #> $runs
 #>   run vehicle max_load  distance
-#> 1   0       0 31.75943 29.029139
-#> 2   1       0 25.78821 16.929475
-#> 3   2       1 41.60558 32.192404
-#> 4   3       1 34.12677 20.601801
+#> 1   0       0 25.78821 16.929475
+#> 2   1       0 31.75943 29.029139
+#> 3   2       1 34.12677 20.601801
+#> 4   3       1 41.60558 30.176394
 #> 5   4       0 22.65398 14.329082
 #> 6   5       0 21.76854 14.231704
 #> 7   6       0 14.34672  6.043174
@@ -103,35 +103,35 @@ print(solution)
 #> 
 #> $visits
 #>    run site order      load
-#> 1    0    0     0 17.611366
-#> 2    1    1     0 11.417455
-#> 3    0    2     2  0.000000
-#> 4    2    3     3  0.000000
-#> 5    1    4     1  0.000000
-#> 6    3    5     2  0.000000
-#> 7    3    6     0 21.760882
-#> 8    2    7     2 13.304476
-#> 9    3    8     1 10.190959
-#> 10   4    9     1  0.000000
+#> 1    1    0     2  0.000000
+#> 2    0    1     0 11.417455
+#> 3    1    2     0 23.898031
+#> 4    3    3     1 21.954433
+#> 5    0    4     1  0.000000
+#> 6    2    5     0 23.935806
+#> 7    2    6     2  0.000000
+#> 8    3    7     0 35.258910
+#> 9    2    8     1 12.365883
+#> 10   4    9     0 10.603327
 #> 11   5   10     0 12.191123
 #> 12   5   11     1  0.000000
 #> 13   6   12     0  0.000000
-#> 14   2   13     0 34.051287
-#> 15   7   14     1 14.782264
-#> 16   2   15     1 19.651142
-#> 17   7   16     2  0.000000
-#> 18   7   17     0 24.405193
-#> 19   0   18     1  7.861395
-#> 20   4   19     0 12.050648
+#> 14   3   13     3  0.000000
+#> 15   7   14     1  6.174874
+#> 16   3   15     2  7.554288
+#> 17   7   16     0 15.797802
+#> 18   7   17     2  0.000000
+#> 19   1   18     1 14.148060
+#> 20   4   19     1  0.000000
 
 # returns the total cost / distance
 # (the quantity that is minimized by CVRP)
 print(milkr_cost(solution))
-#> [1] 170.2523
+#> [1] 168.2363
 
 # returns the savings resulting from the heuristic optimization procedure
 print(milkr_saving(solution))
-#> [1] 166.7192
+#> [1] 168.7352
 ```
 
 A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for
@@ -159,7 +159,7 @@ CPU, using the R package [bench](https://bench.r-lib.org/).
 The following graph shows the run time behavior as the number of sites
 $n$ increase. The curve exhibits near-cubic behavior in $n$. For
 $n = 110$ the performance is still relatively reasonable with a run time
-of $\sim 3.87ms$.
+of $\sim 2.69ms$.
 
 <img src="man/figures/README-benchmark_runtime-1.png" alt="" width="100%" />
 
