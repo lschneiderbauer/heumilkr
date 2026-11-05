@@ -31,6 +31,8 @@
 
 -   `milkr_saving()`: The naive cost now includes the additional round trips of sites whose demand is split across multiple runs. Previously the saving could become negative.
 
+-   `cvrplib_download()`, `clarke_wright_cvrplib()`: Instances defined by an explicit distance matrix (including `E-n13-k4` and `E-n31-k7` in `cvrplib_E`) got corrupted distances, since coordinates were derived from them incorrectly. The matrix is now kept in the new field `distances` and used by the solver, and the coordinates in `pos` are `NA` for those instances.
+
 -   `cvrplib_ls()`, `cvrplib_download()`: Upstream website has changed. Fix malfunctioning functions by adjusting webscraping accordingly.
 
 # heumilkr 0.3.0

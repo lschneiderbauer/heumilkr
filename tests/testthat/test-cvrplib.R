@@ -79,3 +79,85 @@ test_that("CVRP downloader handles solution files correctly", {
   )
   expect_equal(cvrplib_download("test-n2")$best_known_cost, 2.5)
 })
+
+test_that("CVRP downloader keeps explicit distance matrices", {
+  instance_file <- tempfile(fileext = ".vrp")
+  on.exit(unlink(instance_file))
+
+  # distances: depot-1: 1, depot-2: 2, 1-2: 4
+  # (the triangle inequality does not hold on purpose)
+  formats <- list(
+    LOWER_ROW = c("1", "2 4"),
+    LOWER_DIAG_ROW = c("0", "1 0", "2 4 0"),
+    FULL_MATRIX = c("0 1 2", "1 0 4", "2 4 0")
+  )
+
+  local_mocked_bindings(
+    cvrplib_ls = function(cvrplib_url) {
+      data.frame(
+        name = "test-n3",
+        instance_url = paste0("file://", instance_file),
+        solution_url = NA_character_
+      )
+    }
+  )
+
+  for (format in names(formats)) {
+    writeLines(
+      c(
+        "NAME : test-n3",
+        "COMMENT : test",
+        "TYPE : CVRP",
+        "DIMENSION : 3",
+        "EDGE_WEIGHT_TYPE : EXPLICIT",
+        paste0("EDGE_WEIGHT_FORMAT : ", format),
+        "CAPACITY : 10",
+        "EDGE_WEIGHT_SECTION",
+        formats[[format]],
+        "DEMAND_SECTION",
+        "1 0",
+        "2 5",
+        "3 5",
+        "DEPOT_SECTION",
+        "1",
+        "-1",
+        "EOF"
+      ),
+      instance_file
+    )
+
+    inst <- cvrplib_download("test-n3")
+
+    expect_equal(as.numeric(inst$distances), c(1, 2, 4))
+    expect_true(all(is.na(inst$pos$x)))
+    expect_true(all(is.na(inst$pos$y)))
+
+    res <- clarke_wright_cvrplib(inst)
+    expect_equal(as.numeric(attr(res, "distances")), c(1, 2, 4))
+  }
+})
+
+test_that("Bundled instances with explicit distances reproduce the published cost", {
+  route_cost <- function(inst, routes) {
+    d <- as.matrix(inst$distances)
+
+    sum(
+      vapply(
+        routes,
+        function(route) {
+          # the solution files number the sites without the depot
+          path <- c(1, route + 1, 1)
+          sum(d[cbind(path[-length(path)], path[-1])])
+        },
+        FUN.VALUE = 1
+      )
+    )
+  }
+
+  inst <- Filter(function(x) x$name == "E-n13-k4", cvrplib_E)[[1]]
+
+  expect_equal(
+    route_cost(inst, list(1, c(8, 5, 3), c(9, 12, 10, 6), c(11, 4, 7, 2))),
+    inst$best_known_cost
+  )
+})

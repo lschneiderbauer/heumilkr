@@ -19,6 +19,10 @@ instance data. Its \code{best_known_cost} is the cost of the best known solution
 provided by CVRPLIB (not necessarily a proven optimum), or \code{NA} if CVRPLIB
 provides no solution file for the instance. A solution file that exists but
 can not be downloaded raises an error.
+
+Instances defined by an explicit distance matrix store it as \code{distances}, a
+\code{dist} object, and have \code{NA} coordinates in \code{pos}. Instances defined by
+coordinates have \code{distances} set to \code{NULL}.
 }
 \description{
 \href{https://galgos.inf.puc-rio.br/}{CVRLIB} offers a selection of

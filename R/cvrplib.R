@@ -6,7 +6,8 @@ cvrplib_instance <- function(
   capacity,
   pos,
   demand,
-  best_known_cost
+  best_known_cost,
+  distances = NULL
 ) {
   new_cvrplib_instance(
     name,
@@ -16,7 +17,8 @@ cvrplib_instance <- function(
     capacity,
     pos,
     demand,
-    best_known_cost
+    best_known_cost,
+    distances
   )
 }
 
@@ -28,7 +30,8 @@ new_cvrplib_instance <- function(
   capacity,
   pos,
   demand,
-  best_known_cost
+  best_known_cost,
+  distances
 ) {
   stopifnot(is.character(name))
   stopifnot(is.character(type))
@@ -38,6 +41,7 @@ new_cvrplib_instance <- function(
   stopifnot(is.data.frame(pos))
   stopifnot(is.data.frame(demand))
   stopifnot(is.numeric(best_known_cost))
+  stopifnot(is.null(distances) || inherits(distances, "dist"))
 
   structure(
     list(
@@ -48,7 +52,8 @@ new_cvrplib_instance <- function(
       capacity = capacity,
       pos = pos,
       demand = demand,
-      best_known_cost = best_known_cost
+      best_known_cost = best_known_cost,
+      distances = distances
     ),
     class = "cvrplib_instance"
   )
@@ -110,14 +115,22 @@ clarke_wright_cvrplib <- function(instance) {
     ]
 
   demand <- merged$demand
-  dist <- dist(rbind(
-    data.frame(x = origin$x, y = origin$y),
-    merged[, c("x", "y")]
-  ))
+
+  distances <-
+    if (is.null(instance$distances)) {
+      dist(rbind(
+        data.frame(x = origin$x, y = origin$y),
+        merged[, c("x", "y")]
+      ))
+    } else {
+      # the depot comes first, followed by the sites in the order of `demand`
+      sites <- c(setdiff(instance$pos$site, instance$demand$site), merged$site)
+      as.dist(as.matrix(instance$distances)[sites, sites])
+    }
 
   clarke_wright(
     demand,
-    dist,
+    distances,
     vehicles = data.frame(n = NA_integer_, caps = instance$capacity)
   )
 }
@@ -229,10 +242,14 @@ extract_cost <- function(content) {
 #'  provides no solution file for the instance. A solution file that exists but
 #'  can not be downloaded raises an error.
 #'
+#'  Instances defined by an explicit distance matrix store it as `distances`, a
+#'  `dist` object, and have `NA` coordinates in `pos`. Instances defined by
+#'  coordinates have `distances` set to `NULL`.
+#'
 #' @family cvrplib
 #' @concept cvrplib
 #' @importFrom utils read.csv
-#' @importFrom stats dist
+#' @importFrom stats dist as.dist
 #' @export
 cvrplib_download <- function(
   qualifier,
@@ -253,6 +270,8 @@ cvrplib_download <- function(
   capacity <- as.numeric(extract_header(content, "CAPACITY"))
 
   edge_weight_type <- extract_header(content, "EDGE_WEIGHT_TYPE")
+
+  distances <- NULL
 
   if (edge_weight_type %in% c("EUC_2D", "GEO")) {
     coord_section <- grep("NODE_COORD_SECTION", content, fixed = TRUE) + 1
@@ -281,9 +300,7 @@ cvrplib_download <- function(
       )))
       dmat <- matrix(0, nrow = dimension, ncol = dimension)
       dmat[upper.tri(dmat, diag = TRUE)] <- lower_triang
-      pos <- as.data.frame(cmdscale(dist(dmat + t(dmat))))
-      colnames(pos) <- c("x", "y")
-      pos$site <- 1:nrow(pos)
+      distances <- as.dist(dmat + t(dmat))
     } else if (edge_weight_format == "LOWER_ROW") {
       demand_section <- grep("DEMAND_SECTION", content, fixed = TRUE)
       edge_content <- content[edge_weight_section:(demand_section - 1)]
@@ -294,9 +311,7 @@ cvrplib_download <- function(
       )))
       dmat <- matrix(0, nrow = dimension, ncol = dimension)
       dmat[upper.tri(dmat)] <- lower_triang
-      pos <- as.data.frame(cmdscale(dist(dmat + t(dmat))))
-      colnames(pos) <- c("x", "y")
-      pos$site <- 1:nrow(pos)
+      distances <- as.dist(dmat + t(dmat))
     } else if (edge_weight_format == "FULL_MATRIX") {
       edge_content <- content[
         edge_weight_section:(edge_weight_section + dimension - 1)
@@ -308,12 +323,14 @@ cvrplib_download <- function(
       )))
       dim(dmat) <- c(dimension, dimension)
 
-      pos <- as.data.frame(cmdscale(dist(dmat)))
-      colnames(pos) <- c("x", "y")
-      pos$site <- 1:nrow(pos)
+      distances <- as.dist(dmat)
     } else {
       stop(paste0("Unknown edge weight format '", edge_weight_format, "'."))
     }
+
+    # distances do not determine coordinates in general: there might not even be
+    # an embedding, e.g. if the triangle inequality does not hold
+    pos <- data.frame(site = seq_len(dimension), x = NA_real_, y = NA_real_)
   } else {
     stop(paste0("Unknown edge weight type '", edge_weight_type, "'."))
   }
@@ -349,6 +366,7 @@ cvrplib_download <- function(
     capacity,
     pos,
     demand,
-    best_known_cost
+    best_known_cost,
+    distances
   )
 }
