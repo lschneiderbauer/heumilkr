@@ -10,6 +10,7 @@ test_that("Applying clarke_wright to cvrplib data results in a valid solution ob
 test_that("CVRP downloader yields correct result", {
   skip_if_offline()
   skip_on_cran()
+  skip_on_ci()
 
   inst <- cvrplib_download("A-n80-k10")
 
