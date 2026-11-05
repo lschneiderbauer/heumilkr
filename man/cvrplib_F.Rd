@@ -12,15 +12,15 @@ can be directly fed into solver algorithm, e.g. via \code{\link[=clarke_wright_c
 }
 }
 \source{
-\url{http://vrp.atd-lab.inf.puc-rio.br}
+\url{https://galgos.inf.puc-rio.br/cvrplib/en/instances}
 }
 \usage{
 cvrplib_F
 }
 \description{
 A collection of CVRP instances by Fisher, 1994, provided courtesy of
-\href{http://vrp.atd-lab.inf.puc-rio.br}{CVRPLIB}. See
-\href{http://vrp.atd-lab.inf.puc-rio.br}{CVRPLIB} for visualizations of the
+\href{https://galgos.inf.puc-rio.br/cvrplib/en/instances}{CVRPLIB}. See
+\href{https://galgos.inf.puc-rio.br/cvrplib/en/instances}{CVRPLIB} for visualizations of the
 instances and their solutions as well as a multitude of alternative instance
 data.
 }

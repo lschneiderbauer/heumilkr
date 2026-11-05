@@ -73,7 +73,7 @@ format.cvrplib_instance <- function(x, ...) {
       "Demand: ({.val {x$demand$demand}})",
       "Comment: '{x$comment}'"
     ))
-    cli_text("See more at {.href [https://galgos.inf.puc-rio.br/]({url})}.")
+    cli_text("See more at {.href [CVRPLIB]({url})}.")
   })
 }
 
@@ -223,7 +223,7 @@ extract_cost <- function(content) {
 
 #' CVRPLIB problem instance downloader
 #'
-#' [CVRLIB](https://galgos.inf.puc-rio.br/) offers a selection of
+#' [CVRPLIB](https://galgos.inf.puc-rio.br/cvrplib/en/instances) offers a selection of
 #' CVRP problem instances. This function downloads the instance data and
 #' conveniently makes it available to be fed into solver functions, e.g. with
 #' [clarke_wright_cvrplib()]. The primary purpose for those instances is

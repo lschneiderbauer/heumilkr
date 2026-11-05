@@ -25,7 +25,7 @@ Instances defined by an explicit distance matrix store it as \code{distances}, a
 coordinates have \code{distances} set to \code{NULL}.
 }
 \description{
-\href{https://galgos.inf.puc-rio.br/}{CVRLIB} offers a selection of
+\href{https://galgos.inf.puc-rio.br/cvrplib/en/instances}{CVRPLIB} offers a selection of
 CVRP problem instances. This function downloads the instance data and
 conveniently makes it available to be fed into solver functions, e.g. with
 \code{\link[=clarke_wright_cvrplib]{clarke_wright_cvrplib()}}. The primary purpose for those instances is
