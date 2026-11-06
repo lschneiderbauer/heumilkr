@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <tuple>
 
 #include "run.h"
 #include "fleet.h"

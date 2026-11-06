@@ -1,3 +1,4 @@
+#include "clarke_wright.h"
 #include <vector>
 #include <functional>
 #include "router.h"
@@ -11,7 +12,7 @@ tbls cpp_clarke_wright(
     const std::vector<double> &capacities,
     const std::vector<int> &restr_sites,
     const std::vector<int> &restr_vehicles,
-    std::function<void(Router &)> callback = [](Router &) {})
+    std::function<void(Router &)> callback)
 {
   // check that all inputs have the correct size
   assert(distances.size() == (demand.size() + 1) * (demand.size()) / 2);
@@ -47,8 +48,8 @@ tbls cpp_clarke_wright(
   return (router.runs_as_tbls());
 }
 
-#ifndef NDEBUG
-// only for debug purposes
+#ifdef HEUMILKR_DEBUG_MAIN
+// only for debug purposes, see Makefile.debug
 
 #include <stdio.h>
 
