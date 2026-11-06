@@ -9,12 +9,18 @@ cvrplib_download(qualifier, cvrplib_url = "https://galgos.inf.puc-rio.br")
 \arguments{
 \item{qualifier}{The qualifier of the problem instance. E.g. "tai150d".
 This can either be inferred directly from the website or by the output of
-\code{\link[=cvrplib_ls]{cvrplib_ls()}}.}
+\code{\link[=cvrplib_ls]{cvrplib_ls()}}. Can be a vector to download several instances at once, which
+is preferable to repeated calls since the list of available instances is only
+requested once.}
 
 \item{cvrplib_url}{The base URL of the CVRPLIB website. Defaults to https://galgos.inf.puc-rio.br.}
 }
 \value{
-Returns a "\code{cvrplib_instance}" object which contains CVRPLIB problem
+For a single qualifier, returns a "\code{cvrplib_instance}" object. For several
+qualifiers, returns a \code{\link[=list]{list()}} of those objects, named by qualifier. Note that
+a vector of length one counts as a single qualifier.
+
+A "\code{cvrplib_instance}" object contains CVRPLIB problem
 instance data. Its \code{best_known_cost} is the cost of the best known solution
 provided by CVRPLIB (not necessarily a proven optimum), or \code{NA} if CVRPLIB
 provides no solution file for the instance. A solution file that exists but

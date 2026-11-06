@@ -161,3 +161,64 @@ test_that("Bundled instances with explicit distances reproduce the published cos
     inst$best_known_cost
   )
 })
+
+test_that("CVRP downloader handles one or several qualifiers", {
+  write_instance <- function(name) {
+    file <- tempfile(fileext = ".vrp")
+    writeLines(
+      c(
+        paste0("NAME : ", name),
+        "COMMENT : test",
+        "TYPE : CVRP",
+        "DIMENSION : 2",
+        "EDGE_WEIGHT_TYPE : EUC_2D",
+        "CAPACITY : 10",
+        "NODE_COORD_SECTION",
+        "1 0 0",
+        "2 1 1",
+        "DEMAND_SECTION",
+        "1 0",
+        "2 5",
+        "DEPOT_SECTION",
+        "1",
+        "-1",
+        "EOF"
+      ),
+      file
+    )
+    file
+  }
+
+  files <- c(a = write_instance("a"), b = write_instance("b"))
+  on.exit(unlink(files))
+
+  n_ls_calls <- 0
+  local_mocked_bindings(
+    cvrplib_ls = function(cvrplib_url) {
+      n_ls_calls <<- n_ls_calls + 1
+      data.frame(
+        name = names(files),
+        instance_url = paste0("file://", files),
+        solution_url = NA_character_
+      )
+    }
+  )
+
+  # a single qualifier yields the instance itself
+  single <- cvrplib_download("a")
+  expect_s3_class(single, "cvrplib_instance")
+  expect_equal(single$name, "a")
+
+  # several qualifiers yield a named list in the requested order,
+  # and the available instances are only requested once
+  n_ls_calls <- 0
+  several <- cvrplib_download(c("b", "a"))
+  expect_equal(n_ls_calls, 1)
+  expect_type(several, "list")
+  expect_named(several, c("b", "a"))
+  expect_equal(several$b$name, "b")
+  expect_equal(several$a, single)
+
+  expect_error(cvrplib_download(c("a", "nope")), "nope")
+  expect_error(cvrplib_download(character()))
+})

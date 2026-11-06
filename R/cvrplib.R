@@ -232,11 +232,17 @@ extract_cost <- function(content) {
 #' @param qualifier
 #'  The qualifier of the problem instance. E.g. "tai150d".
 #'  This can either be inferred directly from the website or by the output of
-#'  [cvrplib_ls()].
+#'  [cvrplib_ls()]. Can be a vector to download several instances at once, which
+#'  is preferable to repeated calls since the list of available instances is only
+#'  requested once.
 #' @inheritParams cvrplib_ls
 #'
 #' @return
-#'  Returns a "`cvrplib_instance`" object which contains CVRPLIB problem
+#'  For a single qualifier, returns a "`cvrplib_instance`" object. For several
+#'  qualifiers, returns a [list()] of those objects, named by qualifier. Note that
+#'  a vector of length one counts as a single qualifier.
+#'
+#'  A "`cvrplib_instance`" object contains CVRPLIB problem
 #'  instance data. Its `best_known_cost` is the cost of the best known solution
 #'  provided by CVRPLIB (not necessarily a proven optimum), or `NA` if CVRPLIB
 #'  provides no solution file for the instance. A solution file that exists but
@@ -256,11 +262,35 @@ cvrplib_download <- function(
   cvrplib_url = "https://galgos.inf.puc-rio.br"
 ) {
   stopifnot(is.character(qualifier))
+  stopifnot(length(qualifier) > 0)
 
   ls <- cvrplib_ls(cvrplib_url)
 
-  instance_download_url <- ls[ls$name == qualifier, "instance_url"]
+  unknown <- setdiff(qualifier, ls$name)
+  if (length(unknown) > 0) {
+    stop(paste0("Unknown qualifier(s): ", paste(unknown, collapse = ", "), "."))
+  }
 
+  instances <-
+    lapply(
+      qualifier,
+      function(q) {
+        cvrplib_read_instance(
+          ls[ls$name == q, "instance_url"],
+          ls[ls$name == q, "solution_url"]
+        )
+      }
+    )
+
+  if (length(qualifier) == 1) {
+    instances[[1]]
+  } else {
+    names(instances) <- qualifier
+    instances
+  }
+}
+
+cvrplib_read_instance <- function(instance_download_url, solution_download_url) {
   content <- readLines(url(instance_download_url))
 
   name <- extract_header(content, "NAME")
@@ -349,8 +379,6 @@ cvrplib_download <- function(
   demand <- demand[demand$demand > 0, ]
 
   ## solution file
-  solution_download_url <- ls[ls$name == qualifier, "solution_url"]
-
   best_known_cost <-
     if (is.na(solution_download_url)) {
       NA_real_
