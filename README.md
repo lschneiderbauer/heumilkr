@@ -160,10 +160,11 @@ to arrive at its final solution:
 The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz
 CPU, using the R package [bench](https://bench.r-lib.org/).
 
-The following graph shows the run time behavior as the number of sites
-$n$ increase. The curve exhibits near-cubic behavior in $n$. For
-$n = 110$ the performance is still relatively reasonable with a run time
-of $\sim 2.69ms$.
+The following graph shows the run time on one kind of problem: uniformly
+distributed random sites, demands between 5 and 15 and a vehicle
+capacity of 33. It amounts to $\sim 966µs$ for $n = 110$, $\sim 86.2ms$
+for $n = 1010$, and $\sim 408ms$ for $n = 1910$. Run times can differ
+for other problems.
 
 <img src="man/figures/README-benchmark_runtime-1.png" alt="" width="100%" />
 
