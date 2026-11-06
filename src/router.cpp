@@ -49,7 +49,7 @@ Router::Router(const std::shared_ptr<std::vector<double>> demand,
       distances(std::make_shared<Distmat>(std::move(*distances))),
       demand(demand)
 {
-  this->savings = calc_savings(*(this->distances));
+  calc_savings(*(this->distances));
 
   fixed_singleton_runs = std::vector<run>();
   run_demand = *demand;
@@ -63,6 +63,12 @@ Router::Router(const std::shared_ptr<std::vector<double>> demand,
 
   best_links.resize(runs.size());
   best_link_stale.assign(runs.size(), true);
+
+  first_sites.reserve(runs.size());
+  for (const auto &run : runs)
+  {
+    first_sites.push_back(*(run->sites().begin()));
+  }
 }
 
 void Router::combine_runs(RunPtr a, RunPtr b, const VehicleTypeID new_vehicle)
@@ -85,24 +91,53 @@ void Router::combine_runs(RunPtr a, RunPtr b, const VehicleTypeID new_vehicle)
   runs.erase(runs.begin() + b_index);
   best_links.erase(best_links.begin() + b_index);
   best_link_stale.erase(best_link_stale.begin() + b_index);
+  first_sites.erase(first_sites.begin() + b_index);
 
   a->combine(*b, new_vehicle);
 }
 
-// we create a Distmat that is one size smaller than the distances
-// (only calculate for sites)
-Distmat Router::calc_savings(const Distmat &d) const
+// the matrix is one size smaller than the distances (only calculate for sites)
+void Router::calc_savings(const Distmat &d)
 {
-  Distmat savings(d.size() - 1, 0);
-  for (int i = 1; i < savings.size(); i++)
+  n_sites = d.size() - 1;
+  savings.assign(static_cast<size_t>(n_sites) * n_sites, 0);
+
+  for (int i = 0; i < n_sites; i++)
   {
-    for (int j = 0; j < i; j++)
+    double *row = savings.data() + static_cast<size_t>(i) * n_sites;
+    const double origin_to_i = d.get(0, i + 1);
+
+    for (int j = i + 1; j < n_sites; j++)
     {
-      savings.acc(i, j) = d.get(0, i + 1) + d.get(0, j + 1) - d.get(i + 1, j + 1);
+      row[j] = origin_to_i + d.get(0, j + 1) - d.get(i + 1, j + 1);
     }
   }
 
-  return savings;
+  // Mirror the upper triangle.
+  // This would usually simply be a second assignment in the loop above, and the
+  // result would be the same. We only do it separately and in blocks for runtime:
+  // the mirrored entries of one row are a whole row apart in memory, so on large
+  // matrices nearly every such write would be a cache miss. Blocks keep the
+  // accessed rows and columns in cache, which made the whole solver around 10%
+  // faster from 2000 sites on (no difference up to 1000 sites).
+  const int block_size = 64;
+  for (int i_block = 0; i_block < n_sites; i_block += block_size)
+  {
+    for (int j_block = i_block; j_block < n_sites; j_block += block_size)
+    {
+      const int i_end = std::min(i_block + block_size, n_sites);
+      const int j_end = std::min(j_block + block_size, n_sites);
+
+      for (int i = i_block; i < i_end; i++)
+      {
+        for (int j = std::max(j_block, i + 1); j < j_end; j++)
+        {
+          savings[static_cast<size_t>(j) * n_sites + i] =
+              savings[static_cast<size_t>(i) * n_sites + j];
+        }
+      }
+    }
+  }
 }
 
 std::optional<Router::Link> Router::find_best_link_from(const RunPtr &from) const
@@ -113,16 +148,23 @@ std::optional<Router::Link> Router::find_best_link_from(const RunPtr &from) cons
   // combined load of best configuration
   double combined_load = std::numeric_limits<double>::max();
 
+  const Site from_first = *(from->sites().begin());
   const Site from_last = *(from->sites().rbegin());
 
-  for (const auto &to : runs)
+  const double *from_savings = savings.data() + static_cast<size_t>(from_last) * n_sites;
+
+  // Most candidates fail on the saving, so that only the flat arrays are touched
+  // for them, and not the run itself.
+  for (size_t i = 0; i < first_sites.size(); i++)
   {
-    if (from != to)
+    // first sites are unique among runs
+    if (first_sites[i] != from_first)
     {
-      double saving = savings.get(from_last, *(to->sites().begin()));
+      double saving = from_savings[first_sites[i]];
 
       if (saving >= max_saving)
       {
+        const RunPtr &to = runs[i];
         double new_combined_load = from->combined_max_load(*to);
 
         // if the savings are equal, but the new combined load is better, use that one

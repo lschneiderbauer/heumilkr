@@ -70,7 +70,7 @@ private:
     // combines the two runs traversing site a and site b with the new vehicle new_vehicle.
     void combine_runs(RunPtr a, RunPtr b, const VehicleTypeID new_vehicle);
 
-    Distmat calc_savings(const Distmat &d) const;
+    void calc_savings(const Distmat &d);
 
     // the best way to continue a run with another run
     struct Link
@@ -91,7 +91,12 @@ private:
     const std::shared_ptr<Distmat> distances;
     const std::shared_ptr<std::vector<double>> demand;
 
-    Distmat savings;
+    // Square matrix of savings between sites, stored row by row (unlike Distmat):
+    // looking for the best link reads one site's savings, which are adjacent in
+    // memory this way. Worth the additional memory: it avoids most cache misses.
+    std::vector<double> savings;
+    int n_sites;
+
     std::vector<run> fixed_singleton_runs; // those runs are not dynamic, i.e. they won't be changed
 
     // site-indexed: the share of each site's demand that is served by `runs`.
@@ -108,6 +113,11 @@ private:
     // See relink_best() for when an entry goes stale.
     std::vector<std::optional<Link>> best_links;
     std::vector<char> best_link_stale;
+
+    // The first site of each run (same indices as `runs`), to not have to access
+    // each run when looking for links. Merges do not change the first site of a
+    // run, but anything that reorders sites before the merging ends has to update it.
+    std::vector<Site> first_sites;
 };
 
 #endif
