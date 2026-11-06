@@ -1,0 +1,41 @@
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "src/**"
+      - "python/**"
+      - "pyproject.toml"
+      - ".github/workflows/python-check.yaml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "python/**"
+      - "pyproject.toml"
+      - ".github/workflows/python-check.yaml"
+
+name: python-check.yaml
+
+permissions: read-all
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    name: ${{ matrix.os }} (${{ matrix.python }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.10", "3.14"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+
+      - run: pip install ".[test]"
+
+      - run: pytest

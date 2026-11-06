@@ -1,0 +1,64 @@
+# Build definition of the Python package, which lives in python/.
+# It has to be located here, because its source distribution needs the shared
+# C++ core in src/. Everything else in the root belongs to the R package.
+
+[build-system]
+requires = ["scikit-build-core>=0.11", "nanobind>=2.4"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "heumilkr"
+version = "0.1.0"
+description = "Heuristic Capacitated Vehicle Routing Problem solver"
+readme = "python/README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE.md"]
+authors = [{ name = "Lukas Schneiderbauer" }]
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24"]
+keywords = ["vehicle routing", "cvrp", "clarke-wright", "optimization"]
+classifiers = [
+  "Programming Language :: C++",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Mathematics",
+]
+
+[project.optional-dependencies]
+pandas = ["pandas"]
+test = ["pandas", "pytest", "scipy"]
+
+[project.urls]
+Homepage = "https://github.com/lschneiderbauer/heumilkr"
+Issues = "https://github.com/lschneiderbauer/heumilkr/issues"
+
+[tool.scikit-build]
+cmake.source-dir = "python"
+wheel.packages = ["python/heumilkr"]
+# from Python 3.12 on, a single wheel per platform covers all Python versions
+wheel.py-api = "cp312"
+# ship only the Python package and the shared core, not the R package
+sdist.exclude = ["*"]
+sdist.include = [
+  "LICENSE.md",
+  "pyproject.toml",
+  "python/",
+  "!**/__pycache__/",
+  "!python/tests/fixtures/generate.R",
+  "src/*.cpp",
+  "src/*.h",
+  "!src/cpp11.cpp",
+  "!src/r_*.cpp",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["python/tests"]
+
+[tool.cibuildwheel]
+build-frontend = "build"
+skip = ["*-win32", "*_i686", "*-musllinux_*"]
+test-requires = ["pytest"]
+test-command = "pytest {project}/python/tests"
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
+environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }

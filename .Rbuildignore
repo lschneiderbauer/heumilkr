@@ -18,3 +18,9 @@ references.bib
 src/Makefile.debug$
 src/README$
 src/debug$
+^python$
+^pyproject\.toml$
+^\.venv$
+^build$
+^dist$
+^\.pytest_cache$
