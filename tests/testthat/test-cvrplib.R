@@ -114,6 +114,11 @@ test_that("CVRP downloader keeps explicit distance matrices", {
         "CAPACITY : 10",
         "EDGE_WEIGHT_SECTION",
         formats[[format]],
+        # real instances can provide coordinates next to the explicit distances
+        "NODE_COORD_SECTION",
+        "1 0 0",
+        "2 1 0",
+        "3 2 0",
         "DEMAND_SECTION",
         "1 0",
         "2 5",
@@ -126,7 +131,7 @@ test_that("CVRP downloader keeps explicit distance matrices", {
       instance_file
     )
 
-    inst <- cvrplib_download("test-n3")
+    expect_no_warning(inst <- cvrplib_download("test-n3"))
 
     expect_equal(as.numeric(inst$distances), c(1, 2, 4))
     expect_true(all(is.na(inst$pos$x)))
