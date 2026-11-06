@@ -6,7 +6,7 @@
 #
 # Besides the bundled instances this uses instance sets from CVRPLIB. To go easy on
 # the website they are only downloaded once, as one archive per set, and are kept in
-# the (git-ignored) folder benchmark/performance/instances. Extracting the archives
+# the (git-ignored) folder data-raw/instances. Extracting the archives
 # requires the command line tool 7z.
 library(heumilkr)
 library(purrr)
@@ -14,7 +14,7 @@ library(bench)
 
 sha <- system("git rev-parse HEAD", intern = TRUE)
 
-instance_dir <- "./benchmark/performance/instances"
+instance_dir <- "./data-raw/instances"
 
 # returns the instances of a CVRPLIB set
 read_cvrplib_set <- function(
