@@ -32,6 +32,12 @@
   point of the run. Negative demands that exceed vehicle capacities are
   split across multiple runs, like positive demands.
 
+- [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md)
+  has gained a large runtime speedup compared to the previous version:
+  for 500 sites the run time drops from about 6 seconds to about 0.01
+  seconds in our benchmarks. The actual speedup depends on input
+  characteristics and grows with the number of sites.
+
 - [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md):
   Results are now deterministic, also in case of tied savings. Run
   identifiers follow the order of run creation.

@@ -9,6 +9,12 @@ Besides deliveries, it also supports “backhaul”: sites with negative
 demand have goods picked up and brought back to the depot, in any order
 within a run as long as the load stays within the vehicle capacity.
 
+For a fixed number of vehicle types, the run time grows at best
+quadratically and at worst cubically with the number of sites $`n`$. On
+the problems we tested with randomly placed sites and up to 4000 sites,
+it grew roughly like $`n^{2.4}`$ to $`n^{2.6}`$ (see [Runtime
+Benchmarks](#runtime-benchmarks)).
+
 ## Installation
 
 You can install the latest CRAN release of heumilkr with:
@@ -149,10 +155,11 @@ to arrive at its final solution:
 The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz
 CPU, using the R package [bench](https://bench.r-lib.org/).
 
-The following graph shows the run time behavior as the number of sites
-$`n`$ increase. The curve exhibits near-cubic behavior in $`n`$. For
-$`n = 110`$ the performance is still relatively reasonable with a run
-time of $`\sim 2.69ms`$.
+The following graph shows the run time on one kind of problem: uniformly
+distributed random sites, demands between 5 and 15 and a vehicle
+capacity of 33. It amounts to $`\sim 966µs`$ for $`n = 110`$,
+$`\sim 86.2ms`$ for $`n = 1010`$, and $`\sim 408ms`$ for $`n = 1910`$.
+Run times can differ for other problems.
 
 ![](reference/figures/README-benchmark_runtime-1.png)
 
