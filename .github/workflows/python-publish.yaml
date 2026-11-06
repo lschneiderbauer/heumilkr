@@ -1,0 +1,108 @@
+# Publishes the version given in pyproject.toml. To release: bump the version
+# there, commit it, and start this workflow manually in the GitHub Actions tab.
+#
+# Requires a "Trusted Publisher" for this workflow file on (Test)PyPI, using the
+# environment named like the chosen target. No API tokens are needed.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Where to publish to
+        type: choice
+        options: [testpypi, pypi]
+        default: testpypi
+
+name: python-publish.yaml
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Read version and refuse to release it twice
+        id: version
+        env:
+          TARGET: ${{ inputs.target }}
+        run: |
+          version=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          if [ "$TARGET" = "pypi" ]; then
+            if [ "$GITHUB_REF" != "refs/heads/master" ]; then
+              echo "::error::Releases to PyPI have to start from master."
+              exit 1
+            fi
+            if git rev-parse -q --verify "refs/tags/py-v$version" > /dev/null; then
+              echo "::error::Tag py-v$version exists already. Bump the version in pyproject.toml."
+              exit 1
+            fi
+          fi
+
+  sdist:
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pipx run build --sdist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist-sdist
+          path: dist/*.tar.gz
+
+  wheels:
+    needs: version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pypa/cibuildwheel@v3.4.1
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist-wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+
+  publish:
+    needs: [version, sdist, wheels]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: ${{ inputs.target == 'testpypi' && 'https://test.pypi.org/legacy/' || 'https://upload.pypi.org/legacy/' }}
+
+  tag:
+    needs: [version, publish]
+    if: inputs.target == 'pypi'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          git tag "py-v$VERSION"
+          git push origin "py-v$VERSION"

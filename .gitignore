@@ -11,3 +11,9 @@ inst/doc
 
 tests/testthat/_snaps/*.new.md
 data-raw/instances
+
+__pycache__/
+.pytest_cache/
+.venv/
+/build/
+/dist/
