@@ -66,66 +66,93 @@
     
 <p>In this vignette we discuss performance benchmarks of the
 Clarke-Wright algorithm implemented in this package by comparing the
-Clarke-Wright solutions of a set of problem instances with their optimal
-value.</p>
+Clarke-Wright solutions of a set of problem instances with their best
+known value, and by measuring the run time on those instances.</p>
 <div class="section level3">
 <h3 id="the-problem-instance-data">The problem instance data<a class="anchor" aria-label="anchor" href="#the-problem-instance-data"></a>
 </h3>
 <p>The problem instances we are basing our measurements on are provided
 courtesy of <a href="https://galgos.inf.puc-rio.br/cvrplib/en/instances" class="external-link">CVRPLIB</a>
-and can be divided into five groups<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;The naming is directly taken from &lt;a href=&quot;https://galgos.inf.puc-rio.br/cvrplib/en/instances&quot; class=&quot;external-link&quot;&gt;CVRPLIB&lt;/a&gt;&lt;/p&gt;"><sup>1</sup></a> of different characteristics:</p>
+and can be divided into eight groups<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;The naming is directly taken from &lt;a href=&quot;https://galgos.inf.puc-rio.br/cvrplib/en/instances&quot; class=&quot;external-link&quot;&gt;CVRPLIB&lt;/a&gt;&lt;/p&gt;"><sup>1</sup></a> of different characteristics:</p>
 <ul>
 <li><p>Augerat A, 1995 (27 instances)</p></li>
 <li><p>Augerat B, 1995 (23 instances)</p></li>
 <li><p>Christofides and Eilon, 1969 (13 instances)</p></li>
 <li><p>Fisher, 1994 (3 instances)</p></li>
 <li><p>Rochat and Taillard, 1995 (12 instances)</p></li>
+<li><p>Uchoa et al., 2017 (100 generated instances with 100 to 1000
+sites)</p></li>
+<li><p>Loggi, DIMACS 2021 (6 instances with 400 to 1000 sites, extracted
+from real problems)</p></li>
+<li><p>ORTEC, DIMACS 2021 (6 instances with 241 to 700 sites, derived
+from real problems)</p></li>
 </ul>
 <p>The data provides the problem instance as well as the best known
 solution, whose cost is available as the field
 <code>best_known_cost</code> of each instance. CVRPLIB lists the best
-known solutions of all those instances as proven optimal, so we simply
-refer to them as optimal solutions below.</p>
+known solutions of all instances of the first five groups as proven
+optimal, but only for 61 of the 100 instances by Uchoa et al. and for
+none of the Loggi and ORTEC instances. For those, a better solution than
+the best known one might exist.</p>
+<p>The data of the first five groups is bundled with this package. The
+results for all groups are precomputed, so that building this vignette
+does not require downloading anything. See <code>data-raw/perf.R</code>
+in the <a href="https://github.com/lschneiderbauer/heumilkr" class="external-link">package
+source</a> for how they are obtained.</p>
 </div>
 <div class="section level2">
-<h2 id="relation-to-optimal-and-trivial-solution">Relation to optimal and trivial solution<a class="anchor" aria-label="anchor" href="#relation-to-optimal-and-trivial-solution"></a>
+<h2 id="relation-to-best-known-and-trivial-solution">Relation to best known and trivial solution<a class="anchor" aria-label="anchor" href="#relation-to-best-known-and-trivial-solution"></a>
 </h2>
 <p>The idea of this indicator is to measure where the Clarke-Wright
-solution sits in between the optimal solution and the trivial solution<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;By trivial solution we mean the solution where each site
+solution sits in between the best known solution and the trivial
+solution<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;By trivial solution we mean the solution where each site
 is assigned exactly one route (which goes back and forth).&lt;/p&gt;"><sup>2</sup></a>. Let
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
 be the cost of the Clarke-Wright solution,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ω</mi><annotation encoding="application/x-tex">\omega</annotation></semantics></math>
-the cost of the optimal solution, and
+the cost of the best known solution, and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>
 the cost of the trivial solution. The measure
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ξ</mi><annotation encoding="application/x-tex">\xi</annotation></semantics></math>
 is defined to be
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ξ</mi><mo>:=</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mi>γ</mi><mo>−</mo><mi>ω</mi></mrow><mrow><mi>α</mi><mo>−</mo><mi>ω</mi></mrow></mfrac><mspace width="0.167em"></mspace><mi>.</mi></mrow><annotation encoding="application/x-tex">\xi := 1 - \frac{\gamma - \omega}{\alpha - \omega}\,.</annotation></semantics></math>
 The measure can move between zero and 1. It is zero if the solution is
-the trivial solution, and it is one if the solution is the optimal
+the trivial solution, and it is one if the solution is the best known
 solution.</p>
 <p>Evaluating this for CVRPLIB sample data yields the following
 graph.</p>
 <p><img src="clarke_wright_performance_files/figure-html/perf_scale_based_graph-1.png" class="r-plt" alt="" width="100%"></p>
 <p>The mean value over all problem instances is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>ξ</mi><mo accent="true">¯</mo></mover><mo>=</mo><mn>98.6</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">\overline{\xi}=98.6\%</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>ξ</mi><mo accent="true">¯</mo></mover><mo>=</mo><mn>98.9</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">\overline{\xi}=98.9\%</annotation></semantics></math>.</p>
 </div>
 <div class="section level2">
-<h2 id="relative-deviation-of-optimal-solution">Relative deviation of optimal solution<a class="anchor" aria-label="anchor" href="#relative-deviation-of-optimal-solution"></a>
+<h2 id="relative-deviation-from-best-known-solution">Relative deviation from best known solution<a class="anchor" aria-label="anchor" href="#relative-deviation-from-best-known-solution"></a>
 </h2>
 <p>We can also simply measure the relative deviation of the
-Clarke-Wright cost to the optimal cost,
+Clarke-Wright cost to the best known cost,
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>:=</mo><mfrac><mrow><mi>γ</mi><mo>−</mo><mi>ω</mi></mrow><mi>γ</mi></mfrac><mspace width="0.167em"></mspace><mo>,</mo></mrow><annotation encoding="application/x-tex">\rho := \frac{\gamma - \omega}{\gamma}\,,</annotation></semantics></math>
 which measures how much savings we miss by using the Clarke-Wright
-solution instead of the optimal solution.</p>
+solution instead of the best known solution.</p>
 <p><img src="clarke_wright_performance_files/figure-html/perf_rel_graph-1.png" class="r-plt" alt="" width="100%"></p>
 <p>The mean value over all problem instances is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>ρ</mi><mo accent="true">¯</mo></mover><mo>=</mo><mn>5.1</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">\overline{\rho}=5.1\%</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>ρ</mi><mo accent="true">¯</mo></mover><mo>=</mo><mn>5.3</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">\overline{\rho}=5.3\%</annotation></semantics></math>,
 i.e. on average, we miss out on around
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.1</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">5.1\%</annotation></semantics></math>
-savings taking the Clarke-Wright solution compared to the optimal
-one.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.3</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">5.3\%</annotation></semantics></math>
+savings taking the Clarke-Wright solution compared to the best known
+one. For the instances derived from real problems (Loggi and ORTEC) it
+amounts to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.8</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">5.8\%</annotation></semantics></math>.</p>
+</div>
+<div class="section level2">
+<h2 id="run-time">Run time<a class="anchor" aria-label="anchor" href="#run-time"></a>
+</h2>
+<p>The following graph shows the median run time of
+<code><a href="../reference/clarke_wright_cvrplib.html">clarke_wright_cvrplib()</a></code> for each instance, on an Intel®
+Xeon® CPU E3-1231 v3 @ 3.40GHz.</p>
+<p><img src="clarke_wright_performance_files/figure-html/runtime_graph-1.png" class="r-plt" alt="" width="100%"></p>
+<p>The slowest of the instances with 1000 sites takes around
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>118</mn><annotation encoding="application/x-tex">118</annotation></semantics></math>
+ms.</p>
 </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

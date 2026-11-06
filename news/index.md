@@ -24,6 +24,11 @@
 
 ### New features / improvements
 
+- [`cvrplib_download()`](https://lschneiderbauer.github.io/heumilkr/reference/cvrplib_download.md)
+  now accepts a vector of qualifiers and returns a named list of
+  instances in that case. The list of available instances is only
+  requested once. A single qualifier still returns the instance itself.
+
 - [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md)
   now supports negative demands: sites with negative demand are treated
   as “backhaul” points, i.e. they deliver goods back to the depot. Sites

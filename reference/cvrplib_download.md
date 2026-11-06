@@ -21,6 +21,9 @@ cvrplib_download(qualifier, cvrplib_url = "https://galgos.inf.puc-rio.br")
   The qualifier of the problem instance. E.g. "tai150d". This can either
   be inferred directly from the website or by the output of
   [`cvrplib_ls()`](https://lschneiderbauer.github.io/heumilkr/reference/cvrplib_ls.md).
+  Can be a vector to download several instances at once, which is
+  preferable to repeated calls since the list of available instances is
+  only requested once.
 
 - cvrplib_url:
 
@@ -29,11 +32,17 @@ cvrplib_download(qualifier, cvrplib_url = "https://galgos.inf.puc-rio.br")
 
 ## Value
 
-Returns a "`cvrplib_instance`" object which contains CVRPLIB problem
-instance data. Its `best_known_cost` is the cost of the best known
-solution provided by CVRPLIB (not necessarily a proven optimum), or `NA`
-if CVRPLIB provides no solution file for the instance. A solution file
-that exists but can not be downloaded raises an error.
+For a single qualifier, returns a "`cvrplib_instance`" object. For
+several qualifiers, returns a
+[`list()`](https://rdrr.io/r/base/list.html) of those objects, named by
+qualifier. Note that a vector of length one counts as a single
+qualifier.
+
+A "`cvrplib_instance`" object contains CVRPLIB problem instance data.
+Its `best_known_cost` is the cost of the best known solution provided by
+CVRPLIB (not necessarily a proven optimum), or `NA` if CVRPLIB provides
+no solution file for the instance. A solution file that exists but can
+not be downloaded raises an error.
 
 Instances defined by an explicit distance matrix store it as
 `distances`, a `dist` object, and have `NA` coordinates in `pos`.
