@@ -319,10 +319,13 @@ cvrplib_read_instance <- function(instance_download_url, solution_download_url) 
     edge_weight_format <- extract_header(content, "EDGE_WEIGHT_FORMAT")
     edge_weight_section <- grep("EDGE_WEIGHT_SECTION", content, fixed = TRUE) +
       1
+    # the weights end at the next section, which is not necessarily DEMAND_SECTION
+    section_starts <- grep("^\\s*[A-Z]", content)
+    edge_weight_section_end <-
+      min(section_starts[section_starts > edge_weight_section]) - 1
 
     if (edge_weight_format == "LOWER_DIAG_ROW") {
-      demand_section <- grep("DEMAND_SECTION", content, fixed = TRUE)
-      edge_content <- content[edge_weight_section:(demand_section - 1)]
+      edge_content <- content[edge_weight_section:edge_weight_section_end]
 
       lower_triang <- as.numeric(unlist(lapply(
         strsplit(edge_content, "\\s+"),
@@ -332,8 +335,7 @@ cvrplib_read_instance <- function(instance_download_url, solution_download_url) 
       dmat[upper.tri(dmat, diag = TRUE)] <- lower_triang
       distances <- as.dist(dmat + t(dmat))
     } else if (edge_weight_format == "LOWER_ROW") {
-      demand_section <- grep("DEMAND_SECTION", content, fixed = TRUE)
-      edge_content <- content[edge_weight_section:(demand_section - 1)]
+      edge_content <- content[edge_weight_section:edge_weight_section_end]
 
       lower_triang <- as.numeric(unlist(lapply(
         strsplit(edge_content, "\\s+"),
