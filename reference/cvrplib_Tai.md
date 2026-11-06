@@ -1,10 +1,11 @@
 # CVRP instance data by Rochat and Taillard, 1995
 
 A collection of CVRP instances by Rochat and Taillard, 1995, provided
-courtesy of [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br). See
-[CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br) for visualizations of the
-instances and their solutions as well as a multitude of alternative
-instance data.
+courtesy of
+[CVRPLIB](https://galgos.inf.puc-rio.br/cvrplib/en/instances). See
+[CVRPLIB](https://galgos.inf.puc-rio.br/cvrplib/en/instances) for
+visualizations of the instances and their solutions as well as a
+multitude of alternative instance data.
 
 ## Usage
 
@@ -22,4 +23,4 @@ can be directly fed into solver algorithm, e.g. via
 
 ## Source
 
-<http://vrp.atd-lab.inf.puc-rio.br>
+<https://galgos.inf.puc-rio.br/cvrplib/en/instances>

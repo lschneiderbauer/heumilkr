@@ -72,8 +72,8 @@ value.</p>
 <h3 id="the-problem-instance-data">The problem instance data<a class="anchor" aria-label="anchor" href="#the-problem-instance-data"></a>
 </h3>
 <p>The problem instances we are basing our measurements on are provided
-courtesy of <a href="http://vrp.atd-lab.inf.puc-rio.br/" class="external-link">CVRPLIB</a> and
-can be divided into five groups<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;The naming is directly taken from &lt;a href=&quot;http://vrp.atd-lab.inf.puc-rio.br/&quot; class=&quot;external-link&quot;&gt;CVRPLIB&lt;/a&gt;&lt;/p&gt;"><sup>1</sup></a> of different characteristics:</p>
+courtesy of <a href="https://galgos.inf.puc-rio.br/cvrplib/en/instances" class="external-link">CVRPLIB</a>
+and can be divided into five groups<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;The naming is directly taken from &lt;a href=&quot;https://galgos.inf.puc-rio.br/cvrplib/en/instances&quot; class=&quot;external-link&quot;&gt;CVRPLIB&lt;/a&gt;&lt;/p&gt;"><sup>1</sup></a> of different characteristics:</p>
 <ul>
 <li><p>Augerat A, 1995 (27 instances)</p></li>
 <li><p>Augerat B, 1995 (23 instances)</p></li>
@@ -81,8 +81,11 @@ can be divided into five groups<a class="footnote-ref" tabindex="0" data-bs-togg
 <li><p>Fisher, 1994 (3 instances)</p></li>
 <li><p>Rochat and Taillard, 1995 (12 instances)</p></li>
 </ul>
-<p>The data provides the problem instance as well as the optimal
-solution.</p>
+<p>The data provides the problem instance as well as the best known
+solution, whose cost is available as the field
+<code>best_known_cost</code> of each instance. CVRPLIB lists the best
+known solutions of all those instances as proven optimal, so we simply
+refer to them as optimal solutions below.</p>
 </div>
 <div class="section level2">
 <h2 id="relation-to-optimal-and-trivial-solution">Relation to optimal and trivial solution<a class="anchor" aria-label="anchor" href="#relation-to-optimal-and-trivial-solution"></a>

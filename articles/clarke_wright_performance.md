@@ -7,7 +7,8 @@ solutions of a set of problem instances with their optimal value.
 ### The problem instance data
 
 The problem instances we are basing our measurements on are provided
-courtesy of [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/) and can be
+courtesy of
+[CVRPLIB](https://galgos.inf.puc-rio.br/cvrplib/en/instances) and can be
 divided into five groups[^1] of different characteristics:
 
 - Augerat A, 1995 (27 instances)
@@ -20,7 +21,11 @@ divided into five groups[^1] of different characteristics:
 
 - Rochat and Taillard, 1995 (12 instances)
 
-The data provides the problem instance as well as the optimal solution.
+The data provides the problem instance as well as the best known
+solution, whose cost is available as the field `best_known_cost` of each
+instance. CVRPLIB lists the best known solutions of all those instances
+as proven optimal, so we simply refer to them as optimal solutions
+below.
 
 ## Relation to optimal and trivial solution
 
@@ -59,7 +64,7 @@ i.e. on average, we miss out on around $`5.1\%`$ savings taking the
 Clarke-Wright solution compared to the optimal one.
 
 [^1]: The naming is directly taken from
-    [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/)
+    [CVRPLIB](https://galgos.inf.puc-rio.br/cvrplib/en/instances)
 
 [^2]: By trivial solution we mean the solution where each site is
     assigned exactly one route (which goes back and forth).
