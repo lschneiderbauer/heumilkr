@@ -88,7 +88,7 @@ for each instance, on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz.
 
 ![](clarke_wright_performance_files/figure-html/runtime_graph-1.png)
 
-The slowest of the instances with 1000 sites takes around $`118`$ ms.
+The slowest of the instances with 1000 sites takes around $`55`$ ms.
 
 [^1]: The naming is directly taken from
     [CVRPLIB](https://galgos.inf.puc-rio.br/cvrplib/en/instances)

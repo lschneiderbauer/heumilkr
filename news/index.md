@@ -39,9 +39,11 @@
 
 - [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md)
   has gained a large runtime speedup compared to the previous version:
-  for 500 sites the run time drops from about 6 seconds to about 0.01
+  for 500 sites the run time drops from about 6 seconds to about 0.007
   seconds in our benchmarks. The actual speedup depends on input
-  characteristics and grows with the number of sites.
+  characteristics and grows with the number of sites. In return, large
+  problems need more memory: the savings between sites now take about
+  `8 * n^2` bytes for `n` sites instead of half of that.
 
 - [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md):
   Results are now deterministic, also in case of tied savings. Run
