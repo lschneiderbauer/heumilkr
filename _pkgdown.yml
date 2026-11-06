@@ -1,6 +1,14 @@
 url: https://lschneiderbauer.github.io/heumilkr/
 template:
   bootstrap: 5
+navbar:
+  structure:
+    right: [search, python, github, lightswitch]
+  components:
+    python:
+      text: Python package
+      href: https://lschneiderbauer.github.io/heumilkr/python/
+      aria-label: Documentation of the Python package
 reference:
 - title: "Clarke-Wright algorithm"
   desc: >
