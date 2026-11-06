@@ -1,8 +1,7 @@
 #include <cpp11.hpp>
 #include <iterator>
 #include <vector>
-#include "router.h"
-#include <functional>
+#include "clarke_wright.h"
 
 using namespace cpp11;
 
@@ -31,15 +30,6 @@ cpp11::writable::list tbls_to_dfs(const tbls &tbls)
 
   return dfs;
 }
-
-tbls cpp_clarke_wright(
-    const std::vector<double> &demand,
-    const std::vector<double> &distances,
-    const std::vector<int> &n_res,
-    const std::vector<double> &capacities,
-    const std::vector<int> &restr_sites,
-    const std::vector<int> &restr_vehicles,
-    std::function<void(Router &)> callback = [](Router &) {});
 
 [[cpp11::register]]
 cpp11::writable::list r_cpp_clarke_wright(

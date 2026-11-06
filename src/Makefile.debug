@@ -1,5 +1,5 @@
 debug: clarke_wright.cpp fleet.cpp cpp11.cpp symmat.cpp run.cpp router.cpp tsp_greedy.cpp
-	g++ -std=gnu++17 -I. \
+	g++ -std=gnu++17 -I. -DHEUMILKR_DEBUG_MAIN \
 		-fdiagnostics-color=never \
 		-fstack-protector-strong -fstack-clash-protection -Wformat -fcf-protection \
 		-Wdate-time -Wall -pedantic -Wformat-security -g -O0 \
