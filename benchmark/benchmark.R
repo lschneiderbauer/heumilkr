@@ -7,7 +7,10 @@ sha <- system("git rev-parse HEAD", intern = TRUE)
 
 set.seed(42)
 
-demand <- runif(500, 5, 15)
+# The sizes are chosen so that the benchmark takes around 15 seconds in total.
+sizes <- seq(10, 2010, by = 100)
+
+demand <- runif(max(sizes), 5, 15)
 
 pos <-
   data.frame(
@@ -21,8 +24,7 @@ result <-
   do.call(
     rbind,
     map(
-      # seq(1, 10000, length.out = 2),
-      seq(10, 500, by = 20),
+      sizes,
       function(n) {
         demand <- demand[1:n]
         distances <- dist(pos[1:(n + 1), ])
