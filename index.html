@@ -57,12 +57,15 @@
 <!-- badges: start -->
 
 <!-- badges: end -->
-<p>This R package provides an implementation of the Clarke-Wright algorithm (<a href="#ref-clarke1964">Clarke and Wright 1964</a>) to find a quasi-optimal solution to the <a href="https://en.wikipedia.org/wiki/Vehicle_routing_problem" class="external-link">Capacitated Vehicle Routing Problem</a>.</p>
+<p>heumilkr provides an implementation of the Clarke-Wright algorithm (<a href="#ref-clarke1964">Clarke and Wright 1964</a>) to find a quasi-optimal solution to the <a href="https://en.wikipedia.org/wiki/Vehicle_routing_problem" class="external-link">Capacitated Vehicle Routing Problem</a>. It is available as an R package and as a Python package, which share the same C++ core.</p>
 <p>Besides deliveries, it also supports “backhaul”: sites with negative demand have goods picked up and brought back to the depot, in any order within a run as long as the load stays within the vehicle capacity.</p>
 <p>For a fixed number of vehicle types, the run time grows at best quadratically and at worst cubically with the number of sites <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>. On the problems we tested with randomly placed sites and up to 4000 sites, it grew roughly like <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>n</mi><mn>2</mn></msup><annotation encoding="application/x-tex">n^{2}</annotation></semantics></math> to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>n</mi><mn>2.1</mn></msup><annotation encoding="application/x-tex">n^{2.1}</annotation></semantics></math>, and roughly like <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>n</mi><mn>3</mn></msup><annotation encoding="application/x-tex">n^{3}</annotation></semantics></math> if a limited vehicle type repeatedly runs out (see <a href="#runtime-benchmarks">Runtime Benchmarks</a>).</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
+<div class="section level3">
+<h3 id="r">R<a class="anchor" aria-label="anchor" href="#r"></a>
+</h3>
 <p>You can install the latest CRAN release of heumilkr with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"heumilkr"</span><span class="op">)</span></span></code></pre></div>
@@ -71,11 +74,24 @@
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"lschneiderbauer/heumilkr"</span><span class="op">)</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="python">Python<a class="anchor" aria-label="anchor" href="#python"></a>
+</h3>
+<p>You can install the latest PyPI release of heumilkr with:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">pip</span> install heumilkr</span></code></pre></div>
+<p>Alternatively, you can install the development version of heumilkr from <a href="https://github.com/" class="external-link">GitHub</a>, which requires a C++ compiler, with:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">pip</span> install git+https://github.com/lschneiderbauer/heumilkr</span></code></pre></div>
+<p>The only dependency is NumPy. Install <code>heumilkr[pandas]</code> to also get pandas for <code>Solution.to_pandas()</code>.</p>
+</div>
+</div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
+<div class="section level3">
+<h3 id="r-1">R<a class="anchor" aria-label="anchor" href="#r-1"></a>
+</h3>
 <p>The following example generates random demands at random locations, defines two vehicle types, applies the Clarke-Wright algorithm to generate quasi-optimal vehicle runs, and shows the resulting vehicle run solution.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/lschneiderbauer/heumilkr" class="external-link">heumilkr</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span></span>
@@ -164,19 +180,72 @@
 <span><span class="co"># returns the savings resulting from the heuristic optimization procedure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="reference/milkr_saving.html">milkr_saving</a></span><span class="op">(</span><span class="va">solution</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 168.7352</span></span></code></pre></div>
-<p>A plotting function (using <a href="https://ggplot2.tidyverse.org/" class="external-link">ggplot</a>) for the result is built in. The individual runs are distinguished by color. The site locations are marked with round circles while the depot is depicted as a square. The line types (solid/dashed/…) are associated to different vehicle types.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<p>The R package has a built-in plotting function (using <a href="https://ggplot2.tidyverse.org/" class="external-link">ggplot</a>) for the result. The individual runs are distinguished by color. The site locations are marked with round circles while the depot is depicted as a square. The line types (solid/dashed/…) are associated to different vehicle types.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">solution</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-example_plot-1.png" alt="" width="100%"></p>
-<p>The following animation shows how the Clarke-Wright algorithm iterates to arrive at its final solution:</p>
+</div>
+<div class="section level3">
+<h3 id="python-1">Python<a class="anchor" aria-label="anchor" href="#python-1"></a>
+</h3>
+<p>The following example solves a small problem with a fixed set of demands and distances, applies the Clarke-Wright algorithm to generate quasi-optimal vehicle runs, and shows the resulting vehicle run solution.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="im">import</span> heumilkr <span class="im">as</span> hm</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>solution <span class="op">=</span> hm.clarke_wright(</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    demand<span class="op">=</span>[<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">2</span>],</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="co"># distances between all locations, the first one is the depot</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    distances<span class="op">=</span>[</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>        [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>],</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>        [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>],</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>        [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">4</span>],</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>        [<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">1</span>],</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>        [<span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">0</span>],</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>    ],</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>    <span class="co"># one vehicle with capacity 6, and an unlimited number with capacity 9</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>    vehicles<span class="op">=</span>[hm.Vehicle(capacity<span class="op">=</span><span class="dv">6</span>, count<span class="op">=</span><span class="dv">1</span>), hm.Vehicle(capacity<span class="op">=</span><span class="dv">9</span>)],</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>)</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="cf">for</span> run <span class="kw">in</span> solution.runs:</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>    <span class="bu">print</span>(run)</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; Run(id=0, vehicle=1, sites=(0, 2, 3), loads=(6.0, 2.0, 0.0), distance=6.0, max_load=9.0)</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; Run(id=1, vehicle=0, sites=(1,), loads=(0.0,), distance=2.0, max_load=2.0)</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co"># returns the total cost / distance</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co"># (the quantity that is minimized by CVRP)</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="bu">print</span>(solution.cost())</span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt; 8.0</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co"># returns the savings resulting from the heuristic optimization procedure</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="bu">print</span>(solution.saving())</span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; 6.0</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="how-the-algorithm-works">How the Algorithm Works<a class="anchor" aria-label="anchor" href="#how-the-algorithm-works"></a>
+</h2>
+<p>The following animation, made with the R package, shows how the Clarke-Wright algorithm iterates to arrive at its final solution:</p>
 <p><img src="reference/figures/README-unnamed-chunk-2-.gif" alt="" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="runtime-benchmarks">Runtime Benchmarks<a class="anchor" aria-label="anchor" href="#runtime-benchmarks"></a>
 </h2>
-<p>The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz CPU, using the R package <a href="https://bench.r-lib.org/" class="external-link">bench</a>.</p>
+<p>The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz CPU, through the R package using <a href="https://bench.r-lib.org/" class="external-link">bench</a>. The solver itself is the same C++ code in Python, but converting inputs and results adds some overhead that differs between the two packages.</p>
 <p>The following graph shows the run time on one kind of problem: uniformly distributed random sites, demands between 5 and 15 and a vehicle capacity of 33. It amounts to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>764</mn><mi>µ</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">\sim 764µs</annotation></semantics></math> for <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>110</mn></mrow><annotation encoding="application/x-tex">n = 110</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>26.9</mn><mi>m</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">\sim 26.9ms</annotation></semantics></math> for <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>1010</mn></mrow><annotation encoding="application/x-tex">n = 1010</annotation></semantics></math>, and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>110</mn><mi>m</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">\sim 110ms</annotation></semantics></math> for <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>1910</mn></mrow><annotation encoding="application/x-tex">n = 1910</annotation></semantics></math>. Run times can differ for other problems.</p>
 <p><img src="reference/figures/README-benchmark_runtime-1.png" alt="" width="100%"></p>
+</div>
+<div class="section level2">
+<h2 id="feature-differences">Feature Differences<a class="anchor" aria-label="anchor" href="#feature-differences"></a>
+</h2>
+<p>Both packages include the solver with all its options (backhaul, vehicle types and restrictions) and calculate the cost and savings of a solution. The following is only part of the R package:</p>
+<ul>
+<li>plotting a solution,</li>
+<li>downloading and solving <a href="https://galgos.inf.puc-rio.br/cvrplib/" class="external-link">CVRPLIB</a> instances,</li>
+<li>the <a href="https://lschneiderbauer.github.io/heumilkr/articles/clarke_wright_performance.html">performance vignette</a>, although its results also apply to the Python package, since they measure the shared solver.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-clarke1964" class="csl-entry">
 Clarke, G., and J. W. Wright. 1964. “Scheduling of Vehicles from a Central Depot to a Number of Delivery Points.” <em>Operations Research</em> 12 (4): 568–81. <a href="https://doi.org/10.1287/opre.12.4.568" class="external-link uri">https://doi.org/10.1287/opre.12.4.568</a>.
@@ -223,6 +292,8 @@ Clarke, G., and J. W. Wright. 1964. “Scheduling of Vehicles from a Central Dep
 <li><a href="https://app.codecov.io/gh/lschneiderbauer/heumilkr?branch=master" class="external-link"><img src="https://codecov.io/gh/lschneiderbauer/heumilkr/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://CRAN.R-project.org/package=heumilkr" class="external-link"><img src="https://www.r-pkg.org/badges/version/heumilkr" alt="CRAN status"></a></li>
+<li><a href="https://github.com/lschneiderbauer/heumilkr/actions/workflows/python-check.yaml" class="external-link"><img src="https://github.com/lschneiderbauer/heumilkr/actions/workflows/python-check.yaml/badge.svg" alt="python-check"></a></li>
+<li><a href="https://pypi.org/project/heumilkr/" class="external-link"><img src="https://img.shields.io/pypi/v/heumilkr" alt="PyPI status"></a></li>
 </ul>
 </div>
 

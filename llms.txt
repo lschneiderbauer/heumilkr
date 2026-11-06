@@ -1,9 +1,11 @@
 # heumilkr
 
-This R package provides an implementation of the Clarke-Wright algorithm
+heumilkr provides an implementation of the Clarke-Wright algorithm
 ([Clarke and Wright 1964](#ref-clarke1964)) to find a quasi-optimal
 solution to the [Capacitated Vehicle Routing
-Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem).
+Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem). It is
+available as an R package and as a Python package, which share the same
+C++ core.
 
 Besides deliveries, it also supports “backhaul”: sites with negative
 demand have goods picked up and brought back to the depot, in any order
@@ -17,6 +19,8 @@ $`n^{3}`$ if a limited vehicle type repeatedly runs out (see [Runtime
 Benchmarks](#runtime-benchmarks)).
 
 ## Installation
+
+### R
 
 You can install the latest CRAN release of heumilkr with:
 
@@ -34,7 +38,27 @@ Alternatively, you can install the development version of heumilkr from
 devtools::install_github("lschneiderbauer/heumilkr")
 ```
 
+### Python
+
+You can install the latest PyPI release of heumilkr with:
+
+``` sh
+pip install heumilkr
+```
+
+Alternatively, you can install the development version of heumilkr from
+[GitHub](https://github.com/), which requires a C++ compiler, with:
+
+``` sh
+pip install git+https://github.com/lschneiderbauer/heumilkr
+```
+
+The only dependency is NumPy. Install `heumilkr[pandas]` to also get
+pandas for `Solution.to_pandas()`.
+
 ## Example
+
+### R
 
 The following example generates random demands at random locations,
 defines two vehicle types, applies the Clarke-Wright algorithm to
@@ -133,11 +157,11 @@ print(milkr_saving(solution))
 #> [1] 168.7352
 ```
 
-A plotting function (using [ggplot](https://ggplot2.tidyverse.org/)) for
-the result is built in. The individual runs are distinguished by color.
-The site locations are marked with round circles while the depot is
-depicted as a square. The line types (solid/dashed/…) are associated to
-different vehicle types.
+The R package has a built-in plotting function (using
+[ggplot](https://ggplot2.tidyverse.org/)) for the result. The individual
+runs are distinguished by color. The site locations are marked with
+round circles while the depot is depicted as a square. The line types
+(solid/dashed/…) are associated to different vehicle types.
 
 ``` r
 
@@ -146,15 +170,58 @@ plot(solution)
 
 ![](reference/figures/README-example_plot-1.png)
 
-The following animation shows how the Clarke-Wright algorithm iterates
-to arrive at its final solution:
+### Python
+
+The following example solves a small problem with a fixed set of demands
+and distances, applies the Clarke-Wright algorithm to generate
+quasi-optimal vehicle runs, and shows the resulting vehicle run
+solution.
+
+``` python
+import heumilkr as hm
+
+solution = hm.clarke_wright(
+    demand=[3, 2, 4, 2],
+    # distances between all locations, the first one is the depot
+    distances=[
+        [0, 1, 1, 2, 3],
+        [1, 0, 2, 1, 2],
+        [1, 2, 0, 3, 4],
+        [2, 1, 3, 0, 1],
+        [3, 2, 4, 1, 0],
+    ],
+    # one vehicle with capacity 6, and an unlimited number with capacity 9
+    vehicles=[hm.Vehicle(capacity=6, count=1), hm.Vehicle(capacity=9)],
+)
+
+for run in solution.runs:
+    print(run)
+#> Run(id=0, vehicle=1, sites=(0, 2, 3), loads=(6.0, 2.0, 0.0), distance=6.0, max_load=9.0)
+#> Run(id=1, vehicle=0, sites=(1,), loads=(0.0,), distance=2.0, max_load=2.0)
+
+# returns the total cost / distance
+# (the quantity that is minimized by CVRP)
+print(solution.cost())
+#> 8.0
+
+# returns the savings resulting from the heuristic optimization procedure
+print(solution.saving())
+#> 6.0
+```
+
+## How the Algorithm Works
+
+The following animation, made with the R package, shows how the
+Clarke-Wright algorithm iterates to arrive at its final solution:
 
 ![](reference/figures/README-unnamed-chunk-2-.gif)
 
 ## Runtime Benchmarks
 
 The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz
-CPU, using the R package [bench](https://bench.r-lib.org/).
+CPU, through the R package using [bench](https://bench.r-lib.org/). The
+solver itself is the same C++ code in Python, but converting inputs and
+results adds some overhead that differs between the two packages.
 
 The following graph shows the run time on one kind of problem: uniformly
 distributed random sites, demands between 5 and 15 and a vehicle
@@ -163,6 +230,22 @@ $`\sim 26.9ms`$ for $`n = 1010`$, and $`\sim 110ms`$ for $`n = 1910`$.
 Run times can differ for other problems.
 
 ![](reference/figures/README-benchmark_runtime-1.png)
+
+## Feature Differences
+
+Both packages include the solver with all its options (backhaul, vehicle
+types and restrictions) and calculate the cost and savings of a
+solution. The following is only part of the R package:
+
+- plotting a solution,
+- downloading and solving
+  [CVRPLIB](https://galgos.inf.puc-rio.br/cvrplib/) instances,
+- the [performance
+  vignette](https://lschneiderbauer.github.io/heumilkr/articles/clarke_wright_performance.html),
+  although its results also apply to the Python package, since they
+  measure the shared solver.
+
+## References
 
 Clarke, G., and J. W. Wright. 1964. “Scheduling of Vehicles from a
 Central Depot to a Number of Delivery Points.” *Operations Research* 12
