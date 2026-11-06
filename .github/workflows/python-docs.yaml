@@ -1,0 +1,54 @@
+# Builds the reference of the Python package, and publishes it in the python/
+# folder of the GitHub Pages site. The rest of the site is the one of the R
+# package, whose deployment leaves that folder alone.
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "python/heumilkr/**"
+      - "python/pdoc_templates/**"
+      - "pyproject.toml"
+      - ".github/workflows/python-docs.yaml"
+  pull_request:
+    paths:
+      - "python/heumilkr/**"
+      - "python/pdoc_templates/**"
+      - "pyproject.toml"
+      - ".github/workflows/python-docs.yaml"
+  workflow_dispatch:
+
+name: python-docs.yaml
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - run: pip install ".[docs]"
+
+      - name: Build reference
+        run: >
+          pdoc heumilkr
+          --docformat google
+          --footer-text "heumilkr for Python"
+          --no-show-source
+          --template-directory python/pdoc_templates
+          --output-directory _site
+
+      - name: Deploy to GitHub pages
+        if: github.event_name != 'pull_request'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: _site
+          target-folder: python

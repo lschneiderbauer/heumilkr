@@ -26,9 +26,11 @@ classifiers = [
 [project.optional-dependencies]
 pandas = ["pandas"]
 test = ["pandas", "pytest", "scipy"]
+docs = ["pdoc>=15"]
 
 [project.urls]
 Homepage = "https://github.com/lschneiderbauer/heumilkr"
+Documentation = "https://lschneiderbauer.github.io/heumilkr/python/"
 Issues = "https://github.com/lschneiderbauer/heumilkr/issues"
 
 [tool.scikit-build]
@@ -44,6 +46,7 @@ sdist.include = [
   "python/",
   "!**/__pycache__/",
   "!python/tests/fixtures/generate.R",
+  "!python/pdoc_templates/",
   "src/*.cpp",
   "src/*.h",
   "!src/cpp11.cpp",

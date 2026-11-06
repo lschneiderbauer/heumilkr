@@ -77,11 +77,12 @@ class Solution:
     Attributes:
         runs: The runs of the solution.
         demand: The demand of each site, as supplied to the solver.
+        depot_distances: The distance between the depot and each site.
     """
 
     runs: tuple[Run, ...]
     demand: np.ndarray
-    _depot_distances: np.ndarray = field(repr=False)
+    depot_distances: np.ndarray = field(repr=False)
 
     def cost(self) -> float:
         """Returns the total travel distance, which the solver minimizes."""
@@ -98,7 +99,7 @@ class Solution:
                 of in units of distance. It is NaN if the naive cost is zero.
         """
         naive_cost = math.fsum(
-            2 * float(self._depot_distances[site])
+            2 * float(self.depot_distances[site])
             for run in self.runs
             for site in run.sites
         )
@@ -207,7 +208,7 @@ def clarke_wright(
         runs=_build_runs(run_table, visit_table),
         demand=demand_array,
         # the first n_sites entries of the condensed form belong to the depot
-        _depot_distances=condensed[:n_sites],
+        depot_distances=condensed[:n_sites],
     )
 
 

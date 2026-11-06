@@ -56,6 +56,12 @@ solution.to_pandas()["visits"]  # data frames, if pandas is installed
 `distances` can be a square matrix, or the condensed form that
 `scipy.spatial.distance.pdist` returns. All indices start at 0.
 
+## Documentation
+
+The [reference](https://lschneiderbauer.github.io/heumilkr/python/) documents the Python API. The
+[performance benchmarks](https://lschneiderbauer.github.io/heumilkr/articles/clarke_wright_performance.html) are part of the R package site, but apply to
+this package as well, since they measure the shared solver.
+
 ## License
 
 GPL (>= 3)
