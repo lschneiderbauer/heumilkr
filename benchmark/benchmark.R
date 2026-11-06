@@ -8,7 +8,7 @@ sha <- system("git rev-parse HEAD", intern = TRUE)
 set.seed(42)
 
 # The sizes are chosen so that the benchmark takes around 15 seconds in total.
-sizes <- seq(10, 2010, by = 100)
+sizes <- seq(10, 1910, by = 100)
 
 demand <- runif(max(sizes), 5, 15)
 
@@ -30,7 +30,9 @@ result <-
         distances <- dist(pos[1:(n + 1), ])
 
         bench::mark(
-          clarke_wright(demand, distances, vehicles)
+          clarke_wright(demand, distances, vehicles),
+          # large sizes need some iterations without garbage collection
+          min_iterations = 3
         ) |>
           rowwise() |>
           mutate(
