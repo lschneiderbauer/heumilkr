@@ -118,7 +118,7 @@ library(dplyr)
 
 The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 \@ 3.40GHz CPU, using the R package [bench](https://bench.r-lib.org/).
 
-The following graph shows the run time behavior as the number of sites $n$ increase. The curve exhibits near-cubic behavior in $n$. For $n = 110$ the performance is still relatively reasonable with a run time of $\sim `r time(110)`$.
+The following graph shows the run time on one kind of problem: uniformly distributed random sites, demands between 5 and 15 and a vehicle capacity of 33. It amounts to $\sim `r time(110)`$ for $n = 110$, $\sim `r time(1010)`$ for $n = 1010$, and $\sim `r time(1910)`$ for $n = 1910$. Run times can differ for other problems.
 
 ```{r benchmark_runtime, echo = FALSE}
 result |>
