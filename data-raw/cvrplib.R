@@ -26,10 +26,7 @@ data <-
   map(
     set_names(names(selected_instances)),
     function(group) {
-      map(
-        set_names(selected_instances[[group]]),
-        cvrplib_download
-      )
+      cvrplib_download(selected_instances[[group]])
     },
     .progress = TRUE
   )

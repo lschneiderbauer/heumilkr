@@ -12,6 +12,8 @@
 
 ## New features / improvements
 
+-   `cvrplib_download()` now accepts a vector of qualifiers and returns a named list of instances in that case. The list of available instances is only requested once. A single qualifier still returns the instance itself.
+
 -   `clarke_wright()` now supports negative demands: sites with negative demand are treated as "backhaul" points, i.e. they deliver goods back to the depot. Sites with positive and negative demands can be visited in any order within a run, as long as the load stays within the vehicle capacity at every point of the run. Negative demands that exceed vehicle capacities are split across multiple runs, like positive demands.
 
 -   `clarke_wright()`: Results are now deterministic, also in case of tied savings. Run identifiers follow the order of run creation.
