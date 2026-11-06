@@ -60,6 +60,9 @@ Router::Router(const std::shared_ptr<std::vector<double>> demand,
     runs.push_back(std::make_shared<run>(
         create_initial_runs(i, (*demand)[i], fleet, this->distances)));
   }
+
+  best_links.resize(runs.size());
+  best_link_stale.assign(runs.size(), true);
 }
 
 void Router::combine_runs(RunPtr a, RunPtr b, const VehicleTypeID new_vehicle)
@@ -78,7 +81,10 @@ void Router::combine_runs(RunPtr a, RunPtr b, const VehicleTypeID new_vehicle)
      the origin anymore.
   */
 
-  runs.erase(std::find(runs.begin(), runs.end(), b));
+  const auto b_index = std::distance(runs.begin(), std::find(runs.begin(), runs.end(), b));
+  runs.erase(runs.begin() + b_index);
+  best_links.erase(best_links.begin() + b_index);
+  best_link_stale.erase(best_link_stale.begin() + b_index);
 
   a->combine(*b, new_vehicle);
 }
@@ -99,77 +105,138 @@ Distmat Router::calc_savings(const Distmat &d) const
   return savings;
 }
 
-std::optional<std::tuple<RunPtr, RunPtr, VehicleTypeID>> Router::best_link() const
+std::optional<Router::Link> Router::find_best_link_from(const RunPtr &from) const
 {
-  std::optional<std::tuple<RunPtr, RunPtr, VehicleTypeID>> best_link(std::nullopt);
+  std::optional<Link> best_link(std::nullopt);
   double max_saving = 0;
 
   // combined load of best configuration
   double combined_load = std::numeric_limits<double>::max();
 
-  // NOTE: we could do better here if we iterated only over pairwise distinct elements and have
-  // some logic to choose the side (r1->r2, or r2->r1), but this way it's much simpler (at the moment the
-  // performance benefit does not outweigh the additional complexity
+  const Site from_last = *(from->sites().rbegin());
 
-  for (const auto &r1 : runs) {
-    for (const auto &r2 : runs) {
-      if (r1 != r2) {
-        double saving = savings.get(*(r1->sites().rbegin()), *(r2->sites().begin()));
+  for (const auto &to : runs)
+  {
+    if (from != to)
+    {
+      double saving = savings.get(from_last, *(to->sites().begin()));
 
-        if (saving >= max_saving)
+      if (saving >= max_saving)
+      {
+        double new_combined_load = from->combined_max_load(*to);
+
+        // if the savings are equal, but the new combined load is better, use that one
+        // (this can occur when positive and negative demands get combined)
+        if (saving > max_saving || new_combined_load < combined_load)
         {
-          double new_combined_load = r1->combined_max_load(*r2);
+          fleet->release_vehicle(from->vehicle());
+          fleet->release_vehicle(to->vehicle());
 
-          // if the savings are equal, but the new combined load is better, use that one
-          // (this can occur when positive and negative demands get combined)
-          if (saving > max_saving || new_combined_load < combined_load)
-          {
-            fleet->release_vehicle(r1->vehicle());
-            fleet->release_vehicle(r2->vehicle());
-
-            std::optional<VehicleTypeID> selected_vehicle =
+          std::optional<VehicleTypeID> selected_vehicle =
               fleet->find_fitting_vehicle(
-                union_view(r1->sites(), r2->sites()),
-                new_combined_load,
-                false);
+                  union_view(from->sites(), to->sites()),
+                  new_combined_load,
+                  false);
 
-            fleet->reserve_vehicle(r1->vehicle());
-            fleet->reserve_vehicle(r2->vehicle());
+          fleet->reserve_vehicle(from->vehicle());
+          fleet->reserve_vehicle(to->vehicle());
 
-            if (selected_vehicle)
-            {
-              max_saving = saving;
-              combined_load = new_combined_load;
-              best_link = {r1, r2, selected_vehicle.value()};
-            }
+          if (selected_vehicle)
+          {
+            max_saving = saving;
+            combined_load = new_combined_load;
+            best_link = Link{to, selected_vehicle.value(), saving, new_combined_load};
           }
         }
-      }}}
+      }
+    }
+  }
 
   return best_link;
+}
+
+std::optional<size_t> Router::best_link()
+{
+  std::optional<size_t> best(std::nullopt);
+
+  for (size_t i = 0; i < runs.size(); i++)
+  {
+    if (best_link_stale[i])
+    {
+      best_links[i] = find_best_link_from(runs[i]);
+      best_link_stale[i] = false;
+    }
+
+    if (best_links[i])
+    {
+      const Link &link = *best_links[i];
+
+      if (!best ||
+          link.saving > best_links[*best]->saving ||
+          (link.saving == best_links[*best]->saving &&
+           link.combined_load < best_links[*best]->combined_load))
+      {
+        best = i;
+      }
+    }
+  }
+
+  return best;
 }
 
 // TRUE if something got relinked,
 // FALSE if nothing got relinked (i.e. the procedure stabilized)
 bool Router::relink_best()
 {
-  std::optional<std::tuple<RunPtr, RunPtr, VehicleTypeID>> best_link = this->best_link();
-  if (!best_link)
+  const std::optional<size_t> best = this->best_link();
+  if (!best)
   {
     return false;
   }
 
-  RunPtr a;
-  RunPtr b;
-  VehicleTypeID vehicle;
-  std::tie(a, b, vehicle) = best_link.value();
+  const RunPtr a = runs[*best];
+  const RunPtr b = best_links[*best]->to;
+  const VehicleTypeID vehicle = best_links[*best]->vehicle;
+  const VehicleTypeID vehicle_a = a->vehicle();
+  const VehicleTypeID vehicle_b = b->vehicle();
+
+  const auto any_exhausted = [&]()
+  {
+    return fleet->is_exhausted(vehicle_a) ||
+           fleet->is_exhausted(vehicle_b) ||
+           fleet->is_exhausted(vehicle);
+  };
+
+  // A vehicle type that is available before and after the merge is available for
+  // any link, so only an exhausted type can make other links possible or impossible.
+  bool availability_changed = any_exhausted();
 
   // return two vehicles
-  fleet->release_vehicle(a->vehicle());
-  fleet->release_vehicle(b->vehicle());
+  fleet->release_vehicle(vehicle_a);
+  fleet->release_vehicle(vehicle_b);
   fleet->reserve_vehicle(vehicle);
 
+  availability_changed = availability_changed || any_exhausted();
+
   combine_runs(a, b, vehicle);
+
+  /*
+  The cached link of a run stays the best one unless it leads to a or b:
+  * b does not start a run anymore. This includes the merged run itself, whose
+    link led to b, and which now ends at a different site.
+  * A link to the merged run has a higher load than the link to a.
+  Links to other runs do not change. A link to the merged run can not replace them
+  either: it has the same saving as the link to a but can only have a higher load
+  and more vehicle restrictions.
+  */
+  for (size_t i = 0; i < runs.size(); i++)
+  {
+    if (availability_changed ||
+        (best_links[i] && (best_links[i]->to == a || best_links[i]->to == b)))
+    {
+      best_link_stale[i] = true;
+    }
+  }
 
   return true;
 }

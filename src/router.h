@@ -72,7 +72,20 @@ private:
 
     Distmat calc_savings(const Distmat &d) const;
 
-    std::optional<std::tuple<RunPtr, RunPtr, VehicleTypeID>> best_link() const;
+    // the best way to continue a run with another run
+    struct Link
+    {
+        RunPtr to;
+        VehicleTypeID vehicle;
+        double saving;
+        double combined_load;
+    };
+
+    // finds the best link starting at a given run by looking at all other runs
+    std::optional<Link> find_best_link_from(const RunPtr &from) const;
+
+    // returns the index in `runs` of the run where the best link overall starts
+    std::optional<size_t> best_link();
 
     std::shared_ptr<Fleet> fleet;
     const std::shared_ptr<Distmat> distances;
@@ -87,8 +100,14 @@ private:
 
     // kept in creation order: run iteration order (and therefore tie-breaking and
     // run IDs) must not depend on memory addresses. best_link() iterates over all
-    // pairs for each merge, while merges erase only one element each.
+    // runs for each merge, while merges erase only one element each.
     std::vector<RunPtr> runs;
+
+    // Cache of the best link starting at each run (same indices as `runs`), so
+    // that a merge only requires to look for new links of the affected runs.
+    // See relink_best() for when an entry goes stale.
+    std::vector<std::optional<Link>> best_links;
+    std::vector<char> best_link_stale;
 };
 
 #endif

@@ -9,6 +9,11 @@ double Fleet::capacity(const VehicleTypeID vehicle) const
     return vehicle_caps[vehicle];
 }
 
+bool Fleet::is_exhausted(const VehicleTypeID vehicle) const
+{
+    return vehicle_avail[vehicle] <= 0;
+}
+
 void Fleet::release_vehicle(const VehicleTypeID vehicle)
 {
     if (vehicle_avail[vehicle] < INT_MAX)

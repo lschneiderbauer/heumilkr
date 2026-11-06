@@ -19,6 +19,8 @@ public:
   void reserve_vehicle(const VehicleTypeID vehicle);
   void release_vehicle(const VehicleTypeID vehicle);
 
+  bool is_exhausted(const VehicleTypeID vehicle) const;
+
   template <typename ForwardIt>
   std::optional<VehicleTypeID> find_fitting_vehicle(
       ForwardIt sites,
