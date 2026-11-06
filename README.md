@@ -27,7 +27,8 @@ within a run as long as the load stays within the vehicle capacity.
 For a fixed number of vehicle types, the run time grows at best
 quadratically and at worst cubically with the number of sites $n$. On
 the problems we tested with randomly placed sites and up to 4000 sites,
-it grew roughly like $n^{2.4}$ to $n^{2.6}$ (see [Runtime
+it grew roughly like $n^{2}$ to $n^{2.1}$, and roughly like $n^{3}$ if a
+limited vehicle type repeatedly runs out (see [Runtime
 Benchmarks](#runtime-benchmarks)).
 
 ## Installation
@@ -168,8 +169,8 @@ CPU, using the R package [bench](https://bench.r-lib.org/).
 
 The following graph shows the run time on one kind of problem: uniformly
 distributed random sites, demands between 5 and 15 and a vehicle
-capacity of 33. It amounts to $\sim 966µs$ for $n = 110$, $\sim 86.2ms$
-for $n = 1010$, and $\sim 408ms$ for $n = 1910$. Run times can differ
+capacity of 33. It amounts to $\sim 764µs$ for $n = 110$, $\sim 26.9ms$
+for $n = 1010$, and $\sim 110ms$ for $n = 1910$. Run times can differ
 for other problems.
 
 <img src="man/figures/README-benchmark_runtime-1.png" alt="" width="100%" />
