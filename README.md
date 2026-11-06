@@ -24,6 +24,12 @@ Besides deliveries, it also supports “backhaul”: sites with negative
 demand have goods picked up and brought back to the depot, in any order
 within a run as long as the load stays within the vehicle capacity.
 
+For a fixed number of vehicle types, the run time grows at best
+quadratically and at worst cubically with the number of sites $n$. On
+the problems we tested with randomly placed sites and up to 4000 sites,
+it grew roughly like $n^{2.4}$ to $n^{2.6}$ (see [Runtime
+Benchmarks](#runtime-benchmarks)).
+
 ## Installation
 
 You can install the latest CRAN release of heumilkr with:
