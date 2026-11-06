@@ -6,7 +6,9 @@
 #include <vector>
 #include <memory>
 #include <cassert>
+#include <limits>
 #include <optional>
+#include <stdexcept>
 
 // creates potentially multiple singleton runs but returns only a single "run".
 run Router::create_initial_runs(Site s, double demand, std::shared_ptr<Fleet> fleet,
