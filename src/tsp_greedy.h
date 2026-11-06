@@ -1,6 +1,7 @@
 #ifndef TSP_GREEDY
 #define TSP_GREEDY
 
+#include <tuple>
 #include "symmat.h"
 
 template <typename Container>
