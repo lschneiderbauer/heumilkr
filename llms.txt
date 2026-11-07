@@ -231,6 +231,17 @@ Run times can differ for other problems.
 
 ![](reference/figures/README-benchmark_runtime-1.png)
 
+## Documentation
+
+The two packages have separate documentation sites:
+
+- R package: [website](https://lschneiderbauer.github.io/heumilkr/) with
+  the [function
+  reference](https://lschneiderbauer.github.io/heumilkr/reference/) and
+  the articles.
+- Python package: [API
+  reference](https://lschneiderbauer.github.io/heumilkr/python/).
+
 ## Feature Differences
 
 Both packages include the solver with all its options (backhaul, vehicle

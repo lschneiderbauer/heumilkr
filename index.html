@@ -43,6 +43,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
+<li class="nav-item"><a class="nav-link" href="https://lschneiderbauer.github.io/heumilkr/python/" aria-label="Documentation of the Python package">Python package</a></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/lschneiderbauer/heumilkr/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
@@ -232,6 +233,15 @@
 <p>The benchmarks were taken on an Intel® Xeon® CPU E3-1231 v3 @ 3.40GHz CPU, through the R package using <a href="https://bench.r-lib.org/" class="external-link">bench</a>. The solver itself is the same C++ code in Python, but converting inputs and results adds some overhead that differs between the two packages.</p>
 <p>The following graph shows the run time on one kind of problem: uniformly distributed random sites, demands between 5 and 15 and a vehicle capacity of 33. It amounts to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>764</mn><mi>µ</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">\sim 764µs</annotation></semantics></math> for <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>110</mn></mrow><annotation encoding="application/x-tex">n = 110</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>26.9</mn><mi>m</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">\sim 26.9ms</annotation></semantics></math> for <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>1010</mn></mrow><annotation encoding="application/x-tex">n = 1010</annotation></semantics></math>, and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∼</mo><mn>110</mn><mi>m</mi><mi>s</mi></mrow><annotation encoding="application/x-tex">\sim 110ms</annotation></semantics></math> for <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>1910</mn></mrow><annotation encoding="application/x-tex">n = 1910</annotation></semantics></math>. Run times can differ for other problems.</p>
 <p><img src="reference/figures/README-benchmark_runtime-1.png" alt="" width="100%"></p>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<p>The two packages have separate documentation sites:</p>
+<ul>
+<li>R package: <a href="https://lschneiderbauer.github.io/heumilkr/">website</a> with the <a href="https://lschneiderbauer.github.io/heumilkr/reference/">function reference</a> and the articles.</li>
+<li>Python package: <a href="https://lschneiderbauer.github.io/heumilkr/python/">API reference</a>.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="feature-differences">Feature Differences<a class="anchor" aria-label="anchor" href="#feature-differences"></a>

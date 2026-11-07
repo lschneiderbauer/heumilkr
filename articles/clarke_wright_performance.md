@@ -1,5 +1,10 @@
 # Clarke Wright Performance Benchmarks
 
+This article is part of the documentation of the R package, and the
+benchmarks were measured through it. The results also apply to the
+[Python package](https://lschneiderbauer.github.io/heumilkr/python/),
+since it uses the same C++ solver.
+
 In this vignette we discuss performance benchmarks of the Clarke-Wright
 algorithm implemented in this package by comparing the Clarke-Wright
 solutions of a set of problem instances with their best known value, and
