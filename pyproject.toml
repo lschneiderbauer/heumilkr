@@ -8,7 +8,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "heumilkr"
-version = "0.3.0.9000"
+version = "0.4.0"
 description = "Heuristic Capacitated Vehicle Routing Problem solver"
 readme = "python/README.md"
 license = "GPL-3.0-or-later"

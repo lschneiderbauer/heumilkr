@@ -1,4 +1,4 @@
-# heumilkr (development version)
+# heumilkr 0.4.0
 
 -   First release of the Python package. It shares its C++ core with the R package of the same name: releases of both packages with the same major.minor version ship the same solver.
 
