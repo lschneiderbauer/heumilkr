@@ -1,5 +1,7 @@
-# Publishes the version given in pyproject.toml. To release: bump the version
-# there, commit it, and start this workflow manually in the GitHub Actions tab.
+# Publishes the version given in pyproject.toml. To release: set a release
+# version there (no ".9000" development suffix), commit it, and start this
+# workflow manually in the GitHub Actions tab. Its major.minor has to match the
+# R package's DESCRIPTION, see .github/scripts/check-version-sync.sh.
 #
 # Requires a "Trusted Publisher" for this workflow file on (Test)PyPI, using the
 # environment named like the chosen target. No API tokens are needed.
@@ -39,7 +41,13 @@ jobs:
           version=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+          .github/scripts/check-version-sync.sh
+
           if [ "$TARGET" = "pypi" ]; then
+            if [[ "$version" =~ \.9[0-9]{3}$ ]]; then
+              echo "::error::$version is a development version. Set a release version in pyproject.toml."
+              exit 1
+            fi
             if [ "$GITHUB_REF" != "refs/heads/master" ]; then
               echo "::error::Releases to PyPI have to start from master."
               exit 1

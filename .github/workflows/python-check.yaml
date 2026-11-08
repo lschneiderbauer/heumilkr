@@ -5,12 +5,16 @@ on:
       - "src/**"
       - "python/**"
       - "pyproject.toml"
+      - "DESCRIPTION"
+      - ".github/scripts/check-version-sync.sh"
       - ".github/workflows/python-check.yaml"
   pull_request:
     paths:
       - "src/**"
       - "python/**"
       - "pyproject.toml"
+      - "DESCRIPTION"
+      - ".github/scripts/check-version-sync.sh"
       - ".github/workflows/python-check.yaml"
 
 name: python-check.yaml
@@ -18,6 +22,12 @@ name: python-check.yaml
 permissions: read-all
 
 jobs:
+  version-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: .github/scripts/check-version-sync.sh
+
   test:
     runs-on: ${{ matrix.os }}
 
