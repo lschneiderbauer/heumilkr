@@ -24,7 +24,7 @@
 #'  The `i`th entry refers to the demand of the `i`th site.
 #'  The length of the vector equals the number of sites `N`. The
 #'  units of demand values need to match the units of vehicle capacity values.
-#'  `NA` values are not allowed. Positive values are goods to be delivered from
+#'  Missing or infinite values are not allowed. Positive values are goods to be delivered from
 #'  the depot to a site. Negative values are goods to be picked up at a site and
 #'  brought to the depot, i.e. "backhaul". Sites with positive and
 #'  negative demands can be visited in any order within a run, as long as the
@@ -42,15 +42,16 @@
 #'  A [data.frame()] describing available vehicle types and their respective
 #'  capacities. One row per vehicle type. The data frame is expected to have
 #'  two columns:
-#'  * `n` - Number of available vehicles as an [integer()]. This can be set to
-#'          `NA_integer_` if the
+#'  * `n` - Number of available vehicles, a whole number that is not
+#'          negative. This can be set to `NA` if the
 #'          number is "infinite" (i.e. effectively the maximal integer value
 #'          on your machine.).
 #'          It is recommended to keep at least one vehicle type as "infinite",
 #'          otherwise the solver might raise a run time error due to initially
 #'          not having enough vehicles available (even though the final
 #'          solution might satisfy the availability restrictions).
-#'  * `caps` - The vehicle capacity in same units as `demand`.
+#'  * `caps` - The vehicle capacity in same units as `demand`, positive and
+#'             finite.
 #'
 #'  The order of the [data.frame()] is relevant and determines the prioritization
 #'  of vehicle assignments to runs (in case two or more vehicle types are
@@ -64,9 +65,9 @@
 #'  An optional [data.frame()] that allows to define vehicle type restrictions for
 #'  particular sites in the form of a blacklist.
 #'  The data frame is expected to have two columns:
-#'  * `vehicle` - The vehicle type index as an [integer()], starting at 0
+#'  * `vehicle` - The vehicle type index as a whole number, starting at 0
 #'                (i.e. 0 refers to the first row of `vehicles`).
-#'  * `site` - The site index as an [integer()], starting at 0
+#'  * `site` - The site index as a whole number, starting at 0
 #'             (i.e. 0 refers to the first entry of `demand`).
 #'
 #'  Each row defines a restriction: vehicle type `vehicle` can not approach site
@@ -126,33 +127,10 @@ clarke_wright <- function(
     site = integer()
   )
 ) {
-  stopifnot(is.numeric(demand))
-  stopifnot(all(!is.na(demand)))
-  stopifnot(inherits(distances, "dist"))
-  stopifnot(attr(distances, "Size") == length(demand) + 1)
-  stopifnot(all(!is.na(distances)))
-  stopifnot(is.data.frame(vehicles))
-  stopifnot(c("n", "caps") %in% colnames(vehicles))
-  stopifnot(nrow(vehicles) > 0)
-  stopifnot(is.integer(vehicles$n))
-  stopifnot(is.numeric(vehicles$caps))
-  stopifnot(vehicles$caps > 0)
-  stopifnot(is.data.frame(restrictions))
-  stopifnot(c("site", "vehicle") %in% colnames(restrictions))
-
-  # replace NAs by maximal machine integer value
-  vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max
+  input <- prepare_solver_input(demand, distances, vehicles, restrictions)
 
   heumilkr_solution(
-    .Call(
-      `_heumilkr_r_cpp_clarke_wright`,
-      as.numeric(demand),
-      distances,
-      vehicles$n,
-      vehicles$caps,
-      restrictions$site,
-      restrictions$vehicle
-    ),
+    call_solver(r_cpp_clarke_wright, input),
     distances = distances
   )
 }
@@ -176,32 +154,10 @@ clarke_wright_stepwise <- function(
     site = integer()
   )
 ) {
-  stopifnot(is.numeric(demand))
-  stopifnot(all(!is.na(demand)))
-  stopifnot(inherits(distances, "dist"))
-  stopifnot(attr(distances, "Size") == length(demand) + 1)
-  stopifnot(is.data.frame(vehicles))
-  stopifnot(c("n", "caps") %in% colnames(vehicles))
-  stopifnot(nrow(vehicles) > 0)
-  stopifnot(is.integer(vehicles$n))
-  stopifnot(is.numeric(vehicles$caps))
-  stopifnot(vehicles$caps > 0)
-  stopifnot(is.data.frame(restrictions))
-  stopifnot(c("site", "vehicle") %in% colnames(restrictions))
-
-  # replace NAs by maximal machine integer value
-  vehicles$n[is.na(vehicles$n)] <- .Machine$integer.max
+  input <- prepare_solver_input(demand, distances, vehicles, restrictions)
 
   lapply(
-    .Call(
-      `_heumilkr_cpp_clarke_wright_stepwise`,
-      as.numeric(demand),
-      distances,
-      vehicles$n,
-      vehicles$caps,
-      restrictions$site,
-      restrictions$vehicle
-    ),
+    call_solver(cpp_clarke_wright_stepwise, input),
     function(x) {
       heumilkr_solution(
         x,

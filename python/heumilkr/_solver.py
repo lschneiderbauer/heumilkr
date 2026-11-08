@@ -172,37 +172,33 @@ def clarke_wright(
 
     Raises:
         ValueError: If the input is invalid.
-        RuntimeError: If there are not enough vehicles available.
+        RuntimeError: If there are not enough vehicles available to start
+            with one run per site.
     """
-    demand_array = _as_float_array(demand, "demand")
+    demand_array = _as_float_array(demand)
     if demand_array.ndim != 1 or demand_array.size == 0:
         raise ValueError("demand must be a non-empty one-dimensional sequence")
 
     n_sites = demand_array.size
     condensed = _condensed_distances(distances, n_sites)
 
-    vehicles = list(vehicles)
-    if not vehicles:
-        raise ValueError("vehicles must contain at least one vehicle type")
-
+    vehicles = tuple(vehicles)
     counts = [_vehicle_count(vehicle) for vehicle in vehicles]
-    capacities = [_vehicle_capacity(vehicle) for vehicle in vehicles]
+    capacities = [float(vehicle.capacity) for vehicle in vehicles]
 
-    restr_sites = []
-    restr_vehicles = []
-    for restriction in restrictions:
-        site = operator.index(restriction.site)
-        vehicle = operator.index(restriction.vehicle)
-        if not 0 <= site < n_sites:
-            raise ValueError(f"restriction refers to unknown site {site}")
-        if not 0 <= vehicle < len(vehicles):
-            raise ValueError(f"restriction refers to unknown vehicle {vehicle}")
-        restr_sites.append(site)
-        restr_vehicles.append(vehicle)
+    restrictions = tuple(restrictions)
+    restr_sites = [_as_c_int(restriction.site) for restriction in restrictions]
+    restr_vehicles = [_as_c_int(restriction.vehicle) for restriction in restrictions]
 
-    _, run_table, visit_table = _core.clarke_wright(
-        demand_array, condensed, counts, capacities, restr_sites, restr_vehicles
-    )
+    # the core checks the values, see _input_error() for the messages
+    try:
+        _, run_table, visit_table = _core.clarke_wright(
+            demand_array, condensed, counts, capacities, restr_sites, restr_vehicles
+        )
+    except _core.InputError as error:
+        raise _input_error(
+            *error.args, demand=demand_array, vehicles=vehicles, restrictions=restrictions
+        ) from None
 
     return Solution(
         runs=_build_runs(run_table, visit_table),
@@ -212,25 +208,18 @@ def clarke_wright(
     )
 
 
-def _as_float_array(values: Any, name: str) -> np.ndarray:
+def _as_float_array(values: Any) -> np.ndarray:
     array = np.array(values, dtype=np.float64, order="C")
-    if not np.all(np.isfinite(array)):
-        raise ValueError(f"{name} must not contain NaN or infinite values")
     array.flags.writeable = False
     return array
 
 
 def _condensed_distances(distances: Any, n_sites: int) -> np.ndarray:
-    array = _as_float_array(distances, "distances")
+    array = _as_float_array(distances)
     n_locations = n_sites + 1
 
+    # the core checks the length of the condensed form
     if array.ndim == 1:
-        expected = n_locations * n_sites // 2
-        if array.size != expected:
-            raise ValueError(
-                f"condensed distances must have {expected} entries for "
-                f"{n_sites} sites, got {array.size}"
-            )
         return array
 
     if array.shape != (n_locations, n_locations):
@@ -238,7 +227,8 @@ def _condensed_distances(distances: Any, n_sites: int) -> np.ndarray:
             f"distances must have shape ({n_locations}, {n_locations}) for "
             f"{n_sites} sites, got {array.shape}"
         )
-    if not np.allclose(array, array.T):
+    # NaN is reported by the core, together with its location
+    if not np.allclose(array, array.T, equal_nan=True):
         raise ValueError("distance matrix must be symmetric")
 
     condensed = array[np.triu_indices(n_locations, k=1)]
@@ -249,20 +239,89 @@ def _condensed_distances(distances: Any, n_sites: int) -> np.ndarray:
 def _vehicle_count(vehicle: Vehicle) -> int:
     if vehicle.count is None:
         return _UNLIMITED
-
-    count = operator.index(vehicle.count)
-    if count < 0:
-        raise ValueError(f"vehicle count must not be negative, got {count}")
-    return min(count, _UNLIMITED)
+    return _as_c_int(vehicle.count)
 
 
-def _vehicle_capacity(vehicle: Vehicle) -> float:
-    capacity = float(vehicle.capacity)
-    if not (capacity > 0 and math.isfinite(capacity)):
-        raise ValueError(
-            f"vehicle capacity must be positive and finite, got {capacity}"
+def _as_c_int(value: Any) -> int:
+    # Out of range values are clamped, so that they reach the core and are
+    # reported there. Messages refer to the original value.
+    return min(max(operator.index(value), -_UNLIMITED - 1), _UNLIMITED)
+
+
+def _input_error(
+    code: str,
+    index: int,
+    other_index: int,
+    value: float,
+    *,
+    demand: np.ndarray,
+    vehicles: Sequence[Vehicle],
+    restrictions: Sequence[Restriction],
+) -> Exception:
+    """Turns an error of the C++ core into an exception with a message.
+
+    See src/input_error.h for the meaning of the arguments per code.
+    """
+    if code == "non_finite_demand":
+        return ValueError(
+            "demand must not contain NaN or infinite values, "
+            f"got {value} at index {index}"
         )
-    return capacity
+    if code == "wrong_distance_count":
+        return ValueError(
+            f"condensed distances must have {other_index} entries for "
+            f"{demand.size} sites, got {index}"
+        )
+    if code == "non_finite_distance":
+        return ValueError(
+            "distances must not contain NaN or infinite values, "
+            f"got {value} between locations {index} and {other_index}"
+        )
+    if code == "no_vehicle_types":
+        return ValueError("vehicles must contain at least one vehicle type")
+    if code == "negative_vehicle_count":
+        return ValueError(
+            "vehicle count must not be negative, "
+            f"got {vehicles[index].count} for vehicles[{index}]"
+        )
+    if code == "invalid_vehicle_capacity":
+        return ValueError(
+            "vehicle capacity must be positive and finite, "
+            f"got {vehicles[index].capacity} for vehicles[{index}]"
+        )
+    if code == "unknown_restriction_site":
+        return ValueError(
+            f"restrictions[{index}] refers to unknown site "
+            f"{restrictions[index].site}, {_numbering(demand.size, 'site')}"
+        )
+    if code == "unknown_restriction_vehicle":
+        return ValueError(
+            f"restrictions[{index}] refers to unknown vehicle "
+            f"{restrictions[index].vehicle}, "
+            f"{_numbering(len(vehicles), 'vehicle type')}"
+        )
+    if code == "insufficient_vehicles":
+        return RuntimeError(
+            "Not enough vehicles available to start with one run per site, "
+            f"ran out at site {index}. The solver merges runs only afterwards, "
+            "so it can need more vehicles at the start than in the final "
+            "solution. A vehicle type with count=None and without restrictions "
+            "avoids this."
+        )
+
+    # vehicle_length_mismatch, restriction_length_mismatch, and codes that
+    # this function does not know (yet)
+    return RuntimeError(
+        f"internal error of heumilkr, please report it: {code} "
+        f"({index}, {other_index}, {value})"
+    )
+
+
+def _numbering(n: int, what: str) -> str:
+    """For example "sites are numbered from 0 to 4"."""
+    if n == 1:
+        return f"the only {what} is 0"
+    return f"{what}s are numbered from 0 to {n - 1}"
 
 
 def _build_runs(run_table: tuple, visit_table: tuple) -> tuple[Run, ...]:

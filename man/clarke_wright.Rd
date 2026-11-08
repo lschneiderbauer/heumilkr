@@ -16,7 +16,7 @@ clarke_wright(
 The \code{i}th entry refers to the demand of the \code{i}th site.
 The length of the vector equals the number of sites \code{N}. The
 units of demand values need to match the units of vehicle capacity values.
-\code{NA} values are not allowed. Positive values are goods to be delivered from
+Missing or infinite values are not allowed. Positive values are goods to be delivered from
 the depot to a site. Negative values are goods to be picked up at a site and
 brought to the depot, i.e. "backhaul". Sites with positive and
 negative demands can be visited in any order within a run, as long as the
@@ -33,15 +33,16 @@ index refers to the \code{i}th site (as defined by \code{demand}).}
 capacities. One row per vehicle type. The data frame is expected to have
 two columns:
 \itemize{
-\item \code{n} - Number of available vehicles as an \code{\link[=integer]{integer()}}. This can be set to
-\code{NA_integer_} if the
+\item \code{n} - Number of available vehicles, a whole number that is not
+negative. This can be set to \code{NA} if the
 number is "infinite" (i.e. effectively the maximal integer value
 on your machine.).
 It is recommended to keep at least one vehicle type as "infinite",
 otherwise the solver might raise a run time error due to initially
 not having enough vehicles available (even though the final
 solution might satisfy the availability restrictions).
-\item \code{caps} - The vehicle capacity in same units as \code{demand}.
+\item \code{caps} - The vehicle capacity in same units as \code{demand}, positive and
+finite.
 }
 
 The order of the \code{\link[=data.frame]{data.frame()}} is relevant and determines the prioritization
@@ -56,9 +57,9 @@ a good rule of thumb.}
 particular sites in the form of a blacklist.
 The data frame is expected to have two columns:
 \itemize{
-\item \code{vehicle} - The vehicle type index as an \code{\link[=integer]{integer()}}, starting at 0
+\item \code{vehicle} - The vehicle type index as a whole number, starting at 0
 (i.e. 0 refers to the first row of \code{vehicles}).
-\item \code{site} - The site index as an \code{\link[=integer]{integer()}}, starting at 0
+\item \code{site} - The site index as a whole number, starting at 0
 (i.e. 0 refers to the first entry of \code{demand}).
 }
 

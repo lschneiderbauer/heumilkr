@@ -11,6 +11,8 @@ import numpy as np
 import pytest
 
 import heumilkr as hm
+from heumilkr import _core
+from heumilkr._solver import _input_error
 
 UNLIMITED = [hm.Vehicle(capacity=30)]
 
@@ -170,6 +172,82 @@ def test_not_enough_vehicles_raises():
 def test_invalid_input_raises(demand, distances, vehicles, restrictions, message):
     with pytest.raises(ValueError, match=message):
         hm.clarke_wright(demand, distances, vehicles, restrictions)
+
+
+@pytest.mark.parametrize("code", _core.input_error_names())
+def test_each_core_error_has_a_message(code):
+    # inputs that clarke_wright() makes sure to have the same length
+    internal = {"vehicle_length_mismatch", "restriction_length_mismatch"}
+
+    error = _input_error(
+        code,
+        0,
+        1,
+        math.nan,
+        demand=np.array([1.0, 2.0]),
+        vehicles=(hm.Vehicle(capacity=1),),
+        restrictions=(hm.Restriction(vehicle=0, site=0),),
+    )
+
+    assert ("internal error" in str(error)) == (code in internal)
+
+
+@pytest.mark.parametrize(
+    ("demand", "distances", "vehicles", "restrictions", "message"),
+    [
+        ([1, 2, math.nan], line_distances(3), UNLIMITED, (), "at index 2"),
+        (
+            [1, 2],
+            [[0, 1, 2], [1, 0, math.inf], [2, math.inf, 0]],
+            UNLIMITED,
+            (),
+            "between locations 1 and 2",
+        ),
+        (
+            [1],
+            [1],
+            [hm.Vehicle(capacity=1), hm.Vehicle(capacity=-2)],
+            (),
+            r"got -2 for vehicles\[1\]",
+        ),
+        (
+            [1],
+            [1],
+            [hm.Vehicle(capacity=1, count=-2**40)],
+            (),
+            f"got {-2**40} for",
+        ),
+        (
+            [1, 2],
+            line_distances(2),
+            UNLIMITED,
+            [hm.Restriction(vehicle=0, site=0), hm.Restriction(vehicle=0, site=2**40)],
+            rf"restrictions\[1\] refers to unknown site {2**40}, sites are numbered from 0 to 1",
+        ),
+        (
+            [1],
+            [1],
+            UNLIMITED,
+            [hm.Restriction(vehicle=-1, site=0)],
+            "unknown vehicle -1, the only vehicle type is 0",
+        ),
+    ],
+)
+def test_input_errors_point_to_the_problem(
+    demand, distances, vehicles, restrictions, message
+):
+    with pytest.raises(ValueError, match=message):
+        hm.clarke_wright(demand, distances, vehicles, restrictions)
+
+
+def test_restrictions_can_exhaust_the_vehicles():
+    with pytest.raises(RuntimeError, match="ran out at site 1"):
+        hm.clarke_wright(
+            [1, 1],
+            line_distances(2),
+            [hm.Vehicle(capacity=6, count=5)],
+            [hm.Restriction(vehicle=0, site=1)],
+        )
 
 
 def test_runs_are_immutable():

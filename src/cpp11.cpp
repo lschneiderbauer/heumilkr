@@ -19,10 +19,18 @@ extern "C" SEXP _heumilkr_cpp_clarke_wright_stepwise(SEXP demand, SEXP distances
     return cpp11::as_sexp(cpp_clarke_wright_stepwise(cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(demand), cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(distances), cpp11::as_cpp<cpp11::decay_t<const std::vector<int> &>>(n_res), cpp11::as_cpp<cpp11::decay_t<const std::vector<double> &>>(capacities), cpp11::as_cpp<cpp11::decay_t<const std::vector<int> &>>(restr_sites), cpp11::as_cpp<cpp11::decay_t<const std::vector<int> &>>(restr_vehicles)));
   END_CPP11
 }
+// r_clarke_wright.cpp
+cpp11::writable::strings cpp_input_error_names();
+extern "C" SEXP _heumilkr_cpp_input_error_names() {
+  BEGIN_CPP11
+    return cpp11::as_sexp(cpp_input_error_names());
+  END_CPP11
+}
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_heumilkr_cpp_clarke_wright_stepwise", (DL_FUNC) &_heumilkr_cpp_clarke_wright_stepwise, 6},
+    {"_heumilkr_cpp_input_error_names",      (DL_FUNC) &_heumilkr_cpp_input_error_names,      0},
     {"_heumilkr_r_cpp_clarke_wright",        (DL_FUNC) &_heumilkr_r_cpp_clarke_wright,        6},
     {NULL, NULL, 0}
 };

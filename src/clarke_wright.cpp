@@ -3,7 +3,7 @@
 #include <functional>
 #include "router.h"
 #include "symmat.h"
-#include <cassert>
+#include "input_error.h"
 
 tbls cpp_clarke_wright(
     const std::vector<double> &demand,
@@ -14,9 +14,11 @@ tbls cpp_clarke_wright(
     const std::vector<int> &restr_vehicles,
     std::function<void(Router &)> callback)
 {
-  // check that all inputs have the correct size
-  assert(distances.size() == (demand.size() + 1) * (demand.size()) / 2);
-  assert(capacities.size() == n_res.size());
+  if (const auto error = validate_input(
+          demand, distances, n_res, capacities, restr_sites, restr_vehicles))
+  {
+    throw InputException(*error);
+  }
 
   std::vector<std::unordered_set<int>> restricted_vehicles(demand.size());
   for (unsigned int i = 0; i < restr_sites.size(); i++)

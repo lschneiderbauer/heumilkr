@@ -1,5 +1,6 @@
 #include "router.h"
 #include "union_view.h"
+#include "input_error.h"
 #include <algorithm>
 #include <cmath>
 #include <iterator>
@@ -25,9 +26,8 @@ run Router::create_initial_runs(Site s, double demand, std::shared_ptr<Fleet> fl
 
     if (!vehicle)
     {
-      throw std::runtime_error(
-          "Not enough vehicles available to fulfill all demands trivially."
-          " Solver cannot proceed in that case.");
+      throw InputException(
+          InputError{InputErrorCode::insufficient_vehicles, std::size_t(s)});
     }
 
     fleet->reserve_vehicle(*vehicle);

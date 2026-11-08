@@ -7,3 +7,7 @@ r_cpp_clarke_wright <- function(demand, distances, n_res, capacities, restr_site
 cpp_clarke_wright_stepwise <- function(demand, distances, n_res, capacities, restr_sites, restr_vehicles) {
   .Call(`_heumilkr_cpp_clarke_wright_stepwise`, demand, distances, n_res, capacities, restr_sites, restr_vehicles)
 }
+
+cpp_input_error_names <- function() {
+  .Call(`_heumilkr_cpp_input_error_names`)
+}
