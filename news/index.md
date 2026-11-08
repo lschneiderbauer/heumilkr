@@ -1,6 +1,6 @@
 # Changelog
 
-## heumilkr (development version)
+## heumilkr 0.4.0
 
 ### Breaking changes
 

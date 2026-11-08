@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">heumilkr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,16 +38,16 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="heumilkr-development-version">heumilkr (development version)<a class="anchor" aria-label="anchor" href="#heumilkr-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.4.0" id="heumilkr-040">heumilkr 0.4.0<a class="anchor" aria-label="anchor" href="#heumilkr-040"></a></h2>
 <div class="section level3">
-<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<h3 id="breaking-changes-0-4-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-4-0"></a></h3>
 <ul><li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code>: Return value changed: instead of returning a single <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> a list of three <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code>s is returned now that makes it easier to interpret the result.</p></li>
 <li><p><code><a href="../reference/cvrplib_ls.html">cvrplib_ls()</a></code> now returns a <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> instead of a simple vector.</p></li>
 <li><p>“<code>cvrplib_instance</code>” objects, including the bundled data sets: the field <code>optimum</code> is renamed to <code>best_known_cost</code>, since CVRPLIB provides best known solutions that are not necessarily proven optima.</p></li>
 <li><p><code><a href="../reference/cvrplib_download.html">cvrplib_download()</a></code> now raises an error if a solution file exists but can not be downloaded, instead of silently setting the value to <code>NA</code>.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-features--improvements-development-version">New features / improvements<a class="anchor" aria-label="anchor" href="#new-features--improvements-development-version"></a></h3>
+<h3 id="new-features--improvements-0-4-0">New features / improvements<a class="anchor" aria-label="anchor" href="#new-features--improvements-0-4-0"></a></h3>
 <ul><li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code> has more informative error messages: they name the offending argument and element, e.g. <code>`vehicles$caps[2]` is 0</code>, and have the classes <code>heumilkr_error_input</code> and <code>heumilkr_error_&lt;problem&gt;</code> (e.g. <code>heumilkr_error_insufficient_vehicles</code>) to be caught specifically. Infinite values in <code>demand</code> and <code>distances</code> are rejected now (they could make the solver loop forever), as well as negative vehicle counts and restrictions that refer to sites or vehicle types that do not exist. Vehicle counts and restriction indices can now also be whole numbers stored as doubles, e.g. <code>data.frame(site = 1, vehicle = 0)</code>.</p></li>
 <li><p><code><a href="../reference/cvrplib_download.html">cvrplib_download()</a></code> now accepts a vector of qualifiers and returns a named list of instances in that case. The list of available instances is only requested once. A single qualifier still returns the instance itself.</p></li>
 <li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code> now supports negative demands: sites with negative demand are treated as “backhaul” points, i.e. they deliver goods back to the depot. Sites with positive and negative demands can be visited in any order within a run, as long as the load stays within the vehicle capacity at every point of the run. Negative demands that exceed vehicle capacities are split across multiple runs, like positive demands.</p></li>
@@ -55,7 +55,7 @@
 <li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code>: Results are now deterministic, also in case of tied savings. Run identifiers follow the order of run creation.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bugfixes-development-version">Bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-development-version"></a></h3>
+<h3 id="bugfixes-0-4-0">Bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-0-4-0"></a></h3>
 <ul><li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code>: Fractional vehicle capacities are not truncated to integers anymore. Previously this caused unnecessary splits of demand, and capacities below 1 never terminated.</p></li>
 <li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code>: Fix a crash with sites of zero demand.</p></li>
 <li><p><code><a href="../reference/clarke_wright.html">clarke_wright()</a></code>: The <code>load</code> of visits now always refers to the load after the visit, also for sites whose demand is split across multiple runs.</p></li>
