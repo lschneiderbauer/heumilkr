@@ -25,14 +25,14 @@ clarke_wright(
   of "demands" indexed by sites. The `i`th entry refers to the demand of
   the `i`th site. The length of the vector equals the number of sites
   `N`. The units of demand values need to match the units of vehicle
-  capacity values. `NA` values are not allowed. Positive values are
-  goods to be delivered from the depot to a site. Negative values are
-  goods to be picked up at a site and brought to the depot, i.e.
-  "backhaul". Sites with positive and negative demands can be visited in
-  any order within a run, as long as the load stays within the vehicle
-  capacity at every point of the run. Goods picked up at one site can
-  not be delivered to another site. Sites with a demand of zero are
-  still visited.
+  capacity values. Missing or infinite values are not allowed. Positive
+  values are goods to be delivered from the depot to a site. Negative
+  values are goods to be picked up at a site and brought to the depot,
+  i.e. "backhaul". Sites with positive and negative demands can be
+  visited in any order within a run, as long as the load stays within
+  the vehicle capacity at every point of the run. Goods picked up at one
+  site can not be delivered to another site. Sites with a demand of zero
+  are still visited.
 
 - distances:
 
@@ -48,16 +48,16 @@ clarke_wright(
   available vehicle types and their respective capacities. One row per
   vehicle type. The data frame is expected to have two columns:
 
-  - `n` - Number of available vehicles as an
-    [`integer()`](https://rdrr.io/r/base/integer.html). This can be set
-    to `NA_integer_` if the number is "infinite" (i.e. effectively the
-    maximal integer value on your machine.). It is recommended to keep
-    at least one vehicle type as "infinite", otherwise the solver might
-    raise a run time error due to initially not having enough vehicles
-    available (even though the final solution might satisfy the
-    availability restrictions).
+  - `n` - Number of available vehicles, a whole number that is not
+    negative. This can be set to `NA` if the number is "infinite" (i.e.
+    effectively the maximal integer value on your machine.). It is
+    recommended to keep at least one vehicle type as "infinite",
+    otherwise the solver might raise a run time error due to initially
+    not having enough vehicles available (even though the final solution
+    might satisfy the availability restrictions).
 
-  - `caps` - The vehicle capacity in same units as `demand`.
+  - `caps` - The vehicle capacity in same units as `demand`, positive
+    and finite.
 
   The order of the
   [`data.frame()`](https://rdrr.io/r/base/data.frame.html) is relevant
@@ -76,13 +76,11 @@ clarke_wright(
   in the form of a blacklist. The data frame is expected to have two
   columns:
 
-  - `vehicle` - The vehicle type index as an
-    [`integer()`](https://rdrr.io/r/base/integer.html), starting at 0
+  - `vehicle` - The vehicle type index as a whole number, starting at 0
     (i.e. 0 refers to the first row of `vehicles`).
 
-  - `site` - The site index as an
-    [`integer()`](https://rdrr.io/r/base/integer.html), starting at 0
-    (i.e. 0 refers to the first entry of `demand`).
+  - `site` - The site index as a whole number, starting at 0 (i.e. 0
+    refers to the first entry of `demand`).
 
   Each row defines a restriction: vehicle type `vehicle` can not
   approach site `site`. Defaults to an empty

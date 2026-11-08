@@ -24,6 +24,18 @@
 
 ### New features / improvements
 
+- [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md)
+  has more informative error messages: they name the offending argument
+  and element, e.g. `` `vehicles$caps[2]` is 0 ``, and have the classes
+  `heumilkr_error_input` and `heumilkr_error_<problem>`
+  (e.g. `heumilkr_error_insufficient_vehicles`) to be caught
+  specifically. Infinite values in `demand` and `distances` are rejected
+  now (they could make the solver loop forever), as well as negative
+  vehicle counts and restrictions that refer to sites or vehicle types
+  that do not exist. Vehicle counts and restriction indices can now also
+  be whole numbers stored as doubles,
+  e.g. `data.frame(site = 1, vehicle = 0)`.
+
 - [`cvrplib_download()`](https://lschneiderbauer.github.io/heumilkr/reference/cvrplib_download.md)
   now accepts a vector of qualifiers and returns a named list of
   instances in that case. The list of available instances is only

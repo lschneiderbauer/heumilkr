@@ -70,7 +70,7 @@ sites with negative demand and brought back to the depot ("backhaul").</p>
 The <code>i</code>th entry refers to the demand of the <code>i</code>th site.
 The length of the vector equals the number of sites <code>N</code>. The
 units of demand values need to match the units of vehicle capacity values.
-<code>NA</code> values are not allowed. Positive values are goods to be delivered from
+Missing or infinite values are not allowed. Positive values are goods to be delivered from
 the depot to a site. Negative values are goods to be picked up at a site and
 brought to the depot, i.e. "backhaul". Sites with positive and
 negative demands can be visited in any order within a run, as long as the
@@ -89,15 +89,16 @@ index refers to the <code>i</code>th site (as defined by <code>demand</code>).</
 <dt id="arg-vehicles">vehicles<a class="anchor" aria-label="anchor" href="#arg-vehicles"></a></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> describing available vehicle types and their respective
 capacities. One row per vehicle type. The data frame is expected to have
-two columns:</p><ul><li><p><code>n</code> - Number of available vehicles as an <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer()</a></code>. This can be set to
-<code>NA_integer_</code> if the
+two columns:</p><ul><li><p><code>n</code> - Number of available vehicles, a whole number that is not
+negative. This can be set to <code>NA</code> if the
 number is "infinite" (i.e. effectively the maximal integer value
 on your machine.).
 It is recommended to keep at least one vehicle type as "infinite",
 otherwise the solver might raise a run time error due to initially
 not having enough vehicles available (even though the final
 solution might satisfy the availability restrictions).</p></li>
-<li><p><code>caps</code> - The vehicle capacity in same units as <code>demand</code>.</p></li>
+<li><p><code>caps</code> - The vehicle capacity in same units as <code>demand</code>, positive and
+finite.</p></li>
 </ul><p>The order of the <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> is relevant and determines the prioritization
 of vehicle assignments to runs (in case two or more vehicle types are
 eligible for assignment the "first" vehicle is chosen). In a typical scenario
@@ -110,9 +111,9 @@ a good rule of thumb.</p></dd>
 <dt id="arg-restrictions">restrictions<a class="anchor" aria-label="anchor" href="#arg-restrictions"></a></dt>
 <dd><p>An optional <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code> that allows to define vehicle type restrictions for
 particular sites in the form of a blacklist.
-The data frame is expected to have two columns:</p><ul><li><p><code>vehicle</code> - The vehicle type index as an <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer()</a></code>, starting at 0
+The data frame is expected to have two columns:</p><ul><li><p><code>vehicle</code> - The vehicle type index as a whole number, starting at 0
 (i.e. 0 refers to the first row of <code>vehicles</code>).</p></li>
-<li><p><code>site</code> - The site index as an <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer()</a></code>, starting at 0
+<li><p><code>site</code> - The site index as a whole number, starting at 0
 (i.e. 0 refers to the first entry of <code>demand</code>).</p></li>
 </ul><p>Each row defines a restriction: vehicle type <code>vehicle</code> can not approach site
 <code>site</code>. Defaults to an empty <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code>, i.e. no restrictions are enforced.</p></dd>
