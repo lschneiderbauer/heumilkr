@@ -227,3 +227,37 @@ test_that("CVRP downloader handles one or several qualifiers", {
   expect_error(cvrplib_download(c("a", "nope")), "nope")
   expect_error(cvrplib_download(character()))
 })
+
+test_that("Solution quality on the bundled CVRPLIB sets does not get worse.", {
+  # Total cost of the solutions per set. Better solutions pass. If the cost
+  # changes on purpose, replace the values with the output of
+  # vapply(sets, set_cost, numeric(1)).
+  baseline <- c(
+    A = 29484.783712,
+    B = 23187.748305,
+    E = 9339.007433,
+    F = 2213.570932,
+    Tai = 24695.303004
+  )
+
+  sets <- list(
+    A = cvrplib_A,
+    B = cvrplib_B,
+    E = cvrplib_E,
+    F = cvrplib_F,
+    Tai = cvrplib_Tai
+  )
+  set_cost <- function(set) {
+    sum(vapply(
+      set,
+      function(inst) milkr_cost(clarke_wright_cvrplib(inst)),
+      numeric(1)
+    ))
+  }
+
+  cost <- vapply(sets, set_cost, numeric(1))
+
+  for (set in names(baseline)) {
+    expect_lte(cost[[set]], baseline[[set]] * (1 + 1e-6), label = set)
+  }
+})
