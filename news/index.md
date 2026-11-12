@@ -131,7 +131,7 @@ CRAN release: 2024-04-01
 ### New features
 
 - Add the `cvrp_*()` function family for handling
-  [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/) data.
+  [CVRPLIB](https://galgos.inf.puc-rio.br/cvrplib/) data.
 
 - New vignette with performance benchmarks:
   [`vignette("clarke_wright_performance")`](https://lschneiderbauer.github.io/heumilkr/articles/clarke_wright_performance.md).
