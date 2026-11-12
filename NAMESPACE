@@ -12,20 +12,24 @@ export(cvrplib_ls)
 export(milkr_cost)
 export(milkr_saving)
 import(cli)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,autoplot)
-importFrom(ggplot2,geom_path)
-importFrom(ggplot2,geom_point)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,scale_color_discrete)
-importFrom(ggplot2,scale_shape_identity)
-importFrom(ggplot2,scale_size_identity)
-importFrom(ggplot2,theme)
-importFrom(ggplot2,theme_void)
+importFrom(ggplot2,
+  aes,
+  autoplot,
+  geom_path,
+  geom_point,
+  ggplot,
+  scale_color_discrete,
+  scale_shape_identity,
+  scale_size_identity,
+  theme,
+  theme_void
+)
 importFrom(graphics,plot)
 importFrom(rlang,.data)
-importFrom(stats,as.dist)
-importFrom(stats,cmdscale)
-importFrom(stats,dist)
+importFrom(stats,
+  as.dist,
+  cmdscale,
+  dist
+)
 importFrom(utils,read.csv)
 useDynLib(heumilkr, .registration = TRUE)

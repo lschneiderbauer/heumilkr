@@ -21,8 +21,8 @@ clarke_wright_cvrplib(cvrplib_A[[1]])
 
 }
 \seealso{
-Other cvrplib: 
-\code{\link{cvrplib_download}()},
-\code{\link{cvrplib_ls}()}
+Other cvrplib:
+\code{\link[=cvrplib_download]{cvrplib_download()}},
+\code{\link[=cvrplib_ls]{cvrplib_ls()}}
 }
 \concept{cvrplib}

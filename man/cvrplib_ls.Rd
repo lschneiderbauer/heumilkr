@@ -23,8 +23,8 @@ Scrapes the CVRPLIB website to look for available data sets.
 This function call can take some time.
 }
 \seealso{
-Other cvrplib: 
-\code{\link{clarke_wright_cvrplib}()},
-\code{\link{cvrplib_download}()}
+Other cvrplib:
+\code{\link[=clarke_wright_cvrplib]{clarke_wright_cvrplib()}},
+\code{\link[=cvrplib_download]{cvrplib_download()}}
 }
 \concept{cvrplib}

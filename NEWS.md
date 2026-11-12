@@ -63,7 +63,7 @@
 
 ## New features
 
--   Add the `cvrp_*()` function family for handling [CVRPLIB](http://vrp.atd-lab.inf.puc-rio.br/) data.
+-   Add the `cvrp_*()` function family for handling [CVRPLIB](https://galgos.inf.puc-rio.br/cvrplib/) data.
 
 -   New vignette with performance benchmarks: `vignette("clarke_wright_performance")`.
 

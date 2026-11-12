@@ -38,8 +38,8 @@ conveniently makes it available to be fed into solver functions, e.g. with
 benchmarking / comparing speed as well as performance of solvers.
 }
 \seealso{
-Other cvrplib: 
-\code{\link{clarke_wright_cvrplib}()},
-\code{\link{cvrplib_ls}()}
+Other cvrplib:
+\code{\link[=clarke_wright_cvrplib]{clarke_wright_cvrplib()}},
+\code{\link[=cvrplib_ls]{cvrplib_ls()}}
 }
 \concept{cvrplib}
