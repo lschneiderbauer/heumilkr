@@ -21,6 +21,6 @@ src/debug$
 ^python$
 ^pyproject\.toml$
 ^\.venv$
-^build$
+^build/(?!vignette\.rds$)
 ^dist$
 ^\.pytest_cache$
