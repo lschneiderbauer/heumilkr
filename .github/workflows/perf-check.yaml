@@ -1,0 +1,35 @@
+# Compares the instruction count of the C++ core between the base and the head
+# of a pull request, see .github/scripts/perf-compare.sh. An intended slowdown
+# can be accepted with the label performance-regression-accepted.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    paths:
+      - "src/**"
+      - "benchmark/ci/**"
+      - ".github/scripts/perf-compare.sh"
+      - ".github/workflows/perf-check.yaml"
+  workflow_dispatch:
+
+name: perf-check.yaml
+
+permissions: read-all
+
+jobs:
+  perf-check:
+    # pinned, so that the valgrind version is known
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: sudo apt-get update && sudo apt-get install -y valgrind
+
+      - name: Compare instruction counts
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || 'HEAD~1' }}
+          HEAD: ${{ github.event.pull_request.head.sha || 'HEAD' }}
+          PERF_ACCEPTED: ${{ contains(github.event.pull_request.labels.*.name, 'performance-regression-accepted') }}
+        run: .github/scripts/perf-compare.sh "$BASE" "$HEAD"
