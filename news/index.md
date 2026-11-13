@@ -2,6 +2,8 @@
 
 ## heumilkr 0.4.0
 
+CRAN release: 2026-11-13
+
 ### Breaking changes
 
 - [`clarke_wright()`](https://lschneiderbauer.github.io/heumilkr/reference/clarke_wright.md):

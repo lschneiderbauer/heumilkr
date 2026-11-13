@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/lschneiderbauer/heumilkr/blob/master/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/lschneiderbauer/heumilkr/blob/v0.4.0/DESCRIPTION)
 
 Schneiderbauer L (2026). *heumilkr: Heuristic Capacitated Vehicle
 Routing Problem Solver*. R package version 0.4.0,
